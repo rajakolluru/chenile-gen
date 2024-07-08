@@ -15,7 +15,8 @@ function generateService(){
     service=$(captureNonNullField "Service Name")
     serviceVersion=$(captureFieldWithDefaultValue "Service Version" "$defaultVersion")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
-    $scripts_folder/gen-service.sh $service $serviceVersion $outfolder
+    securityEnabled=$(captureFieldWithDefaultValue "Security Enabled?" "n")
+    $scripts_folder/gen-service.sh $service $serviceVersion $outfolder $securityEnabled
 }
 
 function generateMybatisQuery(){   
@@ -30,14 +31,33 @@ function generateQueryService(){
     service=$(captureNonNullField "Service Name")
     serviceVersion=$(captureFieldWithDefaultValue "Service Version" "$defaultVersion")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
-    $scripts_folder/gen-query-service.sh $service $serviceVersion $outfolder
+    securityEnabled=$(captureFieldWithDefaultValue "Security Enabled?" "n")
+    generateQueryController=$(captureFieldWithDefaultValue "Generate Query Controller?" "n")
+    $scripts_folder/gen-query-service.sh $service $serviceVersion $outfolder $securityEnabled $generateQueryController
 }
 
 function generateWorkflowService(){   
-    service=$(captureNonNullField "Workflow Entity Name")
+    service=$(captureNonNullField "Workflow Entity Service Name")
     serviceVersion=$(captureFieldWithDefaultValue "Workflow Entity Service Version" "$defaultVersion")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
-    $scripts_folder/gen-workflow-service.sh $service $serviceVersion $outfolder
+    securityEnabled=$(captureFieldWithDefaultValue "Enable Security?" "n")
+    jpa=$(captureFieldWithDefaultValue "Enable JPA?" "y")
+    cmdline=$(generateCommandLine $serviceVersion $outfolder $securityEnabled $jpa)
+    $scripts_folder/gen-workflow-service1.sh $cmdline $service 
+}
+
+# Usage: generateCommandLine version outfolder securityEnabled persistenceEnabled
+function generateCommandLine(){
+    cmdline="-v $1 -d $2"
+    if [[ $3 == "y" ]]
+    then 
+        cmdline="$cmdline -s"
+    fi
+    if [[ $4 == "y" ]]
+    then 
+        cmdline="$cmdline -j"
+    fi
+    echo $cmdline
 }
 
 function generateMiniMonolith(){

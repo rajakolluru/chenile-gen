@@ -82,7 +82,35 @@ function generateModule(){
   cp -r $template_folder/* $target_folder
   processTemplates $target_folder $json_file
   replaceServiceInName $target_folder "$subParams"
+  processConditionalFolders $target_folder
   processChenileHeaderFiles $target_folder $json_file
+}
+
+## Find all folders that comply to the pattern %%variable=value%%
+## if the condition is true then
+# mv the contents of the folder to the containing folder. Delete the folder
+# Delete the folder and its contents if the condition is false
+# Usage: processConditionalFolders folder
+function processConditionalFolders(){
+  find $1 | awk -F/ '($NF ~ /%%.*%%/ ){print $0}' |
+     {
+      while read dir
+      do
+        expr=$(echo $dir | awk -F"%%" '{print $2}' )
+        var=$(echo $expr | cut -d= -f1)
+        rhs=$(echo $expr | cut -d= -f2)
+        lhs=$(eval 'echo $'${var})
+        echo "Processing directory $dir with expression $expr. LHS = $lhs. RHS = $rhs"
+         if [[ $lhs == "$rhs" ]]
+         then
+           folder_up=${dir%/*}
+           mv $dir/* $folder_up
+           rmdir $dir
+          else
+           rm -rf $dir
+        fi
+      done
+     }
 }
 
 function processChenileHeaderFiles(){

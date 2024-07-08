@@ -1,9 +1,22 @@
 package {{com}}.{{company}}.{{org}}.{{service}}.model;
 
+{{^jpa}}
 import {{chenilePackage}}.workflow.model.AbstractStateEntity;
+{{/jpa}}
+import java.io.Serial;
 
+{{#jpa}}
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+@Entity
+@Table(name = "{{service}}")
+public class {{Service}} extends BaseEntity{
+{{/jpa}}
+{{^jpa}}
 public class {{Service}} extends AbstractStateEntity{
-	private static final long serialVersionUID = 5943127292911636088L;	
+{{/jpa}}
+    @Serial
+	private static final long serialVersionUID = 1L;
 	public String assignee;
 	public String assignComment;
 	public String closeComment;

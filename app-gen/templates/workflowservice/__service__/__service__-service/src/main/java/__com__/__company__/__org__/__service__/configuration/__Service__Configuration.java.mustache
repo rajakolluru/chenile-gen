@@ -55,7 +55,7 @@ public class {{Service}}Configuration {
 		return new STMActionsInfoProvider(stmFlowStore);
 	}
 	
-	@Bean @Profile("!unittest") EntityStore<{{Service}}> {{service}}EntityStore() {
+	@Bean EntityStore<{{Service}}> {{service}}EntityStore() {
 		return new {{Service}}EntityStore();
 	}
 	
