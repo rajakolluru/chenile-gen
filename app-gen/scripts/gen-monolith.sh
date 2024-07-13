@@ -1,11 +1,13 @@
 #!/bin/bash
 
 function usage(){
-  	echo "Usage: $prog <monolith-name> [monolith-version] [dest-folder] [service-to-bundle-name] [service-to-bundle-version]" >&2
-  	echo "monolith version will default to $defaultVersion" >&2
+  echo "Usage: $prog [-v monolith-version] [-d dest-folder] [-s] [-j] [-S service-to-bundle] [-V service-version-to0-bundle] <monolith-name> " >&2
+  echo "service version will default to $defaultVersion" >&2
 	echo "dest-folder will default to $defaultDestFolder" >&2
+	echo "-s will enable security" >&2
+	echo "-j will enable JPA" >&2
 	echo "Service to bundle along with the monolith. If this is not provided we will default to $defaultServiceName as the name of the service"
-	echo "Service to bundle version. If this is not provided we will default to $defaultServiceVersion as the version of the service"
+  echo "Service Version to bundle. If this is not provided we will default to $defaultServiceVersion as the version of the service"
 }
 
 function _exit {
@@ -57,6 +59,16 @@ function constructJsonfile(){
 	echo "\"monolithVersion\": \"$monolithVersion\","
 	echo "\"com\": \"$com\","
 	echo "\"org\": \"$org\","
+	if [[ $securityEnabled == "true" ]]
+  	then
+  	  echo "\"securityEnabled\": \"$securityEnabled\","
+  	fi
+
+  	if [[ $jpa == "true" ]]
+  	then
+  	  echo "\"jpa\": \"$jpa\","
+  	fi
+
 	echo "\"company\": \"$company\","
 	echo "\"chenilePackage\": \"$chenilePackage\","
 	echo "\"chenileVersion\": \"$chenileVersion\","
@@ -87,12 +99,52 @@ fi
 
 
 json_file=/tmp/$prog.$$
+monolithVersion=${defaultVersion}
+dest_folder=${defaultDestFolder}
+service=${defaultServiceName}
+serviceVersion=${defaultVersion}
+
+while getopts ":sjd:v:S:V:" opts; do
+    case "${opts}" in
+        s)
+            securityEnabled=true
+            ;;
+        S)
+            service=${OPTARG}
+            ;;
+        V)
+            serviceVersion=${OPTARG}
+            ;;
+        j)
+            jpa=true
+            ;;
+        d)
+			    dest_folder=${OPTARG}
+			;;
+		v)
+			serviceVersion=${OPTARG}
+			;;
+        :)
+			echo "Option $OPTARG requires an argument" >&2
+			usage
+			_exit 2
+			;;
+        \?)
+			echo "Invalid option $OPTARG" >&2
+            usage
+            _exit 3
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
 monolith=${1}
-Monolith=$(camelCase $monolith)
-monolithVersion=${2:-$defaultVersion}
-dest_folder=${3:-$defaultDestFolder}
-service=${4:-defaultServiceName}
-serviceVersion=${5:-$defaultVersion}
+[[ -z $monolith ]] && {
+	echo "Monolith is not specified."
+	usage
+	_exit 4
+}
+Monolith=$(camelCase $service)
 
 [[ ! -d $dest_folder ]] && mkdir $dest_folder
 echo "Creating monolith ${monolith}(${monolithVersion}) with included service $service($serviceVersion) in folder $dest_folder" >&2

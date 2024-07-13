@@ -25,11 +25,11 @@
 	            <artifactId>spring-boot-starter-web</artifactId>
 	    </dependency>
 	    <dependency>
-			<groupId>org.chenile</groupId>
+			<groupId>{{chenilePackage}}</groupId>
 			<artifactId>chenile-http</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.chenile</groupId>
+			<groupId>{{chenilePackage}}</groupId>
 			<artifactId>cucumber-utils</artifactId>
 			<scope>test</scope>
 		</dependency>
@@ -38,5 +38,29 @@
 			<artifactId>junit-vintage-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
+        {{#jpa}}
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        {{/jpa}}
+        {{#cloudEdgeSwitch}}
+        <dependency>
+            <groupId>{{chenilePackage}}</groupId>
+            <artifactId>cucumber-mqtt-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>hivemq</artifactId>
+            <scope>test</scope>
+        </dependency>
+        {{/cloudEdgeSwitch}}
 	</dependencies>
 </project>

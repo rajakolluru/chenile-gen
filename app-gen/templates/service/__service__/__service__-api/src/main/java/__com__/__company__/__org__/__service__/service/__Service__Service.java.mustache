@@ -1,8 +1,14 @@
 package {{com}}.{{company}}.{{org}}.{{service}}.service;
 
-import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}}Entity;
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
 
 public interface {{Service}}Service {
 	// Define your interface here
-	public {{Service}}Entity op1({{Service}}Entity {{service}}Entity);
+{{^jpa}}
+	public {{Service}} op1({{Service}} {{service}});
+{{/jpa}}
+{{#jpa}}
+    public {{Service}} save({{Service}} user);
+    public {{Service}} retrieve(String id);
+{{/jpa}}
 }

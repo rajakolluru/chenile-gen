@@ -3,26 +3,47 @@ package {{com}}.{{company}}.{{org}}.{{service}}.configuration.controller;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.chenile.base.response.GenericResponse;
-import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}}Entity;
-import org.chenile.http.annotation.ChenileController;
-import org.chenile.http.handler.ControllerSupport;
+import {{chenilePackage}}.base.response.GenericResponse;
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+{{#cloudEdgeSwitch}}
+import org.chenile.cloudedgeswitch.CloudEdgeSwitchConfig;
+import org.chenile.http.annotation.InterceptedBy;
+{{/cloudEdgeSwitch}}
+import {{chenilePackage}}.http.annotation.ChenileController;
+import {{chenilePackage}}.http.handler.ControllerSupport;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @ChenileController(value = "{{service}}Service", serviceName = "_{{service}}Service_",
 		healthCheckerName = "{{service}}HealthChecker")
 public class {{Service}}Controller extends ControllerSupport{
 	
-	@PostMapping("/{{service}}/op1")
-	public ResponseEntity<GenericResponse<{{Service}}Entity>> op1(
+{{^jpa}}
+@PostMapping("/{{service}}/op1")
+	public ResponseEntity<GenericResponse<{{Service}}>> op1(
 			HttpServletRequest httpServletRequest,
-			@RequestBody {{Service}}Entity entity){
+			@RequestBody {{Service}} entity){
 		return process("op1",httpServletRequest,entity);	
 	}
+{{/jpa}}
+{{#jpa}}
+    @PostMapping("/{{service}}")
+    {{#cloudEdgeSwitch}}
+    @InterceptedBy("cloudEdgeSwitch")
+    @CloudEdgeSwitchConfig
+    {{/cloudEdgeSwitch}}
+    public ResponseEntity<GenericResponse<{{Service}}>> save(
+        HttpServletRequest httpServletRequest,
+        @RequestBody {{Service}} entity){
+        return process(httpServletRequest,entity);
+        }
 
+    @GetMapping("/{{service}}/{id}")
+    public ResponseEntity<GenericResponse<{{Service}}>> retrieve(
+    HttpServletRequest httpServletRequest,
+    @PathVariable("id") String id){
+    return process(httpServletRequest,id);
+    }
+{{/jpa}}
 }

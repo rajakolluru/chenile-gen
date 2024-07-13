@@ -42,6 +42,13 @@
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 		</dependency>
+        {{#jpa}}
+            <!-- This is a play dependency. Replace it with a serious Database -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+        {{/jpa}}
 
 		<!-- Start including all the services that need to be packaged with this mini monolith -->
 		{{#services}}

@@ -14,5 +14,13 @@
 	<packaging>jar</packaging>
 
 	<name>{{Service}} API Model and Interfaces</name>
+    {{#jpa}}
+    <dependencies>
+      <dependency>
+        <groupId>{{chenilePackage}}</groupId>
+        <artifactId>jpa-utils</artifactId>
+      </dependency>
+    </dependencies>
+    {{/jpa}}
 
 </project>

@@ -1,19 +1,20 @@
 package {{com}}.{{company}}.{{org}}.{{service}}.model;
 
 {{^jpa}}
-import {{chenilePackage}}.workflow.model.AbstractStateEntity;
+import {{chenilePackage}}.utils.entity.model.AbstractExtendedStateEntity;
 {{/jpa}}
 import java.io.Serial;
 
 {{#jpa}}
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import {{chenilePackage}}.jpautils.entity.AbstractJpaStateEntity;
 @Entity
 @Table(name = "{{service}}")
-public class {{Service}} extends BaseEntity{
+public class {{Service}} extends AbstractJpaStateEntity{
 {{/jpa}}
 {{^jpa}}
-public class {{Service}} extends AbstractStateEntity{
+public class {{Service}} extends AbstractExtendedStateEntity{
 {{/jpa}}
     @Serial
 	private static final long serialVersionUID = 1L;

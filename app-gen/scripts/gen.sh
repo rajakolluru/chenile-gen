@@ -15,8 +15,10 @@ function generateService(){
     service=$(captureNonNullField "Service Name")
     serviceVersion=$(captureFieldWithDefaultValue "Service Version" "$defaultVersion")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
-    securityEnabled=$(captureFieldWithDefaultValue "Security Enabled?" "n")
-    $scripts_folder/gen-service.sh $service $serviceVersion $outfolder $securityEnabled
+    securityEnabled=$(captureFieldWithDefaultValue "Enable Security?" "n")
+    jpa=$(captureFieldWithDefaultValue "Enable JPA?" "y")
+    cmdline=$(generateCommandLine $serviceVersion $outfolder $securityEnabled $jpa)
+    $scripts_folder/gen-service.sh $cmdline $service
 }
 
 function generateMybatisQuery(){   
@@ -43,10 +45,10 @@ function generateWorkflowService(){
     securityEnabled=$(captureFieldWithDefaultValue "Enable Security?" "n")
     jpa=$(captureFieldWithDefaultValue "Enable JPA?" "y")
     cmdline=$(generateCommandLine $serviceVersion $outfolder $securityEnabled $jpa)
-    $scripts_folder/gen-workflow-service1.sh $cmdline $service 
+    $scripts_folder/gen-workflow-service.sh $cmdline $service
 }
 
-# Usage: generateCommandLine version outfolder securityEnabled persistenceEnabled
+# Usage: generateCommandLine version outfolder securityEnabled persistenceEnabled [included-service [included-service-version]]
 function generateCommandLine(){
     cmdline="-v $1 -d $2"
     if [[ $3 == "y" ]]
@@ -57,6 +59,14 @@ function generateCommandLine(){
     then 
         cmdline="$cmdline -j"
     fi
+    if [[ -n $5 ]]
+    then
+      cmdline="$cmdline -S $5"
+    fi
+    if [[ -n $6 ]]
+    then
+      cmdline="$cmdline -V $6"
+    fi
     echo $cmdline
 }
 
@@ -66,8 +76,13 @@ function generateMiniMonolith(){
     [[ -z $outfolder ]] && outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
     [[ -z $service ]] && service=$(captureFieldWithDefaultValue "Service Name to bundle" $defaultServiceName)
     [[ -z $serviceVersion ]] && serviceVersion=$(captureFieldWithDefaultValue "Service Version" $defaultVersion)
-    $scripts_folder/gen-monolith.sh $monolith $monolithVersion $outfolder $service $serviceVersion
+    [[ -z $jpa ]] && jpa=$(captureFieldWithDefaultValue "Enable JPA?" "y")
+    [[ -z $securityEnabled ]] && securityEnabled=$(captureFieldWithDefaultValue "Enable Security?" "n")
+    cmdline=$(generateCommandLine $monolithVersion $outfolder $securityEnabled $jpa $service $serviceVersion)
+    $scripts_folder/gen-monolith.sh $cmdline $monolith
 }
+
+
 
 function generateLocalConfig() {
 		if [[ -d config ]]

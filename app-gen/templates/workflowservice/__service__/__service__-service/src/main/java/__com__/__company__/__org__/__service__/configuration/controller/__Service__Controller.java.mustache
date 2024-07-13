@@ -11,7 +11,7 @@ import org.chenile.http.annotation.ChenileParamType;
 import org.chenile.http.handler.ControllerSupport;
 import org.springframework.http.ResponseEntity;
 
-import {{chenilePackage}}.workflow.model.AbstractStateEntity;
+import {{chenilePackage}}.stm.StateEntity;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,30 +29,30 @@ import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
 public class {{Service}}Controller extends ControllerSupport{
 	
 	@GetMapping("/{{service}}/{id}")
-	public ResponseEntity<GenericResponse<StateEntityServiceResponse>> retrieve(
+	public ResponseEntity<GenericResponse<StateEntityServiceResponse<{{Service}}>>> retrieve(
 			HttpServletRequest httpServletRequest,
 			@PathVariable String id){
-		return process("retrieve",httpServletRequest,id);	
+		return process(httpServletRequest,id);
 	}
 
 	@PostMapping("/{{service}}")
-	public ResponseEntity<GenericResponse<StateEntityServiceResponse>> create(
+	public ResponseEntity<GenericResponse<StateEntityServiceResponse<{{Service}}>>> create(
 			HttpServletRequest httpServletRequest,
-			@ChenileParamType(AbstractStateEntity.class)
+			@ChenileParamType(StateEntity.class)
 			@RequestBody {{Service}} entity){
-		return process("create",httpServletRequest,entity);	
+		return process(httpServletRequest,entity);
 	}
 
 	
 	@PutMapping("/{{service}}/{id}/{eventID}")
 	@BodyTypeSelector("{{service}}BodyTypeSelector")
-	public ResponseEntity<GenericResponse<StateEntityServiceResponse>> processById(
+	public ResponseEntity<GenericResponse<StateEntityServiceResponse<{{Service}}>>> processById(
 			HttpServletRequest httpServletRequest,
 			@PathVariable String id,
 			@PathVariable String eventID,
 			@ChenileParamType(Object.class) 
 			@RequestBody String eventPayload){
-		return process("processById",httpServletRequest,id,eventID,eventPayload);	
+		return process(httpServletRequest,id,eventID,eventPayload);
 	}
 
 
