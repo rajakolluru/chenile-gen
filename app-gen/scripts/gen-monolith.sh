@@ -37,20 +37,21 @@ function setenv(){
 function generateMonolith(){
 	template_folder=$template_folder_base/monolith
   	generateModule $template_folder $dest_folder $json_file "monolith com org company Monolith"
-  	generateCurlScript 
-  	doGitInit $dest_folder/$monolith $monolithVersion
+  	generateCurlScript
+  	if [[ $gitInit == "true" ]]
+    then
+  	  doGitInit $dest_folder/$monolith $monolithVersion
+  	fi
 }
 
 function generateCurlScript(){
 	tmpfile=/tmp/$RANDOM.$$.${prog}
-	# [[ -z $serviceTemplate ]] && return
 	cur_curl_script=${dest_folder}/${monolith}/scripts/curl-scripts.sh
-	service_curl_script=${template_folder_base}/${serviceTemplate}/__service__/scripts/curl-scripts.sh.mustache
+	service_curl_script=${dest_folder}/${service}/scripts/curl-scripts.sh
+
 	[[ ! -f ${cur_curl_script} ]] && return
 	[[ ! -f ${service_curl_script} ]] && return
-	$scripts_folder/node_modules/mustache/bin/mustache $json_file $service_curl_script > $tmpfile
-	sed '1,/#--/d' ${tmpfile} >> ${cur_curl_script}
-	rm $tmpfile
+	sed '1,/#--/d' ${service_curl_script} >> ${cur_curl_script}
 }
 
 function constructJsonfile(){
@@ -103,14 +104,18 @@ monolithVersion=${defaultVersion}
 dest_folder=${defaultDestFolder}
 service=${defaultServiceName}
 serviceVersion=${defaultVersion}
+gitInit=false
 
-while getopts ":sjd:v:S:V:" opts; do
+while getopts ":sjd:v:S:V:g" opts; do
     case "${opts}" in
         s)
             securityEnabled=true
             ;;
         S)
             service=${OPTARG}
+            ;;
+        g)
+            gitInit=true
             ;;
         V)
             serviceVersion=${OPTARG}

@@ -1,10 +1,9 @@
 #!/bin/bash
 
 function usage(){
-  	echo "Usage: $prog <namespace> [namespace-version [dest-folder]]" >&2
-  	echo "namespace version will default to $defaultVersion"
+  echo "Usage: $prog [-v namespace-version] [-d dest-folder] <namespace> " >&2
+  echo "namespace version will default to $defaultVersion" >&2
 	echo "dest-folder will default to $defaultDestFolder" >&2
-	# echo "List of columns that need to be mapped can be passed in stdin"
 }
 
 function _exit {
@@ -35,7 +34,10 @@ function generateQueryNamespace(){
 	constructJsonfile > $json_file
 	template_folder=$template_folder_base/mybatis-query-service
   	generateModule $template_folder $dest_folder $json_file "namespace com org company Namespace"
-  	doGitInit $dest_folder/$namespace $namespaceVersion
+  	if [[ $gitInit == "true" ]]
+  	then
+  	  doGitInit $dest_folder/$namespace $namespaceVersion
+  	fi
 }
 
 function constructJsonfile(){
@@ -68,10 +70,42 @@ fi
 
 
 json_file=/tmp/$prog.$$
+namespaceVersion=${defaultVersion}
+dest_folder=${defaultDestFolder}
+gitInit=false
+while getopts ":d:v:g" opts; do
+    case "${opts}" in
+        g)
+            gitInit=true
+            ;;
+        d)
+            dest_folder=${OPTARG}
+            ;;
+		    v)
+            namespaceVersion=${OPTARG}
+            ;;
+        :)
+            echo "Option $OPTARG requires an argument" >&2
+            usage
+            _exit 2
+            ;;
+        \?)
+			      echo "Invalid option $OPTARG" >&2
+            usage
+            _exit 3
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
 namespace=${1}
+[[ -z $namespace ]] && {
+	echo "Namespace is not specified."
+	usage
+	_exit 4
+}
 Namespace=$(camelCase $namespace)
-namespaceVersion=${2:-$defaultVersion}
-dest_folder=${3:-$defaultDestFolder}
+
 # getColumnsList
 
 [[ ! -d $dest_folder ]] && mkdir $dest_folder

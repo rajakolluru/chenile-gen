@@ -1,8 +1,8 @@
 #!/bin/bash
 
 function usage(){
-  	echo "Usage: $prog <interceptor-name> [interceptor-version [dest-folder]]" >&2
-  	echo "interceptor version will default to $defaultVersion"
+  echo "Usage: $prog [-v interceptor-version] [-d dest-folder] <interceptor-name> " >&2
+  echo "interceptor version will default to $defaultVersion" >&2
 	echo "dest-folder will default to $defaultDestFolder" >&2
 }
 
@@ -28,13 +28,14 @@ function setenv(){
 	setBaseVars
 }
 
-
-
 function generateInterceptor(){
 	constructJsonfile > $json_file
 	template_folder=$template_folder_base/interceptor-template
-  	generateModule $template_folder $dest_folder $json_file "interceptorName com org company InterceptorName"
+  generateModule $template_folder $dest_folder $json_file "interceptorName com org company InterceptorName"
+  if [[ $gitInit == "true" ]]
+  then
   	doGitInit $dest_folder/$interceptorName $interceptorVersion
+  fi
 }
 
 function constructJsonfile(){
@@ -59,10 +60,41 @@ fi
 
 
 json_file=/tmp/$prog.$$
+interceptorVersion=${defaultVersion}
+dest_folder=${defaultDestFolder}
+gitInit=false
+while getopts ":d:v:g" opts; do
+    case "${opts}" in
+        g)
+            gitInit=true
+            ;;
+        d)
+            dest_folder=${OPTARG}
+            ;;
+		    v)
+            interceptorVersion=${OPTARG}
+            ;;
+        :)
+            echo "Option $OPTARG requires an argument" >&2
+            usage
+            _exit 2
+            ;;
+        \?)
+			      echo "Invalid option $OPTARG" >&2
+            usage
+            _exit 3
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
 interceptorName=${1}
+[[ -z $interceptorName ]] && {
+	echo "Interceptor Name is not specified."
+	usage
+	_exit 4
+}
 InterceptorName=$(camelCase $interceptorName)
-interceptorVersion=${2:-$defaultVersion}
-dest_folder=${3:-$defaultDestFolder}
 
 [[ ! -d $dest_folder ]] && mkdir $dest_folder
 echo "Creating interceptor ${interceptorName}(${interceptorVersion}) in folder $dest_folder" >&2

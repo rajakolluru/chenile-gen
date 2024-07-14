@@ -26,7 +26,8 @@ function generateMybatisQuery(){
     namespaceVersion=$(captureFieldWithDefaultValue "Namespace Version" "$defaultVersion")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
     # columns="$(captureList 'Columns to map')"
-    $scripts_folder/gen-mybatis-query.sh $namespace $namespaceVersion $outfolder 
+    cmdline=$(generateCommandLine $namespaceVersion $outfolder "n" "n")
+    $scripts_folder/gen-mybatis-query.sh $cmdline $namespace
 }
 
 function generateQueryService(){   
@@ -66,6 +67,10 @@ function generateCommandLine(){
     if [[ -n $6 ]]
     then
       cmdline="$cmdline -V $6"
+    fi
+    if [[ $gitInit == "y" ]]
+    then
+      cmdline="$cmdline -g"
     fi
     echo $cmdline
 }
@@ -118,7 +123,8 @@ function generateInterceptor(){
     interceptorName=$(captureNonNullField "Interceptor Name")
     interceptorVersion=$(captureFieldWithDefaultValue "Interceptor Version" "$defaultVersion")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
-    $scripts_folder/gen-interceptor.sh $interceptorName $interceptorVersion $outfolder
+    cmdline=$(generateCommandLine $interceptorVersion $outfolder "n" "n")
+    $scripts_folder/gen-interceptor.sh $cmdline $interceptorName
 }
 
 function setenv(){
@@ -157,6 +163,14 @@ then
     _exit 1
 fi
 
+gitInit=n
+gitInit=$(captureFieldWithDefaultValue "Git init (y/n)?" "$gitInit")
+if [[ $gitInit == 'y' || $gitInit == 'Y' ]]
+then
+  gitInit="y"
+else
+  gitInit="n"
+fi
 choice=$(choices  \
     "N|Generate Normal Service & Mini Monolith"  \
     "W|Generate Workflow Service & Mini Monolith" \
@@ -171,4 +185,5 @@ case $choice in
     "Q") generateMybatisQuery;;
     "C") generateLocalConfig;;
 esac
+
 _exit 0

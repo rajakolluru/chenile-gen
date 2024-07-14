@@ -2,7 +2,8 @@ display_cmd=cat
 which jq && display_cmd=jq # if jq is present in path use jq to format the json payload well
 
 function execute(){
-	cmd="curl $1"
+	# cmd="curl $1"
+    cmd="curl -H 'x-chenile-tenant-id: t1' -H 'x-chenile-eid: E1' $1"
 	header="curl -i $1"
 	echo "Command: curl $1" | tr -d '\n' | tr '\t' ' ' | tr -s ' ' # all newlines ignored. all tabs to spaces. fuse multiple spaces to one space
 	echo

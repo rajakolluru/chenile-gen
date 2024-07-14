@@ -100,7 +100,6 @@ function processConditionalFolders(){
         var=$(echo $expr | cut -d= -f1)
         rhs=$(echo $expr | cut -d= -f2)
         lhs=$(eval 'echo $'${var})
-        echo "Processing directory $dir with expression $expr. LHS = $lhs. RHS = $rhs"
          if [[ $lhs == "$rhs" ]]
          then
            folder_up=${dir%/*}

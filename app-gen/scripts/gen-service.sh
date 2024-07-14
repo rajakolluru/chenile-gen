@@ -36,7 +36,10 @@ function generateService(){
 	constructJsonfile > $json_file
 	template_folder=$template_folder_base/service
   	generateModule $template_folder $dest_folder $json_file "service com org company Service"
-  	doGitInit $dest_folder/$service $serviceVersion
+  	if [[ $gitInit == "true" ]]
+  	then
+  	  doGitInit $dest_folder/$service $serviceVersion
+  	fi
 }
 
 function constructJsonfile(){
@@ -75,31 +78,35 @@ serviceVersion=${defaultVersion}
 dest_folder=${defaultDestFolder}
 securityEnabled=false
 jpa=false
+gitInit=false
 
-while getopts ":sjd:v:" opts; do
+while getopts ":sjd:v:g" opts; do
     case "${opts}" in
-        s)
-            securityEnabled=true
-            ;;
-        j)
-            jpa=true
-            ;;
-        d)
+    s)
+      securityEnabled=true
+      ;;
+    j)
+      jpa=true
+      ;;
+    d)
 			dest_folder=${OPTARG}
 			;;
 		v)
 			serviceVersion=${OPTARG}
 			;;
-        :)
+	  g)
+	    gitInit=true
+	    ;;
+    :)
 			echo "Option $OPTARG requires an argument" >&2
 			usage
 			_exit 2
 			;;
-        \?)
+    \?)
 			echo "Invalid option $OPTARG" >&2
-            usage
-            _exit 3
-            ;;
+      usage
+      _exit 3
+      ;;
     esac
 done
 shift $((OPTIND-1))

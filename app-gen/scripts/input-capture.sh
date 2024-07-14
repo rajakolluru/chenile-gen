@@ -1,4 +1,4 @@
-# input-capture.sh - contains functions that capture inout from the user
+# input-capture.sh - contains functions that capture input from the user
 
 function captureNonNullField(){
     error=1
@@ -54,7 +54,7 @@ function choices(){
             index=$((index + 1))
         done
 
-        read -p 'Please enter your choice: (or quit to exit the program) ' p
+        read -p 'Please enter your choice: (or 'quit' to exit the program) ' p
         
         if [[ $p == quit ]]
         then
