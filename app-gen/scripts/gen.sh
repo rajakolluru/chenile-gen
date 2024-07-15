@@ -72,6 +72,10 @@ function generateCommandLine(){
     then
       cmdline="$cmdline -g"
     fi
+    if [[ $cloudSwitchEnabled == "y" ]]
+    then
+      cmdline="$cmdline -c"
+    fi
     echo $cmdline
 }
 
@@ -163,14 +167,10 @@ then
     _exit 1
 fi
 
-gitInit=n
-gitInit=$(captureFieldWithDefaultValue "Git init (y/n)?" "$gitInit")
-if [[ $gitInit == 'y' || $gitInit == 'Y' ]]
-then
-  gitInit="y"
-else
-  gitInit="n"
-fi
+
+gitInit=$(captureYorN "Git Init" "n")
+cloudSwitchEnabled=$(captureYorN "Enable Cloud Switch" "n")
+
 choice=$(choices  \
     "N|Generate Normal Service & Mini Monolith"  \
     "W|Generate Workflow Service & Mini Monolith" \

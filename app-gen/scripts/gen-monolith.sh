@@ -1,11 +1,12 @@
 #!/bin/bash
 
 function usage(){
-  echo "Usage: $prog [-v monolith-version] [-d dest-folder] [-s] [-j] [-S service-to-bundle] [-V service-version-to0-bundle] <monolith-name> " >&2
+  echo "Usage: $prog [-v monolith-version] [-d dest-folder] [-s] [-j] [-c] [-S service-to-bundle] [-V service-version-to0-bundle] <monolith-name> " >&2
   echo "service version will default to $defaultVersion" >&2
 	echo "dest-folder will default to $defaultDestFolder" >&2
 	echo "-s will enable security" >&2
 	echo "-j will enable JPA" >&2
+	echo "-c will enable Cloud Switch" >&2
 	echo "Service to bundle along with the monolith. If this is not provided we will default to $defaultServiceName as the name of the service"
   echo "Service Version to bundle. If this is not provided we will default to $defaultServiceVersion as the version of the service"
 }
@@ -105,11 +106,15 @@ dest_folder=${defaultDestFolder}
 service=${defaultServiceName}
 serviceVersion=${defaultVersion}
 gitInit=false
+cloudSwitchEnabled=false
 
-while getopts ":sjd:v:S:V:g" opts; do
+while getopts ":sjd:v:S:V:gc" opts; do
     case "${opts}" in
         s)
             securityEnabled=true
+            ;;
+        c)
+            cloudSwitchEnabled=true
             ;;
         S)
             service=${OPTARG}

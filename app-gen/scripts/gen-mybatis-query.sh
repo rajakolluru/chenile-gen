@@ -73,10 +73,15 @@ json_file=/tmp/$prog.$$
 namespaceVersion=${defaultVersion}
 dest_folder=${defaultDestFolder}
 gitInit=false
-while getopts ":d:v:g" opts; do
+cloudSwitchEnabled=false
+
+while getopts ":d:v:gc" opts; do
     case "${opts}" in
         g)
             gitInit=true
+            ;;
+        c)
+            cloudSwitchEnabled=true
             ;;
         d)
             dest_folder=${OPTARG}

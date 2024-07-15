@@ -89,4 +89,16 @@ function chooseMultiple(){
   echo "$out"
 }
 
+# usage captureYorN prompt defaultValue
+function captureYorN(){
+  abc=$(captureFieldWithDefaultValue "$1 (y/n)?" "$2")
+  if [[ $abc == 'y' || $abc == 'Y' ]]
+  then
+    abc="y"
+  else
+    abc="n"
+  fi
+  echo $abc
+}
+
 

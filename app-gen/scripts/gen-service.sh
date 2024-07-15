@@ -1,11 +1,12 @@
 #!/bin/bash
 
 function usage(){
-  echo "Usage: $prog [-v service-version] [-d dest-folder] [-s] [-j] <service-name> " >&2
+  echo "Usage: $prog [-v service-version] [-d dest-folder] [-s] [-j] [-c] <service-name> " >&2
   echo "service version will default to $defaultVersion" >&2
 	echo "dest-folder will default to $defaultDestFolder" >&2
 	echo "-s will enable security" >&2
 	echo "-j will enable JPA" >&2
+	echo "-c will enable Cloud Switch" >&2
 }
 
 function _exit {
@@ -56,6 +57,11 @@ function constructJsonfile(){
   	  echo "\"jpa\": \"$jpa\","
   	fi
 
+  	if [[ $cloudSwitchEnabled == "true" ]]
+    then
+      echo "\"cloudSwitchEnabled\": \"$cloudSwitchEnabled\","
+    fi
+
 	echo "\"com\": \"$com\","
 	echo "\"org\": \"$org\","
 	echo "\"company\": \"$company\","
@@ -79,11 +85,15 @@ dest_folder=${defaultDestFolder}
 securityEnabled=false
 jpa=false
 gitInit=false
+cloudSwitchEnabled=false
 
-while getopts ":sjd:v:g" opts; do
+while getopts ":sjd:v:gc" opts; do
     case "${opts}" in
     s)
       securityEnabled=true
+      ;;
+    c)
+      cloudSwitchEnabled=true
       ;;
     j)
       jpa=true
