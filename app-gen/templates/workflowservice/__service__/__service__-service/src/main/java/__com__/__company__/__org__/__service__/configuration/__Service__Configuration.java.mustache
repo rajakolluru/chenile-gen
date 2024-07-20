@@ -26,6 +26,7 @@ import {{com}}.{{company}}.{{org}}.{{service}}.service.cmds.Close{{Service}}Acti
 import {{com}}.{{company}}.{{org}}.{{service}}.service.cmds.Resolve{{Service}}Action;
 import {{com}}.{{company}}.{{org}}.{{service}}.service.healthcheck.{{Service}}HealthChecker;
 import {{com}}.{{company}}.{{org}}.{{service}}.service.store.{{Service}}EntityStore;
+import {{chenilePackage}}.workflow.api.WorkflowRegistry;
 
 /**
  This is where you will instantiate all the required classes in Spring
@@ -52,7 +53,8 @@ public class {{Service}}Configuration {
 	}
 	
 	@Bean @Autowired STMActionsInfoProvider {{service}}ActionsInfoProvider(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore) {
-		return new STMActionsInfoProvider(stmFlowStore);
+		STMActionsInfoProvider provider =  new STMActionsInfoProvider(stmFlowStore);
+        WorkflowRegistry.addSTMActionsInfoProvider({{service}}.class,provider);
 	}
 	
 	@Bean EntityStore<{{Service}}> {{service}}EntityStore() {
