@@ -1,5 +1,5 @@
 export chenilePackage=org.chenile
-export chenileVersion=1.3.5
+export chenileVersion=1.3.6
 
 export com=com
 export company=mycompany
