@@ -24,7 +24,7 @@ public class {{Service}}EntityStore implements EntityStore<{{Service}}>{
 	@Override
 	public void store({{Service}} entity) {
         {{#jpa}}
-        issueRepository.save(entity);
+        {{service}}Repository.save(entity);
         {{/jpa}}
         {{^jpa}}
 		if (entity.getId() == null) {
@@ -40,9 +40,9 @@ public class {{Service}}EntityStore implements EntityStore<{{Service}}>{
 		return theStore.get(id);
         {{/jpa}}
         {{#jpa}}
-        Optional<Issue> issue = issueRepository.findById(id);
-        if (issue.isPresent()) return issue.get();
-        throw new NotFoundException(1500,"Unable to find employee with ID " + id);
+        Optional<{{Service}}> entity = {{service}}Repository.findById(id);
+        if (entity.isPresent()) return entity.get();
+        throw new NotFoundException(1500,"Unable to find {{Service}} with ID " + id);
         {{/jpa}}
 	}
 

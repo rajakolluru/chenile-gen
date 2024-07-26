@@ -54,7 +54,8 @@ public class {{Service}}Configuration {
 	
 	@Bean @Autowired STMActionsInfoProvider {{service}}ActionsInfoProvider(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore) {
 		STMActionsInfoProvider provider =  new STMActionsInfoProvider(stmFlowStore);
-        WorkflowRegistry.addSTMActionsInfoProvider({{service}}.class,provider);
+        WorkflowRegistry.addSTMActionsInfoProvider("{{service}}",provider);
+        return provider;
 	}
 	
 	@Bean EntityStore<{{Service}}> {{service}}EntityStore() {
