@@ -149,7 +149,7 @@ function setenv(){
 
 setenv "${0}" 
 source $scripts_folder/input-capture.sh # init functions that allow us to capture input from user
-
+cat $scripts_folder/banner.txt
 usage="${prog}"
 function usage {
 	echo "$usage" 1>&2

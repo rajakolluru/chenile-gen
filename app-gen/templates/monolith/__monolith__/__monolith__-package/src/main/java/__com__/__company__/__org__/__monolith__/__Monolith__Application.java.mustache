@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication(scanBasePackages = { "{{com}}.{{company}}.{{org}}.**.configuration",
 		"{{chenilePackage}}.configuration" })
 {{#jpa}}
-@EntityScan("org.chenile.samples.**.model")
-@EnableJpaRepositories(basePackages = "org.chenile.samples.**.configuration.dao")
+@EntityScan("{{com}}.{{company}}.{{org}}.**.model")
+@EnableJpaRepositories(basePackages = "{{com}}.{{company}}.{{org}}.**.configuration.dao")
 @EnableTransactionManagement
 {{/jpa}}
 public class {{Monolith}}Application extends SpringBootServletInitializer {
