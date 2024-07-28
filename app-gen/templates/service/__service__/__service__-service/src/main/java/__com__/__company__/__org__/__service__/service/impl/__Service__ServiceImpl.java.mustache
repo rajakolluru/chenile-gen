@@ -34,7 +34,7 @@ public class {{Service}}ServiceImpl implements {{Service}}Service{
     {{Service}}Repository {{service}}Repository;
     @Override
     public {{Service}} save({{Service}} entity) {
-        {{service}}Repository.save(entity);
+        entity = {{service}}Repository.save(entity);
         return entity;
     }
 

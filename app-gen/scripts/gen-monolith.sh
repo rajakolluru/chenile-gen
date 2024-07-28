@@ -61,15 +61,20 @@ function constructJsonfile(){
 	echo "\"monolithVersion\": \"$monolithVersion\","
 	echo "\"com\": \"$com\","
 	echo "\"org\": \"$org\","
-	if [[ $securityEnabled == "true" ]]
+	if [[ $security == "true" ]]
   	then
-  	  echo "\"securityEnabled\": \"$securityEnabled\","
+  	  echo "\"security\": \"$security\","
   	fi
 
   	if [[ $jpa == "true" ]]
   	then
   	  echo "\"jpa\": \"$jpa\","
   	fi
+
+  	if [[ $cloudSwitchEnabled == "true" ]]
+      	then
+      	  echo "\"cloudSwitchEnabled\": \"$cloudSwitchEnabled\","
+    fi
 
 	echo "\"company\": \"$company\","
 	echo "\"chenilePackage\": \"$chenilePackage\","
@@ -107,11 +112,12 @@ service=${defaultServiceName}
 serviceVersion=${defaultVersion}
 gitInit=false
 cloudSwitchEnabled=false
+security=false
 
 while getopts ":sjd:v:S:V:gc" opts; do
     case "${opts}" in
         s)
-            securityEnabled=true
+            security=true
             ;;
         c)
             cloudSwitchEnabled=true
@@ -131,8 +137,8 @@ while getopts ":sjd:v:S:V:gc" opts; do
         d)
 			    dest_folder=${OPTARG}
 			;;
-		v)
-			serviceVersion=${OPTARG}
+		    v)
+			    monolithVersion=${OPTARG}
 			;;
         :)
 			echo "Option $OPTARG requires an argument" >&2
@@ -154,7 +160,7 @@ monolith=${1}
 	usage
 	_exit 4
 }
-Monolith=$(camelCase $service)
+Monolith=$(camelCase $monolith)
 
 [[ ! -d $dest_folder ]] && mkdir $dest_folder
 echo "Creating monolith ${monolith}(${monolithVersion}) with included service $service($serviceVersion) in folder $dest_folder" >&2

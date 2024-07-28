@@ -25,6 +25,11 @@ endif
 build:
 	mvn -Drevision=$(version) install
 
+## it: Perform an integration test (generates Service Registry and Open API files in {{monolith}}-package/target folder)
+.PHONY: it
+it:
+	mvn -Drevision=$(version) -DperformIt=true install
+
 ## test-script: Test the executable with a curl script for a quick validation
 .PHONY: test-script
 test-script:
@@ -35,7 +40,6 @@ test-script:
 deploy:
 	mvn -Drevision=$(version) deploy
 
-
 ## clean: Clean all previous builds
 .PHONY: clean
 clean:
@@ -44,7 +48,7 @@ clean:
 ## run: Run the executable using the spring-boot plugin
 .PHONY: run
 run: 
-	cd *-package && mvn -Drevision=$(version) spring-boot:run
+	cd {{monolith}}-package && mvn -Drevision=$(version) spring-boot:run
 
 # check-tag: checks if the tag name has been passed as a parameter to the "make" command
 # This is internally used by the other goals and should not be invoked by the end user. Hence it 

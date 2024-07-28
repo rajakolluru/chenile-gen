@@ -3,6 +3,10 @@ It helps to create a {{service}} and manages the state of the {{service}} as fol
 OPENED -(assign) -> ASSIGNED -(resolve) -> RESOLVED -(close) -> CLOSED
  
   Scenario: Test create {{service}}
+{{#security}}
+    When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+{{/security}}
     When I POST a REST request to URL "/{{service}}" with payload
     """
     {
@@ -17,6 +21,10 @@ OPENED -(assign) -> ASSIGNED -(resolve) -> RESOLVED -(close) -> CLOSED
     And the REST response key "mutatedEntity.description" is "Description"
 	  
 	Scenario: Retrieve the {{service}} that just got created
+{{#security}}
+    When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+{{/security}}
 	  When I GET a REST request to URL "/{{service}}/${id}" 
 	  Then the REST response contains key "mutatedEntity"
 	  And the REST response key "mutatedEntity.id" is "${id}"
@@ -24,6 +32,10 @@ OPENED -(assign) -> ASSIGNED -(resolve) -> RESOLVED -(close) -> CLOSED
 	  And the REST response key "mutatedEntity.openedBy" is "USER1"
 	  
 	Scenario: Assign the {{service}} to an assignee with comments
+{{#security}}
+    When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+{{/security}}
 		When I PUT a REST request to URL "/{{service}}/${id}/assign" with payload
 		"""
 		{
@@ -38,6 +50,10 @@ OPENED -(assign) -> ASSIGNED -(resolve) -> RESOLVED -(close) -> CLOSED
 	  And the REST response key "mutatedEntity.assignComment" is "MY-ASSIGNEE-CAN-FIX-THIS"
 	  
 	 Scenario: Resolve the {{service}} with comments
+{{#security}}
+    When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+{{/security}}
 		When I PUT a REST request to URL "/{{service}}/${id}/resolve" with payload
 		"""
 		{
@@ -50,6 +66,10 @@ OPENED -(assign) -> ASSIGNED -(resolve) -> RESOLVED -(close) -> CLOSED
 	  And the REST response key "mutatedEntity.resolveComment" is "CANNOT-DUPLICATE"
 	  
 	 Scenario: Close the {{service}} with comments
+{{#security}}
+    When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+{{/security}}
 		When I PUT a REST request to URL "/{{service}}/${id}/close" with payload
 		"""
 		{
@@ -62,6 +82,10 @@ OPENED -(assign) -> ASSIGNED -(resolve) -> RESOLVED -(close) -> CLOSED
 	  And the REST response key "mutatedEntity.closeComment" is "OK" 
 	  
 	 Scenario: Assign a closed {{service}} to someone. This will err out.
+{{#security}}
+    When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+{{/security}}
 		When I PUT a REST request to URL "/{{service}}/${id}/assign" with payload
 		"""
 		{

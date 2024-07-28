@@ -27,6 +27,11 @@ import {{com}}.{{company}}.{{org}}.{{service}}.service.cmds.Resolve{{Service}}Ac
 import {{com}}.{{company}}.{{org}}.{{service}}.service.healthcheck.{{Service}}HealthChecker;
 import {{com}}.{{company}}.{{org}}.{{service}}.service.store.{{Service}}EntityStore;
 import {{chenilePackage}}.workflow.api.WorkflowRegistry;
+{{#security}}
+import org.chenile.workflow.service.stmcmds.StmAuthoritiesBuilder;
+import java.util.function.Function;
+import org.chenile.core.context.ChenileExchange;
+{{/security}}
 
 /**
  This is where you will instantiate all the required classes in Spring
@@ -111,4 +116,13 @@ public class {{Service}}Configuration {
 	@Bean {{Service}}HealthChecker {{service}}HealthChecker(){
     	return new {{Service}}HealthChecker();
     }
+
+{{#security}}
+    @Bean @Autowired Function<ChenileExchange, String[]> {{service}}EventAuthoritiesSupplier(
+        @Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider)
+                    throws Exception{
+        StmAuthoritiesBuilder builder = new StmAuthoritiesBuilder({{service}}InfoProvider);
+        return builder.build();
+    }
+{{/security}}
 }

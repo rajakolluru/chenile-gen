@@ -24,6 +24,28 @@
 			<groupId>{{chenilePackage}}</groupId>
             <artifactId>workflow-service</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        {{#security}}
+        <dependency>
+            <groupId>{{chenilePackage}}</groupId>
+            <artifactId>chenile-security-api</artifactId>
+        </dependency>
+        <!-- Test dependencies for security -->
+        <dependency>
+            <groupId>{{chenilePackage}}</groupId>
+            <artifactId>cucumber-sec-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>{{chenilePackage}}</groupId>
+            <artifactId>security-interceptor</artifactId>
+            <scope>test</scope>
+        </dependency>
+        {{/security}}
 		<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -35,11 +57,6 @@
 		<dependency>
 			<groupId>org.chenile</groupId>
 			<artifactId>cucumber-utils</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
         {{#jpa}}

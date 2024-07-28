@@ -15,9 +15,9 @@ function generateService(){
     service=$(captureNonNullField "Service Name")
     serviceVersion=$(captureFieldWithDefaultValue "Service Version" "$defaultVersion")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
-    securityEnabled=$(captureFieldWithDefaultValue "Enable Security?" "n")
+    security=$(captureFieldWithDefaultValue "Enable Security?" "n")
     jpa=$(captureFieldWithDefaultValue "Enable JPA?" "y")
-    cmdline=$(generateCommandLine $serviceVersion $outfolder $securityEnabled $jpa)
+    cmdline=$(generateCommandLine $serviceVersion $outfolder $security $jpa)
     $scripts_folder/gen-service.sh $cmdline $service
 }
 
@@ -34,22 +34,22 @@ function generateQueryService(){
     service=$(captureNonNullField "Service Name")
     serviceVersion=$(captureFieldWithDefaultValue "Service Version" "$defaultVersion")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
-    securityEnabled=$(captureFieldWithDefaultValue "Security Enabled?" "n")
+    security=$(captureFieldWithDefaultValue "Security Enabled?" "n")
     generateQueryController=$(captureFieldWithDefaultValue "Generate Query Controller?" "n")
-    $scripts_folder/gen-query-service.sh $service $serviceVersion $outfolder $securityEnabled $generateQueryController
+    $scripts_folder/gen-query-service.sh $service $serviceVersion $outfolder $security $generateQueryController
 }
 
 function generateWorkflowService(){   
     service=$(captureNonNullField "Workflow Entity Service Name")
     serviceVersion=$(captureFieldWithDefaultValue "Workflow Entity Service Version" "$defaultVersion")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
-    securityEnabled=$(captureFieldWithDefaultValue "Enable Security?" "n")
+    security=$(captureFieldWithDefaultValue "Enable Security?" "n")
     jpa=$(captureFieldWithDefaultValue "Enable JPA?" "y")
-    cmdline=$(generateCommandLine $serviceVersion $outfolder $securityEnabled $jpa)
+    cmdline=$(generateCommandLine $serviceVersion $outfolder $security $jpa)
     $scripts_folder/gen-workflow-service.sh $cmdline $service
 }
 
-# Usage: generateCommandLine version outfolder securityEnabled persistenceEnabled [included-service [included-service-version]]
+# Usage: generateCommandLine version outfolder security persistenceEnabled [included-service [included-service-version]]
 function generateCommandLine(){
     cmdline="-v $1 -d $2"
     if [[ $3 == "y" ]]
@@ -86,8 +86,8 @@ function generateMiniMonolith(){
     [[ -z $service ]] && service=$(captureFieldWithDefaultValue "Service Name to bundle" $defaultServiceName)
     [[ -z $serviceVersion ]] && serviceVersion=$(captureFieldWithDefaultValue "Service Version" $defaultVersion)
     [[ -z $jpa ]] && jpa=$(captureFieldWithDefaultValue "Enable JPA?" "y")
-    [[ -z $securityEnabled ]] && securityEnabled=$(captureFieldWithDefaultValue "Enable Security?" "n")
-    cmdline=$(generateCommandLine $monolithVersion $outfolder $securityEnabled $jpa $service $serviceVersion)
+    [[ -z $security ]] && security=$(captureFieldWithDefaultValue "Enable Security?" "n")
+    cmdline=$(generateCommandLine $monolithVersion $outfolder $security $jpa $service $serviceVersion)
     $scripts_folder/gen-monolith.sh $cmdline $monolith
 }
 

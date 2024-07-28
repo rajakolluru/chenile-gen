@@ -19,11 +19,6 @@
 			<groupId>{{com}}.{{company}}.{{org}}.{{service}}</groupId>
 			<artifactId>{{service}}-api</artifactId>
 		</dependency>
-	
-		<dependency>
-	            <groupId>org.springframework.boot</groupId>
-	            <artifactId>spring-boot-starter-web</artifactId>
-	    </dependency>
 	    <dependency>
 			<groupId>{{chenilePackage}}</groupId>
 			<artifactId>chenile-http</artifactId>
@@ -45,7 +40,25 @@
             <scope>test</scope>
         </dependency>
         {{/jpa}}
+        {{#security}}
+        <dependency>
+            <groupId>{{chenilePackage}}</groupId>
+            <artifactId>chenile-security-api</artifactId>
+        </dependency>
+        <!-- Test dependencies for security -->
+        <dependency>
+            <groupId>{{chenilePackage}}</groupId>
+            <artifactId>cucumber-sec-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>{{chenilePackage}}</groupId>
+            <artifactId>security-interceptor</artifactId>
+            <scope>test</scope>
+        </dependency>
+        {{/security}}
         {{#cloudEdgeSwitch}}
+        <!-- Test dependencies for Cloud Edge Switch -->
         <dependency>
             <groupId>{{chenilePackage}}</groupId>
             <artifactId>cucumber-mqtt-utils</artifactId>

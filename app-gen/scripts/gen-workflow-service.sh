@@ -47,9 +47,9 @@ function constructJsonfile(){
 	echo "{"
 	echo "\"service\": \"$service\","
 	echo "\"serviceVersion\": \"$serviceVersion\","
-	if [[ $securityEnabled == "true" ]]
+	if [[ $security == "true" ]]
 	then
-	  echo "\"securityEnabled\": \"$securityEnabled\","
+	  echo "\"security\": \"$security\","
 	fi
 
 	if [[ $jpa == "true" ]]
@@ -81,7 +81,7 @@ fi
 json_file=/tmp/$prog.$$
 serviceVersion=${defaultVersion}
 dest_folder=${defaultDestFolder}
-securityEnabled=false
+security=false
 jpa=false
 gitInit=false
 cloudSwitchEnabled=false
@@ -89,7 +89,7 @@ cloudSwitchEnabled=false
 while getopts ":sjd:v:gc" opts; do
     case "${opts}" in
         s)
-            securityEnabled=true
+            security=true
             ;;
         c)
             cloudSwitchEnabled=true

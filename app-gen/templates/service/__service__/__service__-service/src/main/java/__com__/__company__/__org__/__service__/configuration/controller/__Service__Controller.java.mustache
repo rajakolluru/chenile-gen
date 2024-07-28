@@ -6,9 +6,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import {{chenilePackage}}.base.response.GenericResponse;
 import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
 {{#cloudEdgeSwitch}}
-import org.chenile.cloudedgeswitch.CloudEdgeSwitchConfig;
-import org.chenile.http.annotation.InterceptedBy;
+import {{chenilePackage}}.cloudedgeswitch.CloudEdgeSwitchConfig;
+import {{chenilePackage}}.http.annotation.InterceptedBy;
 {{/cloudEdgeSwitch}}
+{{#security}}
+import {{chenilePackage}}.security.model.SecurityConfig;
+{{/security}}
 import {{chenilePackage}}.http.annotation.ChenileController;
 import {{chenilePackage}}.http.handler.ControllerSupport;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +24,9 @@ public class {{Service}}Controller extends ControllerSupport{
 	
 {{^jpa}}
 @PostMapping("/{{service}}/op1")
+    {{#security}}
+    @SecurityConfig(authorities = {"some_premium_scope","test.premium"})
+    {{/security}}
 	public ResponseEntity<GenericResponse<{{Service}}>> op1(
 			HttpServletRequest httpServletRequest,
 			@RequestBody {{Service}} entity){
@@ -33,6 +39,9 @@ public class {{Service}}Controller extends ControllerSupport{
     @InterceptedBy("cloudEdgeSwitch")
     @CloudEdgeSwitchConfig
     {{/cloudEdgeSwitch}}
+    {{#security}}
+    @SecurityConfig(authorities = {"some_premium_scope","test.premium"})
+    {{/security}}
     public ResponseEntity<GenericResponse<{{Service}}>> save(
         HttpServletRequest httpServletRequest,
         @RequestBody {{Service}} entity){
@@ -40,6 +49,9 @@ public class {{Service}}Controller extends ControllerSupport{
         }
 
     @GetMapping("/{{service}}/{id}")
+    {{#security}}
+    @SecurityConfig(authorities = {"some_premium_scope","test.premium"})
+    {{/security}}
     public ResponseEntity<GenericResponse<{{Service}}>> retrieve(
     HttpServletRequest httpServletRequest,
     @PathVariable("id") String id){

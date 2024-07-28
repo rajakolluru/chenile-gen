@@ -1,10 +1,13 @@
 Feature: Tests the {{service}} Service using a REST client.
  
   Scenario: Save the {{service}} first.
-    Given that "tenant" equals "t1"
+    Given that "tenant" equals "tenant0"
     And that "employee" equals "E1"
     When I construct a REST request with header "x-chenile-tenant-id" and value "${tenant}"
     And I construct a REST request with header "x-chenile-eid" and value "${employee}"
+{{#security}}
+    When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
+{{/security}}
     And I POST a REST request to URL "/{{service}}" with payload
     """
     {
@@ -18,30 +21,40 @@ Feature: Tests the {{service}} Service using a REST client.
 
   Scenario: Retrieve the saved {{service}}
     Given that "entity" equals "{{service}}"
-    When I GET a REST request to URL "/${entity}/${id}"
+{{#security}}
+    When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
+{{/security}}
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+    And I GET a REST request to URL "/${entity}/${id}"
     Then success is true
     And the REST response key "id" is "${id}"
 
   Scenario: Save a {{service}} using an ID that already is determined
   Given that "id" equals "123"
-  When I construct a REST request with header "x-chenile-tenant-id" and value "t1"
-  And I construct a REST request with header "x-chenile-eid" and value "E1"
-  When I POST a REST request to URL "/{{service}}" with payload
+{{#security}}
+    When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
+{{/security}}
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+    And I construct a REST request with header "x-chenile-eid" and value "E1"
+    And I POST a REST request to URL "/{{service}}" with payload
   """
   {
     "id": "${id}",
     "attribute1": "value-of-attribute1"
   }
   """
-  Then success is true
-  And the REST response key "id" is "${id}"
+    Then success is true
+    And the REST response key "id" is "${id}"
 
   Scenario: Retrieve the saved {{service}}
   Given that "entity" equals "{{service}}"
-  When I GET a REST request to URL "/${entity}/${id}"
-  Then success is true
-  And the REST response key "id" is "${id}"
-  #And the REST response key "tenant" is "t1"
-  # And the REST response key "createdBy" is "E1"
+{{#security}}
+    When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
+{{/security}}
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+    And I GET a REST request to URL "/${entity}/${id}"
+    Then success is true
+    And the REST response key "id" is "${id}"
+
 
     
