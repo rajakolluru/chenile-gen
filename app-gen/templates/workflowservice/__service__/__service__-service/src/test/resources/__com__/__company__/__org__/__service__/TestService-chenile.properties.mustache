@@ -2,7 +2,12 @@
 
 chenile.module.name=testcase
 chenile.pre.processors=
+{{#security}}
+chenile.post.processors=securityInterceptor
+{{/security}}
+{{^security}}
 chenile.post.processors=
+{{/security}}
 chenile.exception.handler=chenileExceptionHandler
 
 chenile.service.json.package=classpath*:{{com}}/{{company}}/{{org}}/{{service}}/service/*.json,classpath*:org/chenile/**/service/*.json

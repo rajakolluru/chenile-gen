@@ -47,6 +47,10 @@ function constructJsonfile(){
 	echo "\"com\": \"$com\","
 	echo "\"org\": \"$org\","
 	echo "\"company\": \"$company\","
+	if [[ $security == 'true' ]]
+	then
+	  echo "\"security\": \"$security\","
+	fi
 	echo "\"chenilePackage\": \"$chenilePackage\","
 	echo "\"chenileVersion\": \"$chenileVersion\","
 	echo "\"Namespace\": \"$Namespace\""
@@ -74,14 +78,18 @@ namespaceVersion=${defaultVersion}
 dest_folder=${defaultDestFolder}
 gitInit=false
 cloudSwitchEnabled=false
+security=false
 
-while getopts ":d:v:gc" opts; do
+while getopts ":d:v:gcs" opts; do
     case "${opts}" in
         g)
             gitInit=true
             ;;
         c)
             cloudSwitchEnabled=true
+            ;;
+        s)
+            security=true
             ;;
         d)
             dest_folder=${OPTARG}

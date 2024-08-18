@@ -156,3 +156,14 @@ function emitJsonContentsTofile(){
   mv $tmpfile $file
 }
 
+# Usage: printMessage output-folder
+function printMessage {
+  output_folder=$1
+  if  [[ -f $output_folder/README.md ]]
+  then
+    echo "**************************** IMPORTANT NOTE **************"
+    sed  '1,/^## Note/d' $output_folder/README.md
+    echo "**********************************************************"
+  fi
+}
+

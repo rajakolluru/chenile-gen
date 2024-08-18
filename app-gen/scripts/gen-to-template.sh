@@ -33,8 +33,6 @@ function setenv(){
 	setBaseVars
 }
 
-
-
 function generateMonolith(){
 	template_folder=$template_folder_base/monolith
   	generateModule $template_folder $dest_folder $json_file "monolith com org company Monolith"
@@ -97,6 +95,10 @@ function getServiceList(){
 	rm $tmpfile
 }
 
+function getTemplate {
+
+}
+
 setenv "${0}" 
 if (( $# < 1 ))
 then
@@ -104,7 +106,8 @@ then
 	_exit 1
 fi
 
-
+template=${1}
+shift
 json_file=/tmp/$prog.$$
 monolithVersion=${defaultVersion}
 dest_folder=${defaultDestFolder}
@@ -163,9 +166,8 @@ monolith=${1}
 Monolith=$(camelCase $monolith)
 
 [[ ! -d $dest_folder ]] && mkdir $dest_folder
-echo "Creating monolith ${monolith}(${monolithVersion}) with included service $service($serviceVersion) in folder $dest_folder" >&2
+echo "Creating ${template} ${monolith}(${monolithVersion}) with included service $service($serviceVersion) in folder $dest_folder" >&2
 constructJsonfile > $json_file
 getServiceList
 generateMonolith
-printMessage $dest_folder/${monolith}
 _exit 0
