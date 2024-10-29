@@ -33,7 +33,7 @@ function setenv(){
 	setBaseVars
 }
 
-function generateMonolith(){
+function generateArtifact(){
 	template_folder=$template_folder_base/monolith
   	generateModule $template_folder $dest_folder $json_file "monolith com org company Monolith"
   	generateCurlScript
@@ -93,10 +93,6 @@ function getServiceList(){
 	services=$(sed 's/^\(.*\)$/"\1"/' $tmpfile  | tr '\n' ',') # surround each line with double-quotes
 	constructJsonfile > $json_file
 	rm $tmpfile
-}
-
-function getTemplate {
-
 }
 
 setenv "${0}" 
@@ -169,5 +165,5 @@ Monolith=$(camelCase $monolith)
 echo "Creating ${template} ${monolith}(${monolithVersion}) with included service $service($serviceVersion) in folder $dest_folder" >&2
 constructJsonfile > $json_file
 getServiceList
-generateMonolith
+generateArtifact
 _exit 0
