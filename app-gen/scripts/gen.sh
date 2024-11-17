@@ -21,6 +21,16 @@ function generateService(){
     $scripts_folder/gen-service.sh $cmdline $service
 }
 
+function generateBdd(){
+    app=$(captureNonNullField "App Name")
+    entity=$(captureNonNullField "Entity Name")
+    appVersion=$(captureFieldWithDefaultValue "App Version" "$defaultVersion")
+    outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
+    security=$(captureFieldWithDefaultValue "Enable Security?" "n")
+    cmdline=$(generateCommandLine $appVersion $outfolder $security $jpa)
+    $scripts_folder/gen-bdd.sh $cmdline -e $entity $app
+}
+
 function generateMybatisQuery(){   
     namespace=$(captureNonNullField "Namespace")
     namespaceVersion=$(captureFieldWithDefaultValue "Namespace Version" "$defaultVersion")
@@ -176,6 +186,7 @@ choice=$(choices  \
     "W|Generate Workflow Service & Mini Monolith" \
     "I|Generate a Chenile interceptor stub" \
     "Q|Generate a Chenile Mybatis Query Service" \
+    "B|Generate a BDD based Integration Test" \
     "C|Create a local config")
 
 case $choice in
@@ -184,6 +195,7 @@ case $choice in
     "I") generateInterceptor;;
     "Q") generateMybatisQuery;;
     "C") generateLocalConfig;;
+    "B") generateBdd;;
 esac
 
 _exit 0

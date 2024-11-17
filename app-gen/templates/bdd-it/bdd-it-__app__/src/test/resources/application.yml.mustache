@@ -1,0 +1,35 @@
+logging:
+  level:
+    ROOT: INFO
+    org.hibernate.SQL: INFO
+    org.chenile.*: DEBUG
+
+spring:
+  banner:
+    location: classpath:banner.txt
+  devtools:
+    restart:
+      enabled: true
+      additional-exclude: static/**,.h2.server.properties
+    livereload:
+      enabled: false # we use Webpack dev server + BrowserSync for livereload
+  jackson:
+    serialization:
+      indent-output: true
+
+chenile:
+{{#security}}
+  security:
+    client:
+      id: "authz-servlet"
+      secret: "secret"
+    keycloak:
+      host: "http://localhost:8180"
+      base:
+        realm: quickstart
+{{/security}}
+  bdd:
+    target:
+      host: "http://localhost"
+      port: 8080
+
