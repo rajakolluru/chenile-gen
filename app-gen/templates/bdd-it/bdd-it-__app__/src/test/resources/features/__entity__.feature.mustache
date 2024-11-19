@@ -12,14 +12,14 @@ Feature: Tests the {{entity}} Service using a REST client.
     And I POST a REST request to URL "/{{entity}}" with payload
     """
     {
-      "attribute-name": "attribute-value"
+      "attribute1" : "value1"
 	}
 	"""
     Then success is true
     And the http status code is 200
     And store "$.payload.id" from  response to "id"
 
-  Scenario: Retrieve the saved price with non decimal amount
+  Scenario: Retrieve the saved {{entity}}
     Given that "entity" equals "{{entity}}"
 {{#security}}
     And I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"

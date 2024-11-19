@@ -125,6 +125,7 @@ App=$(camelCase $app)
 Entity=$(camelCase $entity)
 
 [[ ! -d $dest_folder ]] && mkdir $dest_folder
-echo "Creating BDD for  ${app}(${appVersion}) in folder $dest_folder" >&2
+echo "Creating BDD for  ${app}(${appVersion}) in folder $dest_folder. " >&2
+echo "This includes an entity feature file at src/main/resources/features/${entity}.feature" >&2
 generateBdd
 _exit 0
