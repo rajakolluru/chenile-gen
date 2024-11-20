@@ -36,7 +36,7 @@ OPENED -(assign) -> ASSIGNED -(resolve) -> RESOLVED -(close) -> CLOSED
     When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
     And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
 {{/security}}
-		When I PUT a REST request to URL "/{{service}}/${id}/assign" with payload
+		When I PATCH a REST request to URL "/{{service}}/${id}/assign" with payload
 		"""
 		{
 			"assignee": "MY-ASSIGNEE",
@@ -54,7 +54,7 @@ OPENED -(assign) -> ASSIGNED -(resolve) -> RESOLVED -(close) -> CLOSED
     When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
     And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
 {{/security}}
-		When I PUT a REST request to URL "/{{service}}/${id}/resolve" with payload
+		When I PATCH a REST request to URL "/{{service}}/${id}/resolve" with payload
 		"""
 		{
 			"comment": "CANNOT-DUPLICATE"
@@ -70,7 +70,7 @@ OPENED -(assign) -> ASSIGNED -(resolve) -> RESOLVED -(close) -> CLOSED
     When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
     And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
 {{/security}}
-		When I PUT a REST request to URL "/{{service}}/${id}/close" with payload
+		When I PATCH a REST request to URL "/{{service}}/${id}/close" with payload
 		"""
 		{
 			"comment": "OK"
@@ -86,7 +86,7 @@ OPENED -(assign) -> ASSIGNED -(resolve) -> RESOLVED -(close) -> CLOSED
     When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
     And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
 {{/security}}
-		When I PUT a REST request to URL "/{{service}}/${id}/assign" with payload
+		When I PATCH a REST request to URL "/{{service}}/${id}/assign" with payload
 		"""
 		{
 			"assignee": "MY-ASSIGNEE",
