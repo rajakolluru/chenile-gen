@@ -111,17 +111,18 @@ public class {{Service}}Configuration {
     return new StmBodyTypeSelector({{service}}InfoProvider,stmTransitionActionResolver);
     }
 
-
     @Bean @Autowired STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(
     @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver){
         return new BaseTransitionAction<>(stmTransitionActionResolver);
     }
 
-    // Create the specific transition actions here. To automatically wire them into the STM
-    // use the convention of "{{service}}" + eventId for the method name. ({{service}} is the prefix passed to the
-    // TransitionActionResolver above.) This will ensure that these are detected automatically by the
-    // Workflow system. The payload types will be detected as well so that there is no need to
-    // introduce an <event-information/> segment in the mfg.xml
+    // Create the specific transition actions here. Make sure that these actions are inheriting from
+    // AbstractSTMTransitionMachine (The sample classes provide an example of this). To automatically wire
+    // them into the STM use the convention of "{{service}}" + eventId for the method name. ({{service}} is the
+    // prefix passed to the TransitionActionResolver above.)
+    // This will ensure that these are detected automatically by the Workflow system.
+    // The payload types will be detected as well so that there is no need to introduce an <event-information/>
+    // segment in src/main/resources/{{com}}/{{company}}/{{service}}/{{service}}-states.xml
 
     @Bean Resolve{{Service}}Action {{service}}Resolve() {
         return new Resolve{{Service}}Action();
