@@ -1,14 +1,14 @@
 package {{com}}.{{company}}.{{org}}.{{service}}.configuration;
 
-import org.chenile.stm.STM;
-import org.chenile.stm.action.STMTransitionAction;
-import org.chenile.stm.impl.BeanFactoryAdapter;
-import org.chenile.stm.impl.STMActionsInfoProvider;
-import org.chenile.stm.impl.STMFlowStoreImpl;
-import org.chenile.stm.impl.STMImpl;
-import org.chenile.stm.impl.XmlFlowReader;
-import org.chenile.stm.spring.SpringBeanFactoryAdapter;
-import org.chenile.workflow.param.MinimalPayload;
+import {{chenilePackage}}.stm.STM;
+import {{chenilePackage}}.stm.action.STMTransitionAction;
+import {{chenilePackage}}.stm.impl.BeanFactoryAdapter;
+import {{chenilePackage}}.stm.impl.STMActionsInfoProvider;
+import {{chenilePackage}}.stm.impl.STMFlowStoreImpl;
+import {{chenilePackage}}.stm.impl.STMImpl;
+import {{chenilePackage}}.stm.impl.XmlFlowReader;
+import {{chenilePackage}}.stm.spring.SpringBeanFactoryAdapter;
+import {{chenilePackage}}.workflow.param.MinimalPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -26,14 +26,13 @@ import {{com}}.{{company}}.{{org}}.{{service}}.service.healthcheck.{{Service}}He
 import {{com}}.{{company}}.{{org}}.{{service}}.service.store.{{Service}}EntityStore;
 import {{chenilePackage}}.workflow.api.WorkflowRegistry;
 {{#security}}
-import org.chenile.workflow.service.stmcmds.StmAuthoritiesBuilder;
+import {{chenilePackage}}.workflow.service.stmcmds.StmAuthoritiesBuilder;
 import java.util.function.Function;
-import org.chenile.core.context.ChenileExchange;
+import {{chenilePackage}}.core.context.ChenileExchange;
 {{/security}}
 
 /**
  This is where you will instantiate all the required classes in Spring
-
 */
 @Configuration
 public class {{Service}}Configuration {
@@ -96,7 +95,7 @@ public class {{Service}}Configuration {
     }
 
     @Bean STMTransitionAction<{{Service}}> default{{service}}STMTransitionAction() {
-            return new DefaultSTMTransitionAction<MinimalPayload>();
+        return new DefaultSTMTransitionAction<MinimalPayload>();
     }
 
     @Bean
@@ -108,7 +107,7 @@ public class {{Service}}Configuration {
     @Bean @Autowired StmBodyTypeSelector {{service}}BodyTypeSelector(
     @Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider,
     @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver) {
-    return new StmBodyTypeSelector({{service}}InfoProvider,stmTransitionActionResolver);
+        return new StmBodyTypeSelector({{service}}InfoProvider,stmTransitionActionResolver);
     }
 
     @Bean @Autowired STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(

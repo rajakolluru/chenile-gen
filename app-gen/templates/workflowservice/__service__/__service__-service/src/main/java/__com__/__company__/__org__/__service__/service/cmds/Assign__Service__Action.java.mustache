@@ -8,6 +8,11 @@ import {{chenilePackage}}.workflow.service.stmcmds.AbstractSTMTransitionAction;
 import {{com}}.{{company}}.{{org}}.{{service}}.model.Assign{{Service}}Payload;
 import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
 
+/**
+    This class implements the assign action. It will need to inherit from the AbstractSTMTransitionAction for
+    auto wiring into STM to work properly. Be sure to use the PayloadType as the second argument and
+    override the transitionTo method accordingly as shown below.
+*/
 public class Assign{{Service}}Action extends AbstractSTMTransitionAction<{{Service}},Assign{{Service}}Payload>{
 
 	@Override
