@@ -3,7 +3,6 @@ package {{com}}.{{company}}.{{org}}.{{service}}.model;
 {{^jpa}}
 import {{chenilePackage}}.utils.entity.model.AbstractExtendedStateEntity;
 {{/jpa}}
-import java.io.Serial;
 
 {{#jpa}}
 import jakarta.persistence.Entity;
@@ -16,8 +15,6 @@ public class {{Service}} extends AbstractJpaStateEntity{
 {{^jpa}}
 public class {{Service}} extends AbstractExtendedStateEntity{
 {{/jpa}}
-    @Serial
-	private static final long serialVersionUID = 1L;
 	public String assignee;
 	public String assignComment;
 	public String closeComment;

@@ -1,19 +1,18 @@
 package {{com}}.{{company}}.{{org}}.{{service}}.service.cmds;
 
-import org.chenile.stm.STMInternalTransitionInvoker;
-import org.chenile.stm.State;
-import org.chenile.stm.action.STMTransitionAction;
-import org.chenile.stm.model.Transition;
+import {{chenilePackage}}.stm.STMInternalTransitionInvoker;
+import {{chenilePackage}}.stm.State;
+import {{chenilePackage}}.stm.model.Transition;
 
 import {{chenilePackage}}.workflow.param.MinimalPayload;
+import {{chenilePackage}}.workflow.service.stmcmds.AbstractSTMTransitionAction;
 import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
 
-public class Close{{Service}}Action implements STMTransitionAction<{{Service}}>{
+public class Close{{Service}}Action extends AbstractSTMTransitionAction<{{Service}},MinimalPayload>{
 
 	@Override
-	public void doTransition({{Service}} {{service}}, Object transitionParam, State startState, String eventId,
+	public void transitionTo({{Service}} {{service}}, MinimalPayload payload, State startState, String eventId,
 			State endState, STMInternalTransitionInvoker<?> stm, Transition transition) throws Exception {
-		MinimalPayload payload = (MinimalPayload) transitionParam;
 		{{service}}.closeComment = payload.getComment();
 	}
 

@@ -8,20 +8,18 @@ import org.chenile.stm.impl.STMFlowStoreImpl;
 import org.chenile.stm.impl.STMImpl;
 import org.chenile.stm.impl.XmlFlowReader;
 import org.chenile.stm.spring.SpringBeanFactoryAdapter;
+import org.chenile.workflow.param.MinimalPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 import {{chenilePackage}}.utils.entity.service.EntityStore;
 import {{chenilePackage}}.workflow.service.impl.StateEntityServiceImpl;
-import {{chenilePackage}}.workflow.service.stmcmds.BaseTransitionAction;
-import {{chenilePackage}}.workflow.service.stmcmds.GenericEntryAction;
-import {{chenilePackage}}.workflow.service.stmcmds.GenericExitAction;
-import {{chenilePackage}}.workflow.service.stmcmds.StmBodyTypeSelector;
+import {{chenilePackage}}.workflow.service.stmcmds.*;
 import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
 import {{com}}.{{company}}.{{org}}.{{service}}.service.cmds.Assign{{Service}}Action;
+import {{com}}.{{company}}.{{org}}.{{service}}.service.cmds.DefaultSTMTransitionAction;
 import {{com}}.{{company}}.{{org}}.{{service}}.service.cmds.Close{{Service}}Action;
 import {{com}}.{{company}}.{{org}}.{{service}}.service.cmds.Resolve{{Service}}Action;
 import {{com}}.{{company}}.{{org}}.{{service}}.service.healthcheck.{{Service}}HealthChecker;
@@ -39,7 +37,7 @@ import org.chenile.core.context.ChenileExchange;
 */
 @Configuration
 public class {{Service}}Configuration {
-	private static final String FLOW_DEFINITION_FILE = "{{com}}/{{company}}/{{org}}/{{service}}/states.xml";
+	private static final String FLOW_DEFINITION_FILE = "{{com}}/{{company}}/{{org}}/{{service}}/{{service}}-states.xml";
 	
 	@Bean BeanFactoryAdapter {{service}}BeanFactoryAdapter() {
 		return new SpringBeanFactoryAdapter();
@@ -84,26 +82,6 @@ public class {{Service}}Configuration {
 	@Bean GenericExitAction<{{Service}}> {{service}}ExitAction(){
 		return new GenericExitAction<{{Service}}>();
 	}
-	
-	@Bean @Autowired StmBodyTypeSelector {{service}}BodyTypeSelector(@Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider) {
-		return new StmBodyTypeSelector({{service}}InfoProvider);
-	}
-	
-	@Bean @Autowired STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(){
-		return new BaseTransitionAction<>();
-	}
-	
-	@Bean Assign{{Service}}Action assign{{Service}}() {
-		return new Assign{{Service}}Action();
-	}
-	
-	@Bean Resolve{{Service}}Action resolve{{Service}}() {
-		return new Resolve{{Service}}Action();
-	}
-	
-	@Bean Close{{Service}}Action close{{Service}}() {
-		return new Close{{Service}}Action();
-	}
 
 	@Bean
 	XmlFlowReader {{service}}FlowReader(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl flowStore) throws Exception {
@@ -117,7 +95,47 @@ public class {{Service}}Configuration {
     	return new {{Service}}HealthChecker();
     }
 
-{{#security}}
+    @Bean STMTransitionAction<{{Service}}> default{{service}}STMTransitionAction() {
+            return new DefaultSTMTransitionAction<MinimalPayload>();
+    }
+
+    @Bean
+    STMTransitionActionResolver {{service}}TransitionActionResolver(
+    @Qualifier("default{{service}}STMTransitionAction") STMTransitionAction<{{Service}}> defaultSTMTransitionAction){
+        return new STMTransitionActionResolver("{{service}}",defaultSTMTransitionAction);
+    }
+
+    @Bean @Autowired StmBodyTypeSelector {{service}}BodyTypeSelector(
+    @Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider,
+    @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver) {
+    return new StmBodyTypeSelector({{service}}InfoProvider,stmTransitionActionResolver);
+    }
+
+
+    @Bean @Autowired STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(
+    @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver){
+        return new BaseTransitionAction<>(stmTransitionActionResolver);
+    }
+
+    // Create the specific transition actions here. To automatically wire them into the STM
+    // use the convention of "{{service}}" + eventId for the method name. ({{service}} is the prefix passed to the
+    // TransitionActionResolver above.) This will ensure that these are detected automatically by the
+    // Workflow system. The payload types will be detected as well so that there is no need to
+    // introduce an <event-information/> segment in the mfg.xml
+
+    @Bean Resolve{{Service}}Action {{service}}Resolve() {
+        return new Resolve{{Service}}Action();
+    }
+
+    @Bean Close{{Service}}Action {{service}}Close() {
+        return new Close{{Service}}Action();
+    }
+
+    @Bean Assign{{Service}}Action {{service}}Assign() {
+        return new Assign{{Service}}Action();
+    }
+
+    {{#security}}
     @Bean @Autowired Function<ChenileExchange, String[]> {{service}}EventAuthoritiesSupplier(
         @Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider)
                     throws Exception{

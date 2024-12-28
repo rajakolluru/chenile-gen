@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<states>
+	<default-transition-action componentName="{{service}}BaseTransitionAction"/>
+	
+	<flow id='{{Service}}Flow' default='true'>
+		<entry-action componentName="{{service}}EntryAction"/>
+		<exit-action componentName="{{service}}ExitAction"/>
+        {{#security}}
+        <security-strategy componentName="stmSecurityStrategy"/>
+        {{/security}}
+		<manual-state id='OPENED' initialState='true'>
+			<on eventId='assign'  newStateId='ASSIGNED' {{#security}}meta-acls="test.premium"{{/security}}/>
+		</manual-state>
+
+		<manual-state id='ASSIGNED'>
+			<on eventId='resolve' newStateId='RESOLVED' {{#security}}meta-acls="test.premium"{{/security}}/>
+		</manual-state>
+		<manual-state id='RESOLVED'>
+			<on eventId='close' newStateId='CLOSED' {{#security}}meta-acls="test.premium"{{/security}}/>
+		</manual-state>
+		<manual-state id='CLOSED' />
+	</flow>
+	
+</states>
