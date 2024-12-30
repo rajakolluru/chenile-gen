@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <states>
+    <enablement-strategy componentName="{{service}}ConfigBasedEnablementStrategy"/>
 	<default-transition-action componentName="{{service}}BaseTransitionAction"/>
 	
 	<flow id='{{Service}}Flow' default='true'>
@@ -16,10 +17,37 @@
 		<manual-state id='ASSIGNED'>
 			<on eventId='resolve' newStateId='RESOLVED' {{#security}}meta-acls="test.premium"{{/security}}/>
 		</manual-state>
-		<manual-state id='RESOLVED'>
+
+    {{^activity}}
+        <manual-state id='RESOLVED'>
 			<on eventId='close' newStateId='CLOSED' {{#security}}meta-acls="test.premium"{{/security}}/>
-		</manual-state>
-		<manual-state id='CLOSED' />
+        </manual-state>
+        <manual-state id='CLOSED' />
+    {{/activity}}
+    {{#activity}}
+        <manual-state id='RESOLVED'>
+            <on eventId='doRetrospective'
+                meta-activity="MANDATORY"
+                {{#security}}meta-acls="test.premium"{{/security}}/>
+            <on eventId='doPerfTesting'
+                meta-activity="MANDATORY"
+                {{#security}}meta-acls="test.premium"{{/security}}/>
+            <on eventId='close' newStateId='CLOSED'
+                {{#security}}meta-acls="test.premium"{{/security}}/>
+        </manual-state>
+        <manual-state id='CLOSED' >
+            <on eventId='captureObservations'
+                meta-activity="MANDATORY" newStateId="AreClosedActivitiesComplete"
+                {{#security}}meta-acls="test.premium"{{/security}}/>
+        </manual-state>
+        <auto-state id="AreClosedActivitiesComplete" componentName="areClosedActivitiesComplete">
+            <on eventId="yes" newStateId="ARCHIVED"/>
+            <on eventId="no" newStateId="CLOSED"/>
+        </auto-state>
+        <manual-state id='ARCHIVED' />
+    {{/activity}}
+
+
 	</flow>
 	
 </states>

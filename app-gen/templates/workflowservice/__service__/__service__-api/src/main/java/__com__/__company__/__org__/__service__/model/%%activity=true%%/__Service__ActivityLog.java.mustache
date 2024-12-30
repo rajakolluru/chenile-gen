@@ -1,0 +1,28 @@
+package {{com}}.{{company}}.{{org}}.{{service}}.model;
+
+import {{chenilePackage}}.workflow.activities.model.ActivityLog;
+
+{{#jpa}}
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import {{chenilePackage}}.jpautils.entity.BaseJpaEntity;
+@Entity
+@Table(name = "{{service}}_activity")
+public class {{Service}}ActivityLog extends BaseJpaEntity implements ActivityLog{
+{{/jpa}}
+{{^jpa}}
+public class {{Service}}ActivityLog implements ActivityLog  {
+{{/jpa}}
+    public String activityName;
+    public boolean activitySuccess;
+    public String activityComment;
+    @Override
+    public String name() {
+        return activityName;
+    }
+
+    @Override
+    public boolean success() {
+        return activitySuccess;
+    }
+}

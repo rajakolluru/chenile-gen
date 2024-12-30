@@ -1,12 +1,14 @@
 #!/bin/bash
 
 function usage(){
-  echo "Usage: $prog [-v service-version] [-d dest-folder] [-s] [-j] [-c] <service-name> " >&2
+  echo "Usage: $prog [-v service-version] [-d dest-folder] [-s] [-j] [-c] [a] [-e] <service-name> " >&2
   echo "service version will default to $defaultVersion" >&2
 	echo "dest-folder will default to $defaultDestFolder" >&2
 	echo "-s will enable security" >&2
 	echo "-j will enable JPA" >&2
-	echo "-c will enabled cloud switch" >&2
+	echo "-c will enable cloud switch" >&2
+	echo "-a will enable activity tracking" >&2
+	echo "-e will generate enablement code" >&2
 }
 
 function _exit {
@@ -62,6 +64,16 @@ function constructJsonfile(){
     echo "\"cloudSwitchEnabled\": \"$cloudSwitchEnabled\","
   fi
 
+  if [[ $activity == "true" ]]
+    then
+      echo "\"activity\": \"$activity\","
+  fi
+
+  if [[ $enablement == "true" ]]
+      then
+        echo "\"enablement\": \"$enablement\","
+    fi
+
 	echo "\"com\": \"$com\","
 	echo "\"org\": \"$org\","
 	echo "\"company\": \"$company\","
@@ -85,8 +97,10 @@ security=false
 jpa=false
 gitInit=false
 cloudSwitchEnabled=false
+activity=false
+enablement=false
 
-while getopts ":sjd:v:gc" opts; do
+while getopts ":sjd:v:gcae" opts; do
     case "${opts}" in
         s)
             security=true
@@ -94,6 +108,12 @@ while getopts ":sjd:v:gc" opts; do
         c)
             cloudSwitchEnabled=true
             ;;
+        a)
+          activity=true
+          ;;
+        e)
+          enablement=true
+          ;;
         j)
             jpa=true
             ;;

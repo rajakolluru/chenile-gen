@@ -1,11 +1,17 @@
 package {{com}}.{{company}}.{{org}}.{{service}}.service.cmds;
 
-import org.chenile.stm.STMInternalTransitionInvoker;
-import org.chenile.stm.State;
-import org.chenile.stm.model.Transition;
-import org.chenile.workflow.param.MinimalPayload;
-import org.chenile.workflow.service.stmcmds.AbstractSTMTransitionAction;
+import {{chenilePackage}}.stm.STMInternalTransitionInvoker;
+import {{chenilePackage}}.stm.State;
+import {{chenilePackage}}.stm.model.Transition;
+import {{chenilePackage}}.workflow.param.MinimalPayload;
+import {{chenilePackage}}.workflow.service.stmcmds.AbstractSTMTransitionAction;
 import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+
+{{#activity}}
+import {{chenilePackage}}.workflow.service.activities.ActivityChecker;
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}}ActivityLog;
+import org.springframework.beans.factory.annotation.Autowired;
+{{/activity}}
 
 /**
     Extend this class to do specific things that are relevant for all actions in the workflow
@@ -13,11 +19,26 @@ import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
 
 public class DefaultSTMTransitionAction<PayloadType extends MinimalPayload>
     extends AbstractSTMTransitionAction<{{Service}}, PayloadType> {
-
+{{#activity}}
+    @Autowired ActivityChecker activityChecker;
+{{/activity}}
     @Override
     public void transitionTo({{Service}} {{service}}, PayloadType payload,
                  State startState, String eventId, State endState, STMInternalTransitionInvoker<?> stm,
                  Transition transition) {
-
+{{^activity}}
     }
+{{/activity}}
+{{#activity}}
+    if (activityChecker.isActivity({{service}},eventId))
+        processActivity({{service}},payload,eventId);
+    }
+    private void processActivity({{Service}} {{service}}, PayloadType payload, String eventId){
+        {{Service}}ActivityLog activityLog = new {{Service}}ActivityLog();
+        activityLog.activitySuccess = true;
+        activityLog.activityComment = payload.getComment();
+        activityLog.activityName = eventId;
+        {{service}}.activities.add(activityLog);
+    }
+{{/activity}}
 }

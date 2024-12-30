@@ -8,12 +8,25 @@ import {{chenilePackage}}.workflow.param.MinimalPayload;
 import {{chenilePackage}}.workflow.service.stmcmds.AbstractSTMTransitionAction;
 import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
 
-public class Close{{Service}}Action extends AbstractSTMTransitionAction<{{Service}},MinimalPayload>{
+{{#activity}}
+import {{chenilePackage}}.base.exception.BadRequestException;
+import {{chenilePackage}}.workflow.service.activities.ActivityChecker;
+import org.springframework.beans.factory.annotation.Autowired;
+{{/activity}}
 
+public class Close{{Service}}Action extends AbstractSTMTransitionAction<{{Service}},MinimalPayload>{
+{{#activity}}
+    @Autowired ActivityChecker activityChecker;
+{{/activity}}
 	@Override
 	public void transitionTo({{Service}} {{service}}, MinimalPayload payload, State startState, String eventId,
 			State endState, STMInternalTransitionInvoker<?> stm, Transition transition) throws Exception {
-		{{service}}.closeComment = payload.getComment();
+{{#activity}}
+        if(!activityChecker.areAllActivitiesComplete({{service}})){
+            throw new BadRequestException(50000,"Invalid Transition to close. All activities are not complete yet");
+        }
+{{/activity}}
+        {{service}}.closeComment = payload.getComment();
 	}
 
 }

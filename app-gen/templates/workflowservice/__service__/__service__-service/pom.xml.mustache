@@ -66,5 +66,12 @@
             <scope>test</scope>
         </dependency>
         {{/jpa}}
+        {{#enablement}}
+        <dependency>
+            <groupId>org.chenile</groupId>
+            <artifactId>cucumber-workflow-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
+        {{/enablement}}
 	</dependencies>
 </project>

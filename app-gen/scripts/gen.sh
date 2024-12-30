@@ -55,7 +55,9 @@ function generateWorkflowService(){
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
     security=$(captureFieldWithDefaultValue "Enable Security?" "n")
     jpa=$(captureFieldWithDefaultValue "Enable JPA?" "y")
-    cmdline=$(generateCommandLine $serviceVersion $outfolder $security $jpa)
+    activity=$(captureFieldWithDefaultValue "Enable Activity Tracking?" "n")
+    enablement=$(captureFieldWithDefaultValue "Generate Enablement Code?" "n")
+    cmdline=$(generateCommandLine $serviceVersion $outfolder $security $jpa )
     $scripts_folder/gen-workflow-service.sh $cmdline $service
 }
 
@@ -85,6 +87,14 @@ function generateCommandLine(){
     if [[ $cloudSwitchEnabled == "y" ]]
     then
       cmdline="$cmdline -c"
+    fi
+    if [[ $activity == "y" ]]
+    then
+      cmdline="$cmdline -a"
+    fi
+    if [[ $enablement == "y" ]]
+    then
+      cmdline="$cmdline -e"
     fi
     echo $cmdline
 }

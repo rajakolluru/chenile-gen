@@ -10,13 +10,15 @@ import cucumber.api.junit.Cucumber;
 @RunWith(Cucumber.class)
 
 @CucumberOptions(features = "src/test/resources/features",
-{{^security}}
-    glue = {"classpath:{{com}}/{{company}}/{{org}}/{{service}}/bdd", "classpath:org/chenile/cucumber/rest"},
-{{/security}}
+    glue = {"classpath:{{com}}/{{company}}/{{org}}/{{service}}/bdd",
 {{#security}}
-    glue = {"classpath:{{com}}/{{company}}/{{org}}/{{service}}/bdd", "classpath:org/chenile/cucumber/rest",
-    "classpath:org/chenile/cucumber/security/rest"},
+    "classpath:org/chenile/cucumber/security/rest",
 {{/security}}
+{{#enablement}}
+    "classpath:org/chenile/cucumber/workflow",
+{{/enablement}}
+    "classpath:org/chenile/cucumber/rest"},
+
         plugin = {"pretty"}
         )
 @ActiveProfiles("unittest")
