@@ -1,50 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<!-- An example states xml file that demonstrates the following features:
+ 1. The progression of {{Service}} from OPENED to CLOSED {{#activity}} and ARCHIVED.{{/activity}}
+ 2. How to define and use a custom DSL to define the workflow.
+ {{#activity}}
+ 3. How to use the activity framework to define mandatory and optional activities (along with a custom
+ DSL that allows us to define these activities)
+ 4. How to define an automatic "activity-checker" state that allows us to check if all the mandatory
+ activities are completed before we proceed to the next status in the workflow.
+ {{/activity}}
+ {{#security}}
+     This also demonstrates how to attach security permissions (not roles) to a state event so that
+     these perms would be checked before the action is allowed.
+ {{/security}}
+-->
 <states>
     <enablement-strategy componentName="{{service}}ConfigBasedEnablementStrategy"/>
 	<default-transition-action componentName="{{service}}BaseTransitionAction"/>
-	
+    {{#activity}}
+    <add-transition-tag tag="mandatory-activity" meta-activity="MANDATORY"
+                        {{#security}}meta-acls="test.premium"{{/security}} eventIdTag="id"/>
+    <add-transition-tag tag="optional-activity" meta-activity="OPTIONAL"
+                        {{#security}}meta-acls="test.premium"{{/security}} eventIdTag="id"/>
+    <add-transition-tag tag="mandatory-post-closure-activity" meta-activity="MANDATORY"
+                        {{#security}}meta-acls="test.premium"{{/security}} eventIdTag="id"
+                        newStateId="AreClosedActivitiesComplete"/>
+    <add-state-tag tag="post-closure-activities-completion-check"
+                   componentName="activitiesCompletionCheck"
+                   id="AreClosedActivitiesComplete"
+                   whichStateId="CLOSED" />
+    <add-transition-tag tag="on-completion" newStateIdTag="goto" eventId="yes"/>
+    <add-transition-tag tag="if-not-complete" newStateIdTag="stay-in" eventId="no"/>
+    {{/activity}}
+    <add-state-tag tag="status" manualState="true"/>
+    <add-transition-tag tag="on-action" eventIdTag="id" newStateIdTag="move-to"
+                    {{#security}}meta-acls="test.premium"{{/security}}/>
+
 	<flow id='{{Service}}Flow' default='true'>
 		<entry-action componentName="{{service}}EntryAction"/>
 		<exit-action componentName="{{service}}ExitAction"/>
         {{#security}}
         <security-strategy componentName="stmSecurityStrategy"/>
         {{/security}}
-		<manual-state id='OPENED' initialState='true'>
-			<on eventId='assign'  newStateId='ASSIGNED' {{#security}}meta-acls="test.premium"{{/security}}/>
-		</manual-state>
+		<status id='OPENED' initialState='true'>
+			<on-action id='assign'  move-to='ASSIGNED'/>
+		</status>
 
-		<manual-state id='ASSIGNED'>
-			<on eventId='resolve' newStateId='RESOLVED' {{#security}}meta-acls="test.premium"{{/security}}/>
-		</manual-state>
+		<status id='ASSIGNED'>
+			<on-action id='resolve' move-to='RESOLVED' />
+		</status>
 
     {{^activity}}
-        <manual-state id='RESOLVED'>
-			<on eventId='close' newStateId='CLOSED' {{#security}}meta-acls="test.premium"{{/security}}/>
-        </manual-state>
-        <manual-state id='CLOSED' />
+        <status id='RESOLVED'>
+			<on-action id='close' move-to='CLOSED'/>
+        </status>
+        <status id='CLOSED' />
     {{/activity}}
     {{#activity}}
-        <manual-state id='RESOLVED'>
-            <on eventId='doRetrospective'
-                meta-activity="MANDATORY"
-                {{#security}}meta-acls="test.premium"{{/security}}/>
-            <on eventId='doPerfTesting'
-                meta-activity="MANDATORY"
-                {{#security}}meta-acls="test.premium"{{/security}}/>
-            <on eventId='close' newStateId='CLOSED'
-                {{#security}}meta-acls="test.premium"{{/security}}/>
-        </manual-state>
-        <manual-state id='CLOSED' >
-            <on eventId='captureObservations'
-                meta-activity="MANDATORY" newStateId="AreClosedActivitiesComplete"
-                {{#security}}meta-acls="test.premium"{{/security}}/>
-        </manual-state>
-        <auto-state id="AreClosedActivitiesComplete" componentName="areClosedActivitiesComplete">
-            <on eventId="yes" newStateId="ARCHIVED"/>
-            <on eventId="no" newStateId="CLOSED"/>
-        </auto-state>
-        <manual-state id='ARCHIVED' />
+        <status id='RESOLVED'>
+            <mandatory-activity id='doRetrospective'/>
+            <mandatory-activity id='doPerfTesting'/>
+            <on-action id='close' move-to='CLOSED'/>
+        </status>
+        <status id='CLOSED' >
+            <mandatory-post-closure-activity id='captureObservations'/>
+        </status>
+        <post-closure-activities-completion-check>
+            <on-completion goto="ARCHIVED"/>
+            <if-not-complete stay-in="CLOSED"/>
+        </post-closure-activities-completion-check>
+        <status id='ARCHIVED' />
     {{/activity}}
 
 

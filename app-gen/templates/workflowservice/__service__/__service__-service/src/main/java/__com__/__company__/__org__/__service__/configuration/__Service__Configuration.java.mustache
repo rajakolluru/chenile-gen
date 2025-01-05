@@ -124,8 +124,8 @@ public class {{Service}}Configuration {
     }
 
     @Bean
-    AreActivitiesComplete areClosedActivitiesComplete(@Qualifier("{{service}}ActivitiesChecker") ActivityChecker activityChecker){
-        return new AreActivitiesComplete(activityChecker, new State("CLOSED", "{{Service}}Flow"));
+    AreActivitiesComplete activitiesCompletionCheck(@Qualifier("{{service}}ActivitiesChecker") ActivityChecker activityChecker){
+        return new AreActivitiesComplete(activityChecker);
     }
 {{/activity}}
 
