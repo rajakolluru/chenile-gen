@@ -10,6 +10,7 @@ function usage(){
 	echo "-c will enable cloud switch" >&2
 	echo "-a will enable activity tracking" >&2
 	echo "-e will generate enablement code" >&2
+	echo "-p will generate customized payloads for every event. Else we will use MinimalPayload" >&2
 }
 
 function _exit {
@@ -100,6 +101,7 @@ function constructJsFile(){
 	echo "\"chenilePackage\": \"$chenilePackage\","
 	echo "\"chenileVersion\": \"$chenileVersion\","
 	echo "\"Service\": \"$Service\"",
+	echo "\"genCustomizedPayload\": \"$genCustomizedPayload\"",
 	echo "\"workflow\": $workflow",
 	echo "\"testcases\": $testcases"
 	echo "}"
@@ -122,11 +124,15 @@ cloudSwitchEnabled=false
 activity=false
 enablement=false
 xmlFile=""
+genCustomizedPayload=false
 
-while getopts ":sjd:v:x:gcae" opts; do
+while getopts ":sjd:v:x:gcaep" opts; do
     case "${opts}" in
         s)
             security=true
+            ;;
+        p)
+            genCustomizedPayload=true
             ;;
         c)
             cloudSwitchEnabled=true

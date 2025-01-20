@@ -70,6 +70,7 @@ function generateWorkflowServiceFromXml(){
     jpa=$(captureFieldWithDefaultValue "Enable JPA?" "y")
     activity=$(captureFieldWithDefaultValue "Enable Activity Tracking?" "n")
     enablement=$(captureFieldWithDefaultValue "Generate Enablement Code?" "n")
+    genCustomizedPayload=$(captureFieldWithDefaultValue "Generate Customized Payload for each event?" "n")
     cmdline=$(generateCommandLine $serviceVersion $outfolder $security $jpa )
     $scripts_folder/gen-workflow-service-custom.sh $cmdline $service
 }
@@ -113,6 +114,10 @@ function generateCommandLine(){
     if [[ ! -z $xmlFile ]]
     then
       cmdline="$cmdline -x $xmlFile"
+    fi
+    if [[ ! -z $genCustomizedPayload ]]
+        then
+          cmdline="$cmdline -p "
     fi
     echo $cmdline
 }
