@@ -43,5 +43,15 @@ public class {{Service}} extends AbstractExtendedStateEntity
         }
         return acts;
     }
+
+    @Override
+    public ActivityLog addActivity(String eventId, String comment) {
+        {{Service}}ActivityLog activityLog = new {{Service}}ActivityLog();
+        activityLog.activityName = eventId;
+        activityLog.activityComment = comment;
+        activityLog.activitySuccess = true;
+        activities.add(activityLog);
+        return activityLog;
+    }
 {{/activity}}
 }

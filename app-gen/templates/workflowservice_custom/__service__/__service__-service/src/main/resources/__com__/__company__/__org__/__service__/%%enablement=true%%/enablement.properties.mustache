@@ -1,0 +1,10 @@
+## Sample enablement properties file.
+# This can contain the following types of properties
+# [Prefix].[FlowName].[State].enabled=true|false  => to enable or disable specific states
+# [Prefix].[FlowName].[State].[Transition].enabled=true|false  => to enable or disable specific transitions
+# [Prefix].[FlowName].[State].meta.[key]=[value]  => to set a metadata [key] to [value] for the state
+# [Prefix].[FlowName].[State].[Transition].meta.[key]=[value]  => to set a metadata [key] to [value] for the transition
+# [Prefix].state.add.[State].in=[FlowName]  => to add a new state to a flow
+# [Prefix].[FlowName].[State].transition.add.to.[NewState]=[Transition]  => to add a new transition to a state that moves it to a new state
+{{Service}}.{{Service}}Flow.OPENED.enabled=true
+{{Service}}.state.add.XXX.in={{Service}}Flow

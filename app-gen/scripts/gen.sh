@@ -61,6 +61,19 @@ function generateWorkflowService(){
     $scripts_folder/gen-workflow-service.sh $cmdline $service
 }
 
+function generateWorkflowServiceFromXml(){
+    service=$(captureNonNullField "Workflow Entity Service Name")
+    serviceVersion=$(captureFieldWithDefaultValue "Workflow Entity Service Version" "$defaultVersion")
+    xmlFile=$(captureFile "Workflow XML File")
+    outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
+    security=$(captureFieldWithDefaultValue "Enable Security?" "n")
+    jpa=$(captureFieldWithDefaultValue "Enable JPA?" "y")
+    activity=$(captureFieldWithDefaultValue "Enable Activity Tracking?" "n")
+    enablement=$(captureFieldWithDefaultValue "Generate Enablement Code?" "n")
+    cmdline=$(generateCommandLine $serviceVersion $outfolder $security $jpa )
+    $scripts_folder/gen-workflow-service-custom.sh $cmdline $service
+}
+
 # Usage: generateCommandLine version outfolder security persistenceEnabled [included-service [included-service-version]]
 function generateCommandLine(){
     cmdline="-v $1 -d $2"
@@ -95,6 +108,11 @@ function generateCommandLine(){
     if [[ $enablement == "y" ]]
     then
       cmdline="$cmdline -e"
+    fi
+
+    if [[ ! -z $xmlFile ]]
+    then
+      cmdline="$cmdline -x $xmlFile"
     fi
     echo $cmdline
 }
@@ -139,6 +157,12 @@ function generateQueryServiceAndMonolith(){
 function generateWorkflowServiceAndMonolith(){
     export serviceTemplate="workflowservice"
     generateWorkflowService
+    generateMiniMonolith
+}
+
+function generateWorkflowServiceAndMonolithFromXml(){
+    export serviceTemplate="workflowservice"
+    generateWorkflowServiceFromXml
     generateMiniMonolith
 }
 
@@ -194,6 +218,7 @@ cloudSwitchEnabled=$(captureYorN "Enable Cloud Switch" "n")
 choice=$(choices  \
     "N|Generate Normal Service & Mini Monolith"  \
     "W|Generate Workflow Service & Mini Monolith" \
+    "X|Generate Workflow Service & Mini Monolith using an XML file" \
     "I|Generate a Chenile interceptor stub" \
     "Q|Generate a Chenile Mybatis Query Service" \
     "B|Generate a BDD based Integration Test" \
@@ -202,6 +227,7 @@ choice=$(choices  \
 case $choice in
     "N") generateNormalServiceAndMonolith ;;
     "W") generateWorkflowServiceAndMonolith;;
+    "X") generateWorkflowServiceAndMonolithFromXml;;
     "I") generateInterceptor;;
     "Q") generateMybatisQuery;;
     "C") generateLocalConfig;;

@@ -1,7 +1,7 @@
 
 .DEFAULT_GOAL := all
 
-## prep-mustache: Build a file from a template file
+## prep-mustache: Install mustache
 .PHONY: prep-mustache
 prep-mustache:
 	if [ ! -d bin/node_modules ]; then cd bin; npm install mustache; fi 
@@ -17,9 +17,9 @@ copy-scripts:
 create-bin:
 	if [ ! -d bin ]; then mkdir bin; fi
 
-## delete-bin: Delete the bin folder
-.PHONY: delete-bin
-delete-bin:
+## clean: Delete the bin folder
+.PHONY: clean
+clean:
 	rm -rf bin
 
 ## all: 

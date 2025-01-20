@@ -7,14 +7,47 @@ function setBaseVars(){
 	base_folder=${scripts_folder%/*}
 	template_folder_base=$base_folder/templates
 	config_folder=$base_folder/config
+	chenilegen_folder=${base_folder%/*}
+	stmcli_bin=${chenilegen_folder}/stmcli/bin
+
 	## set up other environment variables
 	[[ -f $config_folder/setenv.sh ]] && source $config_folder/setenv.sh
   [[ -f ./config/setenv.sh ]] && source ./config/setenv.sh
 }
 
+## Given a file (sample.filelist)  that has the following format:
+# --START--abc.txt--
+# Contents of abc.txt
+# --END--
+# --START--xyz.txt--
+# Contents of xyz.txt
+#--END--
+# This script breaks the file into abc.txt and xyz.txt and deletes
+# sample.filelist. Both the files are created in the same folder
+# where the sample.filelist file resides.
+
+function processFileList() {
+  listFile=$1
+  if [[ $listFile == */* ]]
+  then
+    folder=${listFile%/*}
+  else
+      folder=.
+  fi
+  awk -v folder=${folder} '
+      name {
+         filename = folder "/" name
+         if (/--END--/) name = 0;  else print  >filename
+      }
+      /--START--*/ {split($0,A,"--");name=A[3] }
+       ' ${listFile}
+  rm $listFile
+}
+
 function processTemplates(){
   folder=$1
   json_file=$2
+
   find $folder -name "*.mustache" -print |
     while read template_file
     do
@@ -28,6 +61,10 @@ function processTemplates(){
       [[ -x $template_file ]] && chmod +x $output_file # if original template file has executable
       # permissions the copied file must also have the same executable perms
       rm $template_file
+      if [[ $output_file == *.filelist ]]
+      then
+        processFileList $output_file
+      fi
     done
 }
 

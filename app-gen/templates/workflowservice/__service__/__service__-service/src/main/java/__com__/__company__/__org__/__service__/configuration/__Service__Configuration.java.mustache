@@ -114,17 +114,28 @@ public class {{Service}}Configuration {
         return new StmBodyTypeSelector({{service}}InfoProvider,stmTransitionActionResolver);
     }
 
+{{^activity}}
     @Bean @Autowired STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(
     @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver){
         return new BaseTransitionAction<>(stmTransitionActionResolver);
     }
+{{/activity}}
+
 {{#activity}}
-    @Bean ActivityChecker {{service}}ActivitiesChecker(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
+    @Bean @Autowired STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(
+    @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver,
+    @Qualifier("{{service}}ActivityChecker") ActivityChecker activityChecker){
+        BaseTransitionAction<{{Service}}> baseTransitionAction = new BaseTransitionAction<>(stmTransitionActionResolver);
+        baseTransitionAction.activityChecker = activityChecker;
+        return baseTransitionAction;
+    }
+
+    @Bean ActivityChecker {{service}}ActivityChecker(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
         return new ActivityChecker(stmFlowStore);
     }
 
     @Bean
-    AreActivitiesComplete activitiesCompletionCheck(@Qualifier("{{service}}ActivitiesChecker") ActivityChecker activityChecker){
+    AreActivitiesComplete activitiesCompletionCheck(@Qualifier("{{service}}ActivityChecker") ActivityChecker activityChecker){
         return new AreActivitiesComplete(activityChecker);
     }
 {{/activity}}
@@ -156,7 +167,7 @@ public class {{Service}}Configuration {
 
     @Bean ConfigBasedEnablementStrategy {{service}}ConfigBasedEnablementStrategy(
         @Qualifier("{{service}}ConfigProvider") ConfigProvider configProvider) {
-            return new ConfigBasedEnablementStrategy(configProvider);
+            return new ConfigBasedEnablementStrategy(configProvider,"{{Service}}");
     }
 {{/enablement}}
 

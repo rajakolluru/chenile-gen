@@ -1,0 +1,6 @@
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>A Sample Styling Properties file - Use metadata to style transitions </comment>
+    <entry key="activity==MANDATORY">[thickness=3,#Blue]</entry>
+    <entry key="activity==OPTIONAL">[thickness=3,#LightBlue]</entry>
+</properties>

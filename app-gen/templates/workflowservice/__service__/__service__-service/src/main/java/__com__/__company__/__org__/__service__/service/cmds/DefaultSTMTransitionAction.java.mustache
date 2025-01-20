@@ -7,38 +7,16 @@ import {{chenilePackage}}.workflow.param.MinimalPayload;
 import {{chenilePackage}}.workflow.service.stmcmds.AbstractSTMTransitionAction;
 import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
 
-{{#activity}}
-import {{chenilePackage}}.workflow.service.activities.ActivityChecker;
-import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}}ActivityLog;
-import org.springframework.beans.factory.annotation.Autowired;
-{{/activity}}
-
 /**
-    Extend this class to do specific things that are relevant for all actions in the workflow
+    Use this class to do generic things that are relevant for all actions in the workflow
 */
 
 public class DefaultSTMTransitionAction<PayloadType extends MinimalPayload>
     extends AbstractSTMTransitionAction<{{Service}}, PayloadType> {
-{{#activity}}
-    @Autowired ActivityChecker activityChecker;
-{{/activity}}
     @Override
     public void transitionTo({{Service}} {{service}}, PayloadType payload,
                  State startState, String eventId, State endState, STMInternalTransitionInvoker<?> stm,
                  Transition transition) {
-{{^activity}}
+
     }
-{{/activity}}
-{{#activity}}
-    if (activityChecker.isActivity({{service}},eventId))
-        processActivity({{service}},payload,eventId);
-    }
-    private void processActivity({{Service}} {{service}}, PayloadType payload, String eventId){
-        {{Service}}ActivityLog activityLog = new {{Service}}ActivityLog();
-        activityLog.activitySuccess = true;
-        activityLog.activityComment = payload.getComment();
-        activityLog.activityName = eventId;
-        {{service}}.activities.add(activityLog);
-    }
-{{/activity}}
 }

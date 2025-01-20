@@ -10,6 +10,22 @@ function captureNonNullField(){
     echo $field
 }
 
+function captureFile(){
+    error=1
+    while (( error > 0 ))
+    do
+        read -p "$1:" field
+        if [[ ! -f $field ]]
+        then
+          echo "File $field not found. Try again."
+        elif [[ ! -z $field ]]
+        then
+          error=0
+        fi
+    done
+    echo $field
+}
+
 #captures a list of values. returns them all
 function captureList(){
     list=""

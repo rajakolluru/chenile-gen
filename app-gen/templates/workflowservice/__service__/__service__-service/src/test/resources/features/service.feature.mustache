@@ -143,7 +143,7 @@ OPENED -(assign) -> ASSIGNED -(resolve) -> RESOLVED -(close) -> CLOSED
 
     Scenario: Add a new mandatory activity verifyLogs for the CLOSED state.
     Send verifyLogs event on the {{service}} with comments. This will not affect the state of the state entity.
-        Given that config strategy is "{{service}}ConfigProvider"
+        Given that config strategy is "{{service}}ConfigProvider" with prefix "{{Service}}"
         And that a new mandatory activity "verifyLogs" is added from state "CLOSED" to state "AreClosedActivitiesComplete" in flow "{{Service}}Flow"
         And that "comment" equals "All logs have been verified."
         And that "event" equals "verifyLogs"

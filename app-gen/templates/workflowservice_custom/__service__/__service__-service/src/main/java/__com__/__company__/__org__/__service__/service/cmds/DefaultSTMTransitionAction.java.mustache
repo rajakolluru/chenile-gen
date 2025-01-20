@@ -1,0 +1,23 @@
+package {{com}}.{{company}}.{{org}}.{{service}}.service.cmds;
+
+import {{chenilePackage}}.stm.STMInternalTransitionInvoker;
+import {{chenilePackage}}.stm.State;
+import {{chenilePackage}}.stm.model.Transition;
+import {{chenilePackage}}.workflow.param.MinimalPayload;
+import {{chenilePackage}}.workflow.service.stmcmds.AbstractSTMTransitionAction;
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+
+/**
+    This class is invoked if no specific transition action is specified
+    Extend this class to do generic things that are relevant for all actions in the workflow
+*/
+
+public class DefaultSTMTransitionAction<PayloadType extends MinimalPayload>
+    extends AbstractSTMTransitionAction<{{Service}}, PayloadType> {
+    @Override
+    public void transitionTo({{Service}} {{service}}, PayloadType payload,
+                 State startState, String eventId, State endState, STMInternalTransitionInvoker<?> stm,
+                 Transition transition) {
+
+    }
+}
