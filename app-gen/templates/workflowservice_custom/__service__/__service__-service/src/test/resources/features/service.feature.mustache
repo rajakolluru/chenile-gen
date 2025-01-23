@@ -1,7 +1,22 @@
 Feature: Tests the {{service}} Workflow Service using a REST client. {{Service}} service exists and is under test.
 It helps to create a {{service}} and manages the state of the {{service}} as documented in states xml
  
-  Scenario: Test create {{service}}
+Scenario: Test case set up for  {{service}}
+This sets up the flowName and initialState variables in the test case.
+{{#workflow}}
+    {{#flows}}
+    Given that "flowName" equals "{{id}}"
+        {{#states}}
+            {{#initialState}}
+    And that "initialState" equals "{{id}}"
+            {{/initialState}}
+        {{/states}}
+    {{/flows}}
+{{/workflow}}
+
+{{#testcases}}
+
+Scenario: Create a new {{service}}
 {{#security}}
     When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
     And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
@@ -14,16 +29,7 @@ It helps to create a {{service}} and manages the state of the {{service}} as doc
 	"""
     Then the REST response contains key "mutatedEntity"
     And store "$.payload.mutatedEntity.id" from response to "id"
-{{#workflow}}
-    {{#flows}}
-    And that "flowName" equals "{{id}}"
-        {{#states}}
-            {{#initialState}}
-    And the REST response key "mutatedEntity.currentState.stateId" is "{{id}}"
-            {{/initialState}}
-        {{/states}}
-    {{/flows}}
-{{/workflow}}
+    And the REST response key "mutatedEntity.currentState.stateId" is "${initialState}"
     And store "$.payload.mutatedEntity.currentState.stateId" from response to "currentState"
     And the REST response key "mutatedEntity.description" is "Description"
 	  
@@ -32,13 +38,12 @@ It helps to create a {{service}} and manages the state of the {{service}} as doc
     When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
     And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
 {{/security}}
-	  When I GET a REST request to URL "/{{service}}/${id}" 
-	  Then the REST response contains key "mutatedEntity"
-	  And the REST response key "mutatedEntity.id" is "${id}"
-	  And the REST response key "mutatedEntity.currentState.stateId" is "${currentState}"
-	  
-{{#testcases}}
+      When I GET a REST request to URL "/{{service}}/${id}"
+      Then the REST response contains key "mutatedEntity"
+      And the REST response key "mutatedEntity.id" is "${id}"
+      And the REST response key "mutatedEntity.currentState.stateId" is "${currentState}"
 
+{{#.}}
 	 Scenario: Send the {{event}} event to the {{service}} with comments
      Given that "comment" equals "Comment for {{event}}"
      And that "event" equals "{{event}}"
@@ -57,6 +62,7 @@ It helps to create a {{service}} and manages the state of the {{service}} as doc
 	  And the REST response key "mutatedEntity.currentState.stateId" is "{{to}}"
      And store "$.payload.mutatedEntity.currentState.stateId" from response to "finalState"
 
+{{/.}}
 {{/testcases}}
 
 Scenario: Add new mandatory activities a1,a2 for the last state.

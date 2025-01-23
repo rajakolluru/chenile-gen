@@ -39,7 +39,7 @@ function setenv(){
 function generateService(){
   checkXmlFile
 	constructJsFile > $json_file
-	cp $json_file /tmp/raja
+	cp $json_file /tmp/a.js
 	template_folder=$template_folder_base/workflowservice_custom
   generateModule $template_folder $dest_folder $json_file "service com org company Service"
   cp $xmlFile $dest_folder/${service}/${service}-service/src/main/resources/${com}/${company}/${org}/${service}/${service}-states.xml
