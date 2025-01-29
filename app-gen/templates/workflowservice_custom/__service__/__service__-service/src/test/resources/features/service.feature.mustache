@@ -43,7 +43,7 @@ Scenario: Create a new {{service}}
       And the REST response key "mutatedEntity.id" is "${id}"
       And the REST response key "mutatedEntity.currentState.stateId" is "${currentState}"
 
-{{#.}}
+{{#steps}}
 	 Scenario: Send the {{event}} event to the {{service}} with comments
      Given that "comment" equals "Comment for {{event}}"
      And that "event" equals "{{event}}"
@@ -62,7 +62,7 @@ Scenario: Create a new {{service}}
 	  And the REST response key "mutatedEntity.currentState.stateId" is "{{to}}"
      And store "$.payload.mutatedEntity.currentState.stateId" from response to "finalState"
 
-{{/.}}
+{{/steps}}
 {{/testcases}}
 
 Scenario: Add new mandatory activities a1,a2 for the last state.
