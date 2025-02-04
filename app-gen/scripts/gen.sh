@@ -168,6 +168,10 @@ function generateWorkflowServiceAndMonolith(){
 function generateWorkflowServiceAndMonolithFromXml(){
     export serviceTemplate="workflowservice"
     generateWorkflowServiceFromXml
+    activity=
+    xmlFile=
+    genCustomizedPayload=
+    enablement=
     generateMiniMonolith
 }
 

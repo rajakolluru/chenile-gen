@@ -1,22 +1,14 @@
 Feature: Tests the {{service}} Workflow Service using a REST client. {{Service}} service exists and is under test.
 It helps to create a {{service}} and manages the state of the {{service}} as documented in states xml
- 
-Scenario: Test case set up for  {{service}}
-This sets up the flowName and initialState variables in the test case.
-{{#workflow}}
-    {{#flows}}
-    Given that "flowName" equals "{{id}}"
-        {{#states}}
-            {{#initialState}}
-    And that "initialState" equals "{{id}}"
-            {{/initialState}}
-        {{/states}}
-    {{/flows}}
-{{/workflow}}
 
 {{#testcases}}
-
 Scenario: Create a new {{service}}
+{{#steps}}
+    {{#first}}
+    Given that "flowName" equals "{{fromFlow}}"
+    And that "initialState" equals "{{from}}"
+    {{/first}}
+{{/steps}}
 {{#security}}
     When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
     And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
