@@ -57,6 +57,7 @@ Scenario: Create a new {{service}}
 {{/steps}}
 {{/testcases}}
 
+{{#activity}}
 Scenario: Add new mandatory activities a1,a2 for the last state.
     Add a new state "__TERMINAL_STATE__"
     Add a completion checker activity "cc" to the last state that leads to __TERMINAL_STATE__
@@ -149,7 +150,7 @@ Scenario: Perform mandatory activity (cc) on the  {{service}} with comments
     Then the REST response contains key "mutatedEntity"
     And the REST response key "mutatedEntity.id" is "${id}"
     And the REST response key "mutatedEntity.currentState.stateId" is "${terminalState}"
-
+{{/activity}}
 
 Scenario: Send an invalid event to {{service}} . This will err out.
 {{#security}}
