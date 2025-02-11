@@ -39,7 +39,6 @@ function setenv(){
 function generateService(){
   checkXmlFile
 	constructJsFile > $json_file
-	cp $json_file /tmp/a.js
 	template_folder=$template_folder_base/workflowservice_custom
   generateModule $template_folder $dest_folder $json_file "service com org company Service"
   cp $xmlFile $dest_folder/${service}/${service}-service/src/main/resources/${com}/${company}/${org}/${service}/${service}-states.xml
@@ -50,10 +49,12 @@ function generateService(){
 }
 
 function checkXmlFile() {
+  # Render the state machine as a JSON file
   outfile=/tmp/out.$$
   ${stmcli_bin}/stm-cli -j -o $outfile $xmlFile
   workflow=$(cat $outfile)
   rm $outfile
+  # Construct test cases for the state machine and render them as JSON.
   ${stmcli_bin}/stm-cli -t -o $outfile $xmlFile
   testcases=$(cat $outfile)
   rm $outfile

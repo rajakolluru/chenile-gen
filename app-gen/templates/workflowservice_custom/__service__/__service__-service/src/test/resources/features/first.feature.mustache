@@ -1,7 +1,8 @@
-Feature: Tests the {{service}} Workflow Service using a REST client. {{Service}} service exists and is under test.
-It helps to create a {{service}} and manages the state of the {{service}} as documented in states xml
-
 {{#testcases}}
+{{#first}}
+Feature: Tests the {{service}} Workflow Service using a REST client. This is done only for the
+first testcase. {{Service}} service exists and is under test.
+It helps to create a {{service}} and manages the state of the {{service}} as documented in states xml
 Scenario: Create a new {{service}}
 {{#steps}}
     {{#first}}
@@ -55,6 +56,7 @@ Scenario: Create a new {{service}}
      And store "$.payload.mutatedEntity.currentState.stateId" from response to "finalState"
 
 {{/steps}}
+{{/first}}
 {{/testcases}}
 
 {{#activity}}
