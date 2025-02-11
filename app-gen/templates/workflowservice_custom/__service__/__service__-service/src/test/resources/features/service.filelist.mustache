@@ -7,55 +7,54 @@ It helps to create a {{service}} and manages the state of the {{service}} as doc
 Scenario: Create a new {{service}}
 {{#steps}}
     {{#first}}
-    Given that "flowName" equals "{{fromFlow}}"
-    And that "initialState" equals "{{from}}"
+Given that "flowName" equals "{{fromFlow}}"
+And that "initialState" equals "{{from}}"
     {{/first}}
 {{/steps}}
 {{#security}}
-    When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
-    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
+And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
 {{/security}}
-    When I POST a REST request to URL "/{{service}}" with payload
-    """json
-    {
-	    "description": "Description"
-	}
-	"""
-    Then the REST response contains key "mutatedEntity"
-    And store "$.payload.mutatedEntity.id" from response to "id"
-    And the REST response key "mutatedEntity.currentState.stateId" is "${initialState}"
-    And store "$.payload.mutatedEntity.currentState.stateId" from response to "currentState"
-    And the REST response key "mutatedEntity.description" is "Description"
-	  
-	Scenario: Retrieve the {{service}} that just got created
+When I POST a REST request to URL "/{{service}}" with payload
+"""json
+{
+    "description": "Description"
+}
+"""
+Then the REST response contains key "mutatedEntity"
+And store "$.payload.mutatedEntity.id" from response to "id"
+And the REST response key "mutatedEntity.currentState.stateId" is "${initialState}"
+And store "$.payload.mutatedEntity.currentState.stateId" from response to "currentState"
+And the REST response key "mutatedEntity.description" is "Description"
+
+Scenario: Retrieve the {{service}} that just got created
 {{#security}}
-    When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
-    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
+And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
 {{/security}}
-      When I GET a REST request to URL "/{{service}}/${id}"
-      Then the REST response contains key "mutatedEntity"
-      And the REST response key "mutatedEntity.id" is "${id}"
-      And the REST response key "mutatedEntity.currentState.stateId" is "${currentState}"
+When I GET a REST request to URL "/{{service}}/${id}"
+Then the REST response contains key "mutatedEntity"
+And the REST response key "mutatedEntity.id" is "${id}"
+And the REST response key "mutatedEntity.currentState.stateId" is "${currentState}"
 
 {{#steps}}
-	 Scenario: Send the {{event}} event to the {{service}} with comments
-     Given that "comment" equals "Comment for {{event}}"
-     And that "event" equals "{{event}}"
+Scenario: Send the {{event}} event to the {{service}} with comments
+Given that "comment" equals "Comment for {{event}}"
+And that "event" equals "{{event}}"
 {{#security}}
-    When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
-    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+When I construct a REST request with authorization header in realm "tenant0" for user "t0-premium" and password "t0-premium"
+And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
 {{/security}}
-		When I PATCH a REST request to URL "/{{service}}/${id}/${event}" with payload
-		"""json
-		{
-			"comment": "${comment}"
-		}
-		"""
-	  Then the REST response contains key "mutatedEntity"
-	  And the REST response key "mutatedEntity.id" is "${id}"
-	  And the REST response key "mutatedEntity.currentState.stateId" is "{{to}}"
-     And store "$.payload.mutatedEntity.currentState.stateId" from response to "finalState"
-
+When I PATCH a REST request to URL "/{{service}}/${id}/${event}" with payload
+"""json
+{
+    "comment": "${comment}"
+}
+"""
+Then the REST response contains key "mutatedEntity"
+And the REST response key "mutatedEntity.id" is "${id}"
+And the REST response key "mutatedEntity.currentState.stateId" is "{{to}}"
+And store "$.payload.mutatedEntity.currentState.stateId" from response to "finalState"
 {{/steps}}
 --END--
 {{/first}}
