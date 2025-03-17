@@ -9,6 +9,7 @@ import org.chenile.jgen.blueprints.model.FieldType;
 import org.chenile.jgen.blueprints.model.InputField;
 import org.chenile.jgen.config.Config;
 import org.chenile.jgen.config.ConfigProvider;
+import org.chenile.jgen.util.FieldUtils;
 import picocli.CommandLine;
 
 import java.io.File;
@@ -120,7 +121,7 @@ public class GenMain implements Runnable {
             String in = scanner.nextLine();
             if (in == null || in.isEmpty()) input = defValue;
             else input = in;
-        }while(!valid(field,input));
+        }while(!FieldUtils.isValid(field,input));
         return input;
     }
 
@@ -129,26 +130,5 @@ public class GenMain implements Runnable {
         StringSubstitutor stringSubstitutor = new StringSubstitutor(configMap);
         return stringSubstitutor.replace(value);
     }
-
-    private boolean valid(InputField field,String input) {
-        if (input == null || input.isEmpty()) return false;
-        if (field.type == FieldType.BOOLEAN){
-            input = input.toLowerCase(Locale.ROOT);
-            return "y".equals(input) || "n".equals(input);
-        }
-        if (field.type == FieldType.FILE){
-            File file = new File(input);
-            if (!file.exists())return false;
-        }
-        if (field.type == FieldType.NUMBER){
-            try {
-                Integer.parseInt(input);
-            }catch(NumberFormatException nfe){
-                return false;
-            }
-        }
-        return true;
-    }
-
 
 }
