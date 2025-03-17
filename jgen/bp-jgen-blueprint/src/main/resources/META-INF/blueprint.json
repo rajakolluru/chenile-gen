@@ -1,0 +1,37 @@
+{
+  "initHook" : "org.chenile.jgen.blueprint.jgenbp.InitJGenBlueprint",
+  "name" : "jgen-blueprint",
+  "description" : "Generates a New JGen Blueprint",
+  "templateFolder": "blueprint-template",
+  "inputFields" :[
+    {
+      "name" : "blueprintName",
+      "type" : "STRING",
+      "description": "Name of Blueprint"
+    },
+    {
+      "name" : "destFolder",
+      "type" : "STRING",
+      "description": "Destination Folder",
+      "defaultValue" : "${defaultDestFolder}"
+    },
+    {
+      "name" : "security",
+      "type" : "BOOLEAN",
+      "description": "Enable Security",
+      "defaultValue" : "n"
+    },
+    {
+      "name" : "jpa",
+      "type" : "BOOLEAN",
+      "description": "Enable JPA",
+      "defaultValue" : "y"
+    },
+    {
+      "name" : "cloudSwitchEnabled",
+      "type" : "BOOLEAN",
+      "description": "Enable Cloud Switch",
+      "defaultValue" : "n"
+    }
+  ]
+}

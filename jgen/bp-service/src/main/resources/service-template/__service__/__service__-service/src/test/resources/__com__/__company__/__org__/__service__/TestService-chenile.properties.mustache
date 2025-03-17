@@ -1,0 +1,24 @@
+# All Chenile configuration properties
+chenile.module.name={{service}}-test
+{{#security}}
+chenile.post.processors=securityInterceptor
+{{/security}}
+{{^security}}
+chenile.post.processors=
+{{/security}}
+chenile.pre.processors=
+chenile.exception.handler=chenileExceptionHandler
+
+chenile.service.json.package=classpath*:{{com}}/{{company}}/{{org}}/{{service}}/service/*.json,classpath*:org/chenile/**/service/*.json
+chenile.event.json.package=classpath*:{{com}}/{{company}}/{{org}}/{{service}}/event/*.json
+chenile.interceptors.path=org/chenile/core/chenile-core.xml
+
+# The event processor to be used. This can be over-ridden at the app level
+# Hence must be specified here
+chenile.event.processor=
+
+# File Watch Related
+chenile.file.watch.json.package=classpath*:org/chenile/core/test/filewatch/*.json
+chenile.file.watch.source.folder=/tmp/src
+chenile.file.watch.dest.folder=/tmp/dest
+chenile.file.watch.polltime.seconds=20

@@ -1,0 +1,14 @@
+package {{com}}.{{company}}.{{org}}.{{service}}.service;
+
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+
+public interface {{Service}}Service {
+	// Define your interface here
+{{^jpa}}
+	public {{Service}} op1({{Service}} {{service}});
+{{/jpa}}
+{{#jpa}}
+    public {{Service}} save({{Service}} {{service}});
+    public {{Service}} retrieve(String id);
+{{/jpa}}
+}

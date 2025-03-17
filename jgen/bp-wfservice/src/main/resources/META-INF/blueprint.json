@@ -1,0 +1,61 @@
+{
+  "initHook" : "org.chenile.jgen.blueprint.wfservice.InitWfserviceBlueprint",
+  "name" : "wfservice",
+  "description" : "Generates a typical  Workflow service ",
+  "templateFolder": "wfservice-template",
+  "inputFields" :[
+    {
+      "name" : "service",
+      "type" : "STRING",
+      "description": "Workflow Service Name"
+    },
+    {
+    "name" : "serviceVersion",
+    "type" : "STRING",
+    "description": "Version of service",
+    "defaultValue" : "${defaultVersion}"
+    },
+    {
+      "name" : "destFolder",
+      "type" : "STRING",
+      "description": "Destination Folder",
+      "defaultValue" : "${defaultDestFolder}"
+    }
+
+  ,{
+      "name" : "activity",
+      "type" : "BOOLEAN",
+      "description": "Enable Activity Management",
+      "defaultValue" : "n"
+    },
+
+    {
+      "name" : "enablement",
+      "type" : "BOOLEAN",
+      "description": "Enablement",
+      "defaultValue" : "n"
+    }
+  ,
+
+    {
+      "name" : "jpa",
+      "type" : "BOOLEAN",
+      "description": "JPA",
+      "defaultValue" : "y"
+    }
+    ,
+    {
+        "name" : "cloudSwitchEnabled",
+        "type" : "BOOLEAN",
+        "description": "Enable Cloud Switch",
+        "defaultValue" : "n"
+    }
+    ,
+    {
+        "name" : "security",
+        "type" : "BOOLEAN",
+        "description": "Enable Security",
+        "defaultValue" : "n"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "initHook" : "org.chenile.jgen.blueprint.interceptor.InitInterceptorBlueprint",
+  "name" : "chenile-interceptor",
+  "description" : "Generates a Chenile Interceptor",
+  "templateFolder": "interceptor-template",
+  "inputFields" :[
+    {
+      "name" : "interceptorName",
+      "type" : "STRING",
+      "description": "Name of interceptor"
+    },
+    {
+      "name" : "interceptorVersion",
+      "type" : "STRING",
+      "description": "Interceptor Version",
+      "defaultValue": "${defaultVersion}"
+    },
+    {
+      "name" : "destFolder",
+      "type" : "STRING",
+      "description": "Destination Folder",
+      "defaultValue" : "${defaultDestFolder}"
+    }
+  ]
+}

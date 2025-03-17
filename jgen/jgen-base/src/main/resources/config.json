@@ -1,0 +1,11 @@
+{
+	"chenilePackage" : "org.chenile",
+	"chenileVersion" : "2.0.14",
+	"chenileBddVersion" : "0.1.1",
+	"com" : "com",
+	"company" : "mycompany",
+	"org" : "myorg",
+	"defaultServiceName" : "serviceName",
+	"defaultVersion" : "0.0.1-SNAPSHOT",
+	"defaultDestFolder" : "./output"
+}

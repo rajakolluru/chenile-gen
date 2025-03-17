@@ -1,0 +1,194 @@
+package {{com}}.{{company}}.{{org}}.{{service}}.configuration;
+
+import {{chenilePackage}}.stm.*;
+import {{chenilePackage}}.stm.action.STMTransitionAction;
+import {{chenilePackage}}.stm.impl.*;
+import {{chenilePackage}}.stm.spring.SpringBeanFactoryAdapter;
+import {{chenilePackage}}.workflow.param.MinimalPayload;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import {{chenilePackage}}.utils.entity.service.EntityStore;
+import {{chenilePackage}}.workflow.service.impl.StateEntityServiceImpl;
+import {{chenilePackage}}.workflow.service.stmcmds.*;
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+import {{com}}.{{company}}.{{org}}.{{service}}.service.cmds.*;
+import {{com}}.{{company}}.{{org}}.{{service}}.service.healthcheck.{{Service}}HealthChecker;
+import {{com}}.{{company}}.{{org}}.{{service}}.service.store.{{Service}}EntityStore;
+import {{chenilePackage}}.workflow.api.WorkflowRegistry;
+{{#security}}
+import {{chenilePackage}}.workflow.service.stmcmds.StmAuthoritiesBuilder;
+import java.util.function.Function;
+import {{chenilePackage}}.core.context.ChenileExchange;
+{{/security}}
+{{#activity}}
+import org.chenile.stm.State;
+import org.chenile.workflow.service.activities.ActivityChecker;
+import org.chenile.workflow.service.activities.AreActivitiesComplete;
+{{/activity}}
+{{#enablement}}
+
+{{/enablement}}
+
+/**
+ This is where you will instantiate all the required classes in Spring
+*/
+@Configuration
+public class {{Service}}Configuration {
+	private static final String FLOW_DEFINITION_FILE = "{{com}}/{{company}}/{{org}}/{{service}}/{{service}}-states.xml";
+	public static final String PREFIX_FOR_PROPERTIES = "{{Service}}";
+    public static final String PREFIX_FOR_RESOLVER = "{{service}}";
+
+    @Bean BeanFactoryAdapter {{service}}BeanFactoryAdapter() {
+		return new SpringBeanFactoryAdapter();
+	}
+	
+	@Bean STMFlowStoreImpl {{service}}FlowStore(
+            @Qualifier("{{service}}BeanFactoryAdapter") BeanFactoryAdapter {{service}}BeanFactoryAdapter
+            )throws Exception{
+		STMFlowStoreImpl stmFlowStore = new STMFlowStoreImpl();
+		stmFlowStore.setBeanFactory({{service}}BeanFactoryAdapter);
+		return stmFlowStore;
+	}
+	
+	@Bean @Autowired STM<{{Service}}> {{service}}EntityStm(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore) throws Exception{
+		STMImpl<{{Service}}> stm = new STMImpl<>();		
+		stm.setStmFlowStore(stmFlowStore);
+		return stm;
+	}
+	
+	@Bean @Autowired STMActionsInfoProvider {{service}}ActionsInfoProvider(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore) {
+		STMActionsInfoProvider provider =  new STMActionsInfoProvider(stmFlowStore);
+        WorkflowRegistry.addSTMActionsInfoProvider("{{service}}",provider);
+        return provider;
+	}
+	
+	@Bean EntityStore<{{Service}}> {{service}}EntityStore() {
+		return new {{Service}}EntityStore();
+	}
+	
+	@Bean @Autowired StateEntityServiceImpl<{{Service}}> _{{service}}StateEntityService_(
+			@Qualifier("{{service}}EntityStm") STM<{{Service}}> stm,
+			@Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider,
+			@Qualifier("{{service}}EntityStore") EntityStore<{{Service}}> entityStore){
+		return new StateEntityServiceImpl<>(stm, {{service}}InfoProvider, entityStore);
+	}
+	
+	// Now we start constructing the STM Components 
+	
+	@Bean @Autowired GenericEntryAction<{{Service}}> {{service}}EntryAction(@Qualifier("{{service}}EntityStore") EntityStore<{{Service}}> entityStore,
+			@Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider,
+            @Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
+        GenericEntryAction<{{Service}}> entryAction =  new GenericEntryAction<{{Service}}>(entityStore,{{service}}InfoProvider);
+        stmFlowStore.setEntryAction(entryAction);
+        return entryAction;
+	}
+	
+	@Bean GenericExitAction<{{Service}}> {{service}}ExitAction(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
+        GenericExitAction<{{Service}}> exitAction = new GenericExitAction<{{Service}}>();
+        stmFlowStore.setExitAction(exitAction);
+        return exitAction;
+	}
+
+	@Bean
+	XmlFlowReader {{service}}FlowReader(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl flowStore) throws Exception {
+		XmlFlowReader flowReader = new XmlFlowReader(flowStore);
+		flowReader.setFilename(FLOW_DEFINITION_FILE);
+		return flowReader;
+	}
+	
+
+	@Bean {{Service}}HealthChecker {{service}}HealthChecker(){
+    	return new {{Service}}HealthChecker();
+    }
+
+    @Bean STMTransitionAction<{{Service}}> default{{service}}STMTransitionAction() {
+        return new DefaultSTMTransitionAction<MinimalPayload>();
+    }
+
+    @Bean
+    STMTransitionActionResolver {{service}}TransitionActionResolver(
+    @Qualifier("default{{service}}STMTransitionAction") STMTransitionAction<{{Service}}> defaultSTMTransitionAction){
+        return new STMTransitionActionResolver(PREFIX_FOR_RESOLVER,defaultSTMTransitionAction);
+    }
+
+    @Bean @Autowired StmBodyTypeSelector {{service}}BodyTypeSelector(
+    @Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider,
+    @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver) {
+        return new StmBodyTypeSelector({{service}}InfoProvider,stmTransitionActionResolver);
+    }
+
+{{^activity}}
+    @Bean @Autowired STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(
+        @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver){
+            return new BaseTransitionAction<>(stmTransitionActionResolver);
+    }
+{{/activity}}
+
+{{#activity}}
+    @Bean @Autowired STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(
+        @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver,
+        @Qualifier("{{service}}ActivityChecker") ActivityChecker activityChecker,
+        @Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
+        BaseTransitionAction<{{Service}}> baseTransitionAction = new BaseTransitionAction<>(stmTransitionActionResolver);
+        baseTransitionAction.activityChecker = activityChecker;
+        stmFlowStore.setDefaultTransitionAction(baseTransitionAction);
+        return baseTransitionAction;
+    }
+
+    @Bean ActivityChecker {{service}}ActivityChecker(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
+        return new ActivityChecker(stmFlowStore);
+    }
+
+    @Bean
+    AreActivitiesComplete activitiesCompletionCheck(@Qualifier("{{service}}ActivityChecker") ActivityChecker activityChecker){
+        return new AreActivitiesComplete(activityChecker);
+    }
+{{/activity}}
+
+    // Create the specific transition actions here. Make sure that these actions are inheriting from
+    // AbstractSTMTransitionMachine (The sample classes provide an example of this). To automatically wire
+    // them into the STM use the convention of "{{service}}" + eventId for the method name. ({{service}} is the
+    // prefix passed to the TransitionActionResolver above.)
+    // This will ensure that these are detected automatically by the Workflow system.
+    // The payload types will be detected as well so that there is no need to introduce an <event-information/>
+    // segment in src/main/resources/{{com}}/{{company}}/{{service}}/{{service}}-states.xml
+
+    {{#workflow}}
+        {{#flows}}
+            {{#states}}
+                {{#transitions}}
+    @Bean {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Action
+            {{service}}{{#capitalize}}{{eventId}}{{/capitalize}}(){
+        return new {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Action();
+    }
+                {{/transitions}}
+            {{/states}}
+        {{/flows}}
+    {{/workflow}}
+
+{{#enablement}}
+    @Bean ConfigProviderImpl {{service}}ConfigProvider() {
+        return new ConfigProviderImpl();
+    }
+
+    @Bean ConfigBasedEnablementStrategy {{service}}ConfigBasedEnablementStrategy(
+        @Qualifier("{{service}}ConfigProvider") ConfigProvider configProvider,
+        @Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore) {
+        ConfigBasedEnablementStrategy enablementStrategy = new ConfigBasedEnablementStrategy(configProvider,PREFIX_FOR_PROPERTIES);
+        stmFlowStore.setEnablementStrategy(enablementStrategy);
+        return enablementStrategy;
+    }
+{{/enablement}}
+
+    {{#security}}
+    @Bean @Autowired Function<ChenileExchange, String[]> {{service}}EventAuthoritiesSupplier(
+        @Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider)
+                    throws Exception{
+        StmAuthoritiesBuilder builder = new StmAuthoritiesBuilder({{service}}InfoProvider);
+        return builder.build();
+    }
+{{/security}}
+}

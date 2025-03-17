@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>{{com}}.{{company}}.{{org}}.{{service}}</groupId>
+		<artifactId>{{service}}-parent</artifactId>
+		<version>${revision}</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	
+	<artifactId>{{service}}-service</artifactId>
+	<packaging>jar</packaging>
+
+	<name>{{Service}} Service Implementations</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>{{com}}.{{company}}.{{org}}.{{service}}</groupId>
+			<artifactId>{{service}}-api</artifactId>
+		</dependency>
+	    <dependency>
+			<groupId>{{chenilePackage}}</groupId>
+			<artifactId>chenile-http</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>{{chenilePackage}}</groupId>
+			<artifactId>cucumber-utils</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+        {{#jpa}}
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        {{/jpa}}
+        {{#security}}
+        <dependency>
+            <groupId>{{chenilePackage}}</groupId>
+            <artifactId>chenile-security-api</artifactId>
+        </dependency>
+        <!-- Test dependencies for security -->
+        <dependency>
+            <groupId>{{chenilePackage}}</groupId>
+            <artifactId>cucumber-sec-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>{{chenilePackage}}</groupId>
+            <artifactId>security-interceptor</artifactId>
+            <scope>test</scope>
+        </dependency>
+        {{/security}}
+        {{#cloudEdgeSwitch}}
+        <!-- Test dependencies for Cloud Edge Switch -->
+        <dependency>
+            <groupId>{{chenilePackage}}</groupId>
+            <artifactId>cucumber-mqtt-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>hivemq</artifactId>
+            <scope>test</scope>
+        </dependency>
+        {{/cloudEdgeSwitch}}
+	</dependencies>
+</project>

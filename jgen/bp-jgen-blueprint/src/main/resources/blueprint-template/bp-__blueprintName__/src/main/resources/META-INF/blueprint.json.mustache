@@ -1,0 +1,51 @@
+{
+  "initHook" : "org.chenile.jgen.blueprint.{{blueprintName}}.Init{{BlueprintName}}Blueprint",
+  "name" : "{{blueprintName}}",
+  "description" : "Generates a New {{BlueprintName}}",
+  "templateFolder": "{{blueprintName}}-template",
+  "inputFields" :[
+    {
+      "name" : "{{blueprintName}}",
+      "type" : "STRING",
+      "description": "Name of {{blueprintName}}"
+    },
+    {
+    "name" : "{{blueprintName}}Version",
+    "type" : "STRING",
+    "description": "Version of {{blueprintName}}",
+    "defaultValue" : "${defaultVersion}"
+    },
+    {
+      "name" : "destFolder",
+      "type" : "STRING",
+      "description": "Destination Folder",
+      "defaultValue" : "${defaultDestFolder}"
+    }
+    {{#jpa}}
+    ,{
+        "name" : "jpa",
+        "type" : "BOOLEAN",
+        "description": "Enable JPA",
+        "defaultValue" : "y"
+    }
+    {{/jpa}}
+    {{#cloudSwitchEnabled}}
+    ,
+    {
+        "name" : "cloudSwitchEnabled",
+        "type" : "BOOLEAN",
+        "description": "Enable Cloud Switch",
+        "defaultValue" : "n"
+    }
+    {{/cloudSwitchEnabled}}
+    {{#security}}
+    ,
+    {
+        "name" : "security",
+        "type" : "BOOLEAN",
+        "description": "Enable Security",
+        "defaultValue" : "n"
+    }
+    {{/security}}
+  ]
+}

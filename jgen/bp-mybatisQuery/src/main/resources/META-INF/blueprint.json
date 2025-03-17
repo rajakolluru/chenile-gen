@@ -1,0 +1,32 @@
+{
+  "initHook" : "org.chenile.jgen.blueprint.mybatisQuery.InitMybatisQueryBlueprint",
+  "name" : "mybatisQuery",
+  "description" : "Generates a New MybatisQuery",
+  "templateFolder": "mybatis-query-template",
+  "inputFields" :[
+    {
+      "name" : "namespace",
+      "type" : "STRING",
+      "description": "Name space of query"
+    },
+    {
+    "name" : "namespaceVersion",
+    "type" : "STRING",
+    "description": "Version of query",
+    "defaultValue" : "${defaultVersion}"
+    },
+    {
+      "name" : "destFolder",
+      "type" : "STRING",
+      "description": "Destination Folder",
+      "defaultValue" : "${defaultDestFolder}"
+    }
+    ,
+    {
+        "name" : "security",
+        "type" : "BOOLEAN",
+        "description": "Enable Security",
+        "defaultValue" : "n"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+<states>
+	<include file="activities"/>
+<flow id='RETURN_FLOW' default="true">
+	<manual-state id='INITIATED' initialState="true">
+			<on eventId="approve" newStateId='APPROVED'/>
+			<on eventId="cancel" newStateId='CANCELLED'/>
+	</manual-state>
+	<manual-state id='APPROVED'>
+			<on eventId="receive" newStateId='RECEIVED'/>
+	</manual-state>
+	<manual-state id='RECEIVED'>
+			<on eventId="refund" newStateId='REFUNDED'/>
+	</manual-state>
+	<manual-state id='REFUNDED'>
+	</manual-state>
+	<manual-state id="CANCELLED"/>
+</flow>
+
+</states>
+

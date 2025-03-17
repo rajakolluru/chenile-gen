@@ -1,0 +1,69 @@
+{
+  "initHook" : "org.chenile.jgen.blueprint.wfcustom.InitWfcustomBlueprint",
+  "name" : "wfcustom",
+  "description" : "Generates a New Custom Workflow",
+  "templateFolder": "wfcustom-template",
+  "inputFields" :[
+    {
+      "name" : "service",
+      "type" : "STRING",
+      "description": "Workflow Entity"
+    },
+    {
+    "name" : "serviceVersion",
+    "type" : "STRING",
+    "description": "Version of Entity",
+    "defaultValue" : "${defaultVersion}"
+    },
+    {
+      "name" : "destFolder",
+      "type" : "STRING",
+      "description": "Destination Folder",
+      "defaultValue" : "${defaultDestFolder}"
+    }
+    ,{
+        "name" : "jpa",
+        "type" : "BOOLEAN",
+        "description": "Enable JPA",
+        "defaultValue" : "y"
+    }
+    ,
+    {
+        "name" : "cloudSwitchEnabled",
+        "type" : "BOOLEAN",
+        "description": "Enable Cloud Switch",
+        "defaultValue" : "n"
+    }
+    ,
+    {
+      "name" : "xmlFile",
+      "type" : "FILE",
+      "description": "XML File name"
+    },
+    {
+        "name" : "security",
+        "type" : "BOOLEAN",
+        "description": "Enable Security",
+        "defaultValue" : "n"
+    }
+  ,{
+      "name" : "activity",
+      "type" : "BOOLEAN",
+      "description": "Enable Activity Management",
+      "defaultValue" : "n"
+    },
+
+    {
+      "name" : "enablement",
+      "type" : "BOOLEAN",
+      "description": "Enablement",
+      "defaultValue" : "n"
+    },
+    {
+      "name" : "genCustomizedPayload",
+      "type" : "BOOLEAN",
+      "description": "Generate Customized Payload",
+      "defaultValue" : "n"
+    }
+  ]
+}

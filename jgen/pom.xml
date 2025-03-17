@@ -5,86 +5,82 @@
 	<parent>
 		<artifactId>chenile-parent</artifactId>
 		<groupId>org.chenile</groupId>
-		<version>2.0.14</version>
+		<version>2.0.16</version>
 	</parent>
 	<artifactId>jgen</artifactId>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
+	<version>${revision}</version>
+	<modules>
+		<module>jgen-base</module>
+		<module>bp-interceptor</module>
+		<module>bp-service</module>
+		<module>bp-jgen-blueprint</module>
+		<module>bp-wfservice</module>
+		<module>bp-wfcustom</module>
+		<module>bp-minimonolith</module>
+		<module>bp-mybatisQuery</module>
+		<module>bp-it</module>
+		<module>jgen-cli</module>
+	</modules>
 
-	<name>Java Code Generation</name>
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>org.chenile.workflow.cli.CLI</mainClass>
-						</manifest>
-					</archive>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-				</configuration>
-				<executions>
-					<execution>
-						<id>make-assembly</id> <!-- this is used for inheritance merges -->
-						<phase>package</phase> <!--  bind to the packaging phase -->
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+	<name>Java based Code Generator</name>
+	<properties>
+		<jgen.version>0.0.1</jgen.version>
+		<revision>${jgen.version}</revision>
+	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>jgen-base</artifactId>
+				<version>${jgen.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>jgen-cli</artifactId>
+				<version>${jgen.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>bp-interceptor</artifactId>
+				<version>${jgen.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>bp-service</artifactId>
+				<version>${jgen.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>bp-jgen-blueprint</artifactId>
+				<version>${jgen.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>bp-wfservice</artifactId>
+				<version>${jgen.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>bp-wfcustom</artifactId>
+				<version>${jgen.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>bp-minimonolith</artifactId>
+				<version>${jgen.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>bp-mybatisQuery</artifactId>
+				<version>${jgen.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>bp-it</artifactId>
+				<version>${jgen.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
-	<dependencies>
-		<!-- https://mvnrepository.com/artifact/org.apache/org.apache.commons.io -->
-		<!-- https://mvnrepository.com/artifact/org.apache.directory.studio/org.apache.commons.io -->
-		<dependency>
-			<groupId>org.apache.directory.studio</groupId>
-			<artifactId>org.apache.commons.io</artifactId>
-			<version>2.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-text</artifactId>
-			<version>1.10.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.chenile</groupId>
-			<artifactId>workflow-service</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>info.picocli</groupId>
-			<artifactId>picocli</artifactId>
-			<version>4.7.6</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.spullara.mustache.java</groupId>
-			<artifactId>compiler</artifactId>
-			<version>0.9.14</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		 <dependency>
-			<groupId>org.chenile</groupId>
-			<artifactId>chenile-http</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.chenile</groupId>
-			<artifactId>cucumber-workflow-utils</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
 </project>

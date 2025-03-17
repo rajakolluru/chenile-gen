@@ -1,0 +1,19 @@
+package {{com}}.{{company}}.{{org}}.{{service}}.service.cmds;
+
+import {{chenilePackage}}.stm.STMInternalTransitionInvoker;
+import {{chenilePackage}}.stm.State;
+import {{chenilePackage}}.stm.model.Transition;
+
+import {{chenilePackage}}.workflow.param.MinimalPayload;
+import {{chenilePackage}}.workflow.service.stmcmds.AbstractSTMTransitionAction;
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+
+public class Resolve{{Service}}Action extends AbstractSTMTransitionAction<{{Service}},MinimalPayload>{
+
+	@Override
+	public void transitionTo({{Service}} {{service}}, MinimalPayload payload, State startState, String eventId,
+			State endState, STMInternalTransitionInvoker<?> stm, Transition transition) throws Exception {
+		{{service}}.resolveComment = payload.getComment();
+	}
+
+}

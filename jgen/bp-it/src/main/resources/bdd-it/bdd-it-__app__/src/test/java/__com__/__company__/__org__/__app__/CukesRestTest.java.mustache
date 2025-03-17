@@ -1,0 +1,17 @@
+package {{com}}.{{company}}.{{org}}.{{app}};
+
+import cucumber.api.CucumberOptions;
+import cucumber.api.junit.Cucumber;
+import org.junit.runner.RunWith;
+
+
+@RunWith(Cucumber.class)
+@CucumberOptions(features = "src/test/resources/features",
+        glue = {"classpath:{{com}}/{{company}}/{{org}}/{{app}}", "classpath:org/chenile/cucumber/rest",
+                "classpath:org/chenile/cucumber/security/rest"},
+        plugin = {"pretty"}
+)
+public class CukesRestTest {
+
+}
+

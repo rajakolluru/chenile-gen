@@ -1,0 +1,46 @@
+package {{com}}.{{company}}.{{org}}.{{service}}.service.store;
+
+import {{chenilePackage}}.utils.entity.service.EntityStore;
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+{{#jpa}}
+import org.springframework.beans.factory.annotation.Autowired;
+import {{chenilePackage}}.base.exception.NotFoundException;
+import {{com}}.{{company}}.{{org}}.{{service}}.configuration.dao.{{Service}}Repository;
+import java.util.Optional;
+{{/jpa}}
+
+public class {{Service}}EntityStore implements EntityStore<{{Service}}>{
+    {{#jpa}}
+    @Autowired private {{Service}}Repository {{service}}Repository;
+    {{/jpa}}
+    {{^jpa}}
+    private Map<String, {{Service}}> theStore = new HashMap<>();
+    public static int counter = 1; // use a counter to generate the ID. (not prod quality code)
+    {{/jpa}}
+
+	@Override
+	public void store({{Service}} entity) {
+        {{#jpa}}
+        {{service}}Repository.save(entity);
+        {{/jpa}}
+        {{^jpa}}
+		if (entity.getId() == null) {
+			entity.setId(counter++ + "");
+		}
+		theStore.put(entity.getId(), entity);
+        {{/jpa}}
+	}
+
+	@Override
+	public {{Service}} retrieve(String id) {
+        {{^jpa}}
+		return theStore.get(id);
+        {{/jpa}}
+        {{#jpa}}
+        Optional<{{Service}}> entity = {{service}}Repository.findById(id);
+        if (entity.isPresent()) return entity.get();
+        throw new NotFoundException(1500,"Unable to find {{Service}} with ID " + id);
+        {{/jpa}}
+	}
+
+}

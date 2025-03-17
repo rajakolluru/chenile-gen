@@ -1,0 +1,18 @@
+package org.chenile.jgen.blueprint.{{blueprintName}};
+
+import org.chenile.jgen.blueprints.BlueprintConfig;
+import org.chenile.jgen.blueprints.InitHook;
+import org.chenile.jgen.util.CapUtils;
+
+import java.util.Map;
+
+public class Init{{BlueprintName}}Blueprint implements InitHook {
+
+    @Override
+    public void init(BlueprintConfig blueprintConfig) {
+        blueprintConfig.postInputCaptureHook = (Map<String,Object> map) -> {
+            String {{blueprintName}} = (String)map.get("{{blueprintName}}Name");
+            map.put("{{BlueprintName}}Name", CapUtils.capitalizeFirst({{blueprintName}}));
+        };
+    }
+}

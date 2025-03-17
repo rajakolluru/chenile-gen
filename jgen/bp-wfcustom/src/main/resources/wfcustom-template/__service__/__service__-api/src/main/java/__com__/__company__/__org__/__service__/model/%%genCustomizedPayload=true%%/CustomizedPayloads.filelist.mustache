@@ -1,0 +1,20 @@
+{{#workflow}}
+    {{#flows}}
+        {{#states}}
+            {{#transitions}}
+--START--{{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Payload.java
+package {{com}}.{{company}}.{{org}}.{{service}}.model;
+
+import {{chenilePackage}}.workflow.param.MinimalPayload;
+
+/**
+    Customized Payload for the {{eventId}} event.
+*/
+public class {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Payload extends MinimalPayload{
+
+}
+--END--
+            {{/transitions}}
+        {{/states}}
+    {{/flows}}
+{{/workflow}}

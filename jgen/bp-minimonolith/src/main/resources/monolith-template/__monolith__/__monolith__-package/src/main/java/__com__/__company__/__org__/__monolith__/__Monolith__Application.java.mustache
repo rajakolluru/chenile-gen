@@ -1,0 +1,24 @@
+package {{com}}.{{company}}.{{org}}.{{monolith}};
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+{{#jpa}}
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+{{/jpa}}
+
+@SpringBootApplication(scanBasePackages = { "{{com}}.{{company}}.{{org}}.**.configuration",
+		"{{chenilePackage}}.configuration" })
+{{#jpa}}
+@EntityScan("{{com}}.{{company}}.{{org}}.**.model")
+@EnableJpaRepositories(basePackages = "{{com}}.{{company}}.{{org}}.**.configuration.dao")
+@EnableTransactionManagement
+{{/jpa}}
+public class {{Monolith}}Application extends SpringBootServletInitializer {
+
+	public static void main(String[] args) {
+		SpringApplication.run({{Monolith}}Application.class, args);
+	}
+}

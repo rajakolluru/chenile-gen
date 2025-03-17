@@ -1,0 +1,37 @@
+{
+  "initHook" : "org.chenile.jgen.blueprint.it.InitItBlueprint",
+  "name" : "it",
+  "description" : "Generates a New Integration Test case",
+  "templateFolder": "it-template",
+  "inputFields" :[
+    {
+      "name" : "app",
+      "type" : "STRING",
+      "description": "Name of app"
+    },
+    {
+    "name" : "appVersion",
+    "type" : "STRING",
+    "description": "Version of App",
+    "defaultValue" : "${defaultVersion}"
+    },
+    {
+      "name" : "entity",
+      "type" : "STRING",
+      "description": "Name of Entity"
+    },
+    {
+      "name" : "destFolder",
+      "type" : "STRING",
+      "description": "Destination Folder",
+      "defaultValue" : "${defaultDestFolder}"
+    }
+    ,
+    {
+        "name" : "security",
+        "type" : "BOOLEAN",
+        "description": "Enable Security",
+        "defaultValue" : "n"
+    }
+  ]
+}

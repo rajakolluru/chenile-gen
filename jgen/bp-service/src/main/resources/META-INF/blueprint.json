@@ -1,0 +1,44 @@
+{
+  "initHook" : "org.chenile.jgen.blueprint.service.InitServiceBlueprint",
+  "name" : "chenile-service",
+  "description" : "Generates a Chenile Service",
+  "templateFolder": "service-template",
+  "inputFields" :[
+    {
+      "name" : "service",
+      "type" : "STRING",
+      "description": "Name of Service",
+      "defaultValue": "${defaultServiceName}"
+    },
+    {
+      "name" : "serviceVersion",
+      "type" : "STRING",
+      "description": "Service Version",
+      "defaultValue": "${defaultVersion}"
+    },
+    {
+      "name" : "destFolder",
+      "type" : "STRING",
+      "description": "Destination Folder",
+      "defaultValue" : "${defaultDestFolder}"
+    },
+    {
+      "name" : "security",
+      "type" : "BOOLEAN",
+      "description": "Enable Security",
+      "defaultValue" : "n"
+    },
+    {
+      "name" : "jpa",
+      "type" : "BOOLEAN",
+      "description": "Enable JPA",
+      "defaultValue" : "y"
+    },
+    {
+      "name" : "cloudSwitchEnabled",
+      "type" : "BOOLEAN",
+      "description": "Enable Cloud Switch",
+      "defaultValue" : "n"
+    }
+  ]
+}

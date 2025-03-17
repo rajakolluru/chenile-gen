@@ -1,0 +1,52 @@
+package {{com}}.{{company}}.{{org}}.{{service}}.model;
+
+{{^jpa}}
+import {{chenilePackage}}.utils.entity.model.AbstractExtendedStateEntity;
+{{/jpa}}
+{{#activity}}
+import {{chenilePackage}}.workflow.activities.model.ActivityEnabledStateEntity;
+import {{chenilePackage}}.workflow.activities.model.ActivityLog;
+import java.util.*;
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}}ActivityLog;
+{{/activity}}
+{{#jpa}}
+import jakarta.persistence.*;
+import {{chenilePackage}}.jpautils.entity.AbstractJpaStateEntity;
+@Entity
+@Table(name = "{{service}}")
+public class {{Service}} extends AbstractJpaStateEntity
+{{/jpa}}
+{{^jpa}}
+public class {{Service}} extends AbstractExtendedStateEntity
+{{/jpa}}
+{{#activity}}
+    implements ActivityEnabledStateEntity
+{{/activity}}
+{
+	public String description;
+{{#activity}}
+{{#jpa}}
+    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER,orphanRemoval = true)
+{{/jpa}}
+    public List< {{Service}}ActivityLog> activities = new ArrayList<>();
+
+    @Override
+    public Collection<ActivityLog> obtainActivities() {
+        Collection<ActivityLog> acts = new ArrayList<>();
+        for (ActivityLog a: activities){
+            acts.add(a);
+        }
+        return acts;
+    }
+
+    @Override
+    public ActivityLog addActivity(String eventId, String comment) {
+        {{Service}}ActivityLog activityLog = new {{Service}}ActivityLog();
+        activityLog.activityName = eventId;
+        activityLog.activityComment = comment;
+        activityLog.activitySuccess = true;
+        activities.add(activityLog);
+        return activityLog;
+    }
+{{/activity}}
+}

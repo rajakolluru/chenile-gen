@@ -1,0 +1,48 @@
+package {{com}}.{{company}}.{{org}}.{{service}}.service.impl;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+import {{com}}.{{company}}.{{org}}.{{service}}.service.{{Service}}Service;
+
+{{#jpa}}
+import {{com}}.{{company}}.{{org}}.{{service}}.configuration.dao.{{Service}}Repository;
+import org.chenile.base.exception.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Optional;
+{{/jpa}}
+
+public class {{Service}}ServiceImpl implements {{Service}}Service{
+    private static final Logger logger = LoggerFactory.getLogger({{Service}}ServiceImpl.class);
+    {{^jpa}}
+	@Override
+	public {{Service}} op1({{Service}} {{service}}) {
+        logger.debug("At the op1 method in service class");
+		// Implement the service here
+		{{service}}.id = "{{Service}}ServiceImpl";
+        /*
+            Some example code for throwing an error.
+            throw new ServerException(ErrorCodes.SOME_ERROR,new Object[] {});
+        */
+		return {{service}};
+	}
+    {{/jpa}}
+    {{#jpa}}
+    @Autowired
+    {{Service}}Repository {{service}}Repository;
+    @Override
+    public {{Service}} save({{Service}} entity) {
+        entity = {{service}}Repository.save(entity);
+        return entity;
+    }
+
+    @Override
+    public {{Service}} retrieve(String id) {
+        Optional<{{Service}}> entity = {{service}}Repository.findById(id);
+        if (entity.isPresent()) return entity.get();
+        throw new NotFoundException(1500,"Unable to find {{service}} with ID " + id);
+    }
+    {{/jpa}}
+}
