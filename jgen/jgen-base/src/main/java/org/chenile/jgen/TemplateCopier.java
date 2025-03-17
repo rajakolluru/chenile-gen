@@ -177,6 +177,7 @@ public class TemplateCopier {
             }
             if (writer != null){
                 writer.append(line);
+                writer.append("\n");
             }
         }
         boolean ignoreMe = file.delete();
