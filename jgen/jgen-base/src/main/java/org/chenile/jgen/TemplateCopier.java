@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.text.StringSubstitutor;
 import org.chenile.jgen.util.CapUtils;
+import org.chenile.jgen.util.FileProcessingHelper;
 
 import java.io.File;
 import java.io.FileReader;
@@ -50,7 +51,7 @@ public class TemplateCopier {
      * @throws Exception if there is an exception
      */
     private void processConditionals(File output, Map<String, Object> map) throws Exception{
-        iterateFiles((file) -> processConditional(file,map),output);
+        FileProcessingHelper.iterateFiles((file) -> processConditional(file,map),true,output);
     }
 
     /**
@@ -94,7 +95,7 @@ public class TemplateCopier {
     }
 
     public void processTemplates(File output,Map<String,Object> map) throws Exception{
-        iterateFiles((file) -> processTemplate(file,map),output);
+        FileProcessingHelper.iterateFiles((file) -> processTemplate(file,map),true,output);
     }
 
     /**
@@ -108,7 +109,7 @@ public class TemplateCopier {
      * @throws Exception if there is an exception in processing
      */
     public void substituteVarsInName(File output,Map<String,Object> map) throws Exception{
-       iterateFiles((file) -> substituteName(file,map),output);
+        FileProcessingHelper.iterateFiles((file) -> substituteName(file,map),true,output);
     }
 
     private void substituteName(File name, Map<String, Object> map) {
@@ -180,38 +181,6 @@ public class TemplateCopier {
             }
         }
         boolean ignoreMe = file.delete();
-    }
-
-    @FunctionalInterface
-    public interface CheckedConsumer<T> {
-        void apply(T t) throws Exception;
-    }
-
-    /**
-     *
-     * @param consumer - a consumer that accepts a file/folder and does some processing on it
-     * @param depthFirst - indicates if a directory will be processed after the files/folders in it are processed
-     * @param startDirs - the directories to do the processing from
-     * @throws Exception if there is an exception
-     */
-    private void iterateFiles(CheckedConsumer<File> consumer,boolean depthFirst,File... startDirs)
-            throws Exception{
-        for (File startDir: startDirs){
-            if (startDir.isDirectory()) {
-                if (!depthFirst)
-                    consumer.apply(startDir);
-                iterateFiles(consumer,Objects.requireNonNull(startDir.listFiles()));
-                if(depthFirst)
-                    consumer.apply(startDir);
-            }else {
-                consumer.apply(startDir);
-            }
-        }
-    }
-
-    private void iterateFiles(CheckedConsumer<File> consumer,File... startDirs)
-            throws Exception{
-        iterateFiles(consumer,true,startDirs);
     }
 
     public static void main(String[] args) throws Exception{
