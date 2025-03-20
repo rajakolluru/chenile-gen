@@ -89,7 +89,6 @@ public class TemplateCopier {
         }
     }
 
-
     public void copyFolder(File input, File output) throws Exception{
         FileUtils.copyDirectory(input, output);
     }

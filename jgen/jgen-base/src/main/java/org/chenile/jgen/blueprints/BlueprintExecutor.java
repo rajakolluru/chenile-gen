@@ -1,6 +1,5 @@
 package org.chenile.jgen.blueprints;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.chenile.jgen.TemplateCopier;
 import org.chenile.jgen.config.Config;
 import org.chenile.jgen.config.ConfigProvider;
@@ -9,7 +8,6 @@ import java.util.Map;
 
 public class BlueprintExecutor {
     ConfigProvider configProvider = new ConfigProvider();
-    ObjectMapper objectMapper = new ObjectMapper();
     TemplateCopier templateCopier = new TemplateCopier();
     public void execute(BlueprintConfig blueprintConfig, Config config, Map<String,Object> inputMap) throws Exception {
         if (config == null){
