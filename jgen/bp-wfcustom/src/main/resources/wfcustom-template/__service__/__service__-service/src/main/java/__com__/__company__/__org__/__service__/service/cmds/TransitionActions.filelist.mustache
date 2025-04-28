@@ -1,7 +1,7 @@
 {{#workflow}}
     {{#flows}}
-        {{#states}}
-            {{#transitions}}
+        {{#events}}
+
 --START--{{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Action.java
 package {{com}}.{{company}}.{{org}}.{{service}}.service.cmds;
 
@@ -45,7 +45,7 @@ public class {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Action extends 
 
 }
 --END--
-            {{/transitions}}
-        {{/states}}
+
+        {{/events}}
     {{/flows}}
 {{/workflow}}

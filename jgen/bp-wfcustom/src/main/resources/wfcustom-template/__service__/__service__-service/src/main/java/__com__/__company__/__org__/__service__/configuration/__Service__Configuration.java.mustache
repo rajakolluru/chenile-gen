@@ -158,14 +158,12 @@ public class {{Service}}Configuration {
 
     {{#workflow}}
         {{#flows}}
-            {{#states}}
-                {{#transitions}}
+                {{#events}}
     @Bean {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Action
             {{service}}{{#capitalize}}{{eventId}}{{/capitalize}}(){
         return new {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Action();
     }
-                {{/transitions}}
-            {{/states}}
+                {{/events}}
         {{/flows}}
     {{/workflow}}
 
