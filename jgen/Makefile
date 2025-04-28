@@ -7,9 +7,9 @@ build:
 	mvn install
 	
 
-## copy-scripts: copies all scripts from the scripts folder to bin
-.PHONY: copy-scripts
-copy-scripts: 
+## make-cli: copies all scripts from the scripts folder to bin
+.PHONY: make-cli
+make-cli: 
 	cd jgen-cli; make 
 
 
@@ -21,7 +21,7 @@ clean:
 
 ## all: 
 .PHONY: all
-all: build copy-scripts
+all: build make-cli
 
 ## help: type for getting this help
 .PHONY: help

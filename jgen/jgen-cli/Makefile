@@ -22,6 +22,7 @@ create-bin:
 .PHONY: clean
 clean:
 	rm -rf bin
+	mvn clean
 
 ## all: 
 .PHONY: all
