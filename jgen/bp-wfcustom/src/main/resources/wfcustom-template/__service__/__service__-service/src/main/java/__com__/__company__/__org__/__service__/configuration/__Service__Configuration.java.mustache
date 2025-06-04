@@ -122,8 +122,11 @@ public class {{Service}}Configuration {
 
 {{^activity}}
     @Bean @Autowired STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(
-        @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver){
-            return new BaseTransitionAction<>(stmTransitionActionResolver);
+        @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver,
+        @Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
+        BaseTransitionAction<{{Service}}> baseTransitionAction = new BaseTransitionAction<>(stmTransitionActionResolver);
+        stmFlowStore.setDefaultTransitionAction(baseTransitionAction);
+        return baseTransitionAction;
     }
 {{/activity}}
 

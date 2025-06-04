@@ -40,7 +40,7 @@ public class InitWfcustomBlueprint implements InitHook {
 
     private void processXmlFile(String xmlFile, Map<String, Object> map) {
         CLIParams params = new CLIParams();
-        params.xmlFile = new File(xmlFile);
+        params.xmlFiles = new File[] {new File(xmlFile)};
         try {
             Map<String,Object> statesMap = cliHelper.toMap(params);
             map.put("workflow",statesMap);

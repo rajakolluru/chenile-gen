@@ -10,6 +10,7 @@ import org.chenile.jgen.blueprints.model.InputField;
 import org.chenile.jgen.config.Config;
 import org.chenile.jgen.config.ConfigProvider;
 import org.chenile.jgen.util.FieldUtils;
+import org.chenile.workflow.cli.VersionProvider;
 import picocli.CommandLine;
 
 import java.io.File;
@@ -17,7 +18,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-@CommandLine.Command(name = "jgen", mixinStandardHelpOptions = true, version = "jgen 1.0",
+@CommandLine.Command(name = "jgen", mixinStandardHelpOptions = true,
+        versionProvider = VersionProvider.class,
         description = "Java Based Blueprint Generator with support for plugins")
 public class GenMain implements Runnable {
     @CommandLine.Option(names = {"-c", "--config"}, description = "Name of config file.")
