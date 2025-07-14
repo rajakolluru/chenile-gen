@@ -57,13 +57,25 @@
       "name" : "enablement",
       "type" : "BOOLEAN",
       "description": "Enablement",
-      "defaultValue" : "n"
+      "defaultValue" : "y"
     },
     {
       "name" : "genCustomizedPayload",
       "type" : "BOOLEAN",
       "description": "Generate Customized Payload",
-      "defaultValue" : "n"
+      "defaultValue" : "y"
+    },
+    {
+      "name" : "genDefaultPostSaveHook",
+      "type" : "BOOLEAN",
+      "description": "Generate Default Post Save Hook",
+      "defaultValue" : "y"
+    },
+    {
+      "name" : "genDefaultAutoState",
+      "type" : "BOOLEAN",
+      "description": "Generate Default Auto State",
+      "defaultValue" : "y"
     }
   ]
 }

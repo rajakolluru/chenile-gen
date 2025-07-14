@@ -8,7 +8,7 @@ fi
 
 if [[ -z ${jarfile} ]] 
 then
-	echo "Missing JAR file. Please check if you downloaded correctly"
+	echo "Missing JAR file. Perhaps you skipped making it? Issue the command 'make clean all' in jgen folder."
 	exit 1 
 fi
 

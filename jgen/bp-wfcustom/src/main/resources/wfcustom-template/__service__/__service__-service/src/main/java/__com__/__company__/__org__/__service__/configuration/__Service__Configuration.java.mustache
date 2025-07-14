@@ -77,7 +77,8 @@ public class {{Service}}Configuration {
 	}
 	
 	// Now we start constructing the STM Components 
-	
+
+{{^genDefaultPostSaveHook}}
 	@Bean @Autowired GenericEntryAction<{{Service}}> {{service}}EntryAction(@Qualifier("{{service}}EntityStore") EntityStore<{{Service}}> entityStore,
 			@Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider,
             @Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
@@ -85,7 +86,35 @@ public class {{Service}}Configuration {
         stmFlowStore.setEntryAction(entryAction);
         return entryAction;
 	}
-	
+{{/genDefaultPostSaveHook}}
+
+{{#genDefaultPostSaveHook}}
+    @Bean @Autowired DefaultPostSaveHook<{{Service}}> {{service}}DefaultPostSaveHook(
+    @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver){
+    DefaultPostSaveHook<{{Service}}> postSaveHook = new DefaultPostSaveHook<>(stmTransitionActionResolver);
+    return postSaveHook;
+    }
+
+    @Bean @Autowired GenericEntryAction<{{Service}}> {{service}}EntryAction(@Qualifier("{{service}}EntityStore") EntityStore<{{Service}}> entityStore,
+    @Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider,
+    @Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore,
+    @Qualifier("{{service}}DefaultPostSaveHook") DefaultPostSaveHook<{{Service}}> postSaveHook)  {
+    GenericEntryAction<{{Service}}> entryAction =  new GenericEntryAction<{{Service}}>(entityStore,{{service}}InfoProvider,postSaveHook);
+    stmFlowStore.setEntryAction(entryAction);
+    return entryAction;
+    }
+{{/genDefaultPostSaveHook}}
+
+{{#genDefaultAutoState}}
+    @Bean @Autowired DefaultAutomaticStateComputation<{{Service}}> {{service}}DefaultAutoState(
+    @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver,
+    @Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
+    DefaultAutomaticStateComputation<{{Service}}> autoState = new DefaultAutomaticStateComputation<>(stmTransitionActionResolver);
+    stmFlowStore.setDefaultAutomaticStateComputation(autoState);
+    return autoState;
+    }
+{{/genDefaultAutoState}}
+
 	@Bean GenericExitAction<{{Service}}> {{service}}ExitAction(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
         GenericExitAction<{{Service}}> exitAction = new GenericExitAction<{{Service}}>();
         stmFlowStore.setExitAction(exitAction);
@@ -184,7 +213,7 @@ public class {{Service}}Configuration {
     }
 {{/enablement}}
 
-    {{#security}}
+{{#security}}
     @Bean @Autowired Function<ChenileExchange, String[]> {{service}}EventAuthoritiesSupplier(
         @Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider)
                     throws Exception{

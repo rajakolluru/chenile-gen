@@ -22,6 +22,7 @@ import java.util.*;
         versionProvider = VersionProvider.class,
         description = "Java Based Blueprint Generator with support for plugins")
 public class GenMain implements Runnable {
+    public static final String DEFAULT_CONFIG_FILE = "config/jgen-config.json";
     @CommandLine.Option(names = {"-c", "--config"}, description = "Name of config file.")
     private File configFile;
     @CommandLine.Option(names = {"-e", "--emit-config"}, description = "Emits a config file for customization")
