@@ -9,6 +9,9 @@ import {{chenilePackage}}.workflow.activities.model.ActivityLog;
 import java.util.*;
 import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}}ActivityLog;
 {{/activity}}
+{{#genDefaultPostSaveHook}}
+import org.chenile.workflow.model.*;
+{{/genDefaultPostSaveHook}}
 {{#jpa}}
 import jakarta.persistence.*;
 import {{chenilePackage}}.jpautils.entity.AbstractJpaStateEntity;
@@ -22,8 +25,25 @@ public class {{Service}} extends AbstractExtendedStateEntity
 {{#activity}}
     implements ActivityEnabledStateEntity
 {{/activity}}
+{{#genDefaultPostSaveHook}}
+    {{#activity}}
+        ,
+    {{/activity}}
+    {{^activity}}
+        implements
+    {{/activity}}
+    ContainsTransientMap
+{{/genDefaultPostSaveHook}}
 {
 	public String description;
+{{#genDefaultPostSaveHook}}
+    @Transient
+    public TransientMap transientMap = new TransientMap();
+    public TransientMap getTransientMap(){
+        return this.transientMap;
+    }
+{{/genDefaultPostSaveHook}}
+
 {{#activity}}
 {{#jpa}}
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER,orphanRemoval = true)

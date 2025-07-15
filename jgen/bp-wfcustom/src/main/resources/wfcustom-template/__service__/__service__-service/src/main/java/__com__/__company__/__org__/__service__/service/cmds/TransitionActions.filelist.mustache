@@ -41,6 +41,9 @@ public class {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Action extends 
 {{/genCustomizedPayload}}
             State startState, String eventId,
 			State endState, STMInternalTransitionInvoker<?> stm, Transition transition) throws Exception {
+{{#genDefaultPostSaveHook}}
+            {{service}}.transientMap.previousPayload = payload;
+{{/genDefaultPostSaveHook}}
 	}
 
 }

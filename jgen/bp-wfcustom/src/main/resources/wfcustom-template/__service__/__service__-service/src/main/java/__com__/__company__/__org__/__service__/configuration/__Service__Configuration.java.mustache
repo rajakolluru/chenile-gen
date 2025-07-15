@@ -28,9 +28,9 @@ import org.chenile.stm.State;
 import org.chenile.workflow.service.activities.ActivityChecker;
 import org.chenile.workflow.service.activities.AreActivitiesComplete;
 {{/activity}}
-{{#enablement}}
-
-{{/enablement}}
+{{#genDefaultPostSaveHook}}
+import {{com}}.{{company}}.{{org}}.{{service}}.service.postSaveHooks.*;
+{{/genDefaultPostSaveHook}}
 
 /**
  This is where you will instantiate all the required classes in Spring
@@ -221,4 +221,17 @@ public class {{Service}}Configuration {
         return builder.build();
     }
 {{/security}}
+
+{{#genDefaultPostSaveHook}}
+    {{#workflow}}
+        {{#flows}}
+            {{#states}}
+    @Bean {{#capitalize}}{{id}}{{/capitalize}}{{Service}}PostSaveHook
+        {{service}}{{#capitalize}}{{id}}{{/capitalize}}(){
+            return new {{#capitalize}}{{id}}{{/capitalize}}{{Service}}PostSaveHook();
+        }
+            {{/states}}
+        {{/flows}}
+    {{/workflow}}
+{{/genDefaultPostSaveHook}}
 }

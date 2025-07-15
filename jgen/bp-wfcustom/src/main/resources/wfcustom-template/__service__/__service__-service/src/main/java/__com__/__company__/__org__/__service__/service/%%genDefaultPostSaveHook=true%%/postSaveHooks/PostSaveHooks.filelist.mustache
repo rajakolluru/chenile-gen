@@ -1,0 +1,23 @@
+{{#workflow}}
+    {{#flows}}
+        {{#states}}
+
+--START--{{#capitalize}}{{id}}{{/capitalize}}{{Service}}PostSaveHook.java
+package {{com}}.{{company}}.{{org}}.{{service}}.service.postSaveHooks;
+
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+import {{chenilePackage}}.workflow.model.TransientMap;
+import {{chenilePackage}}.workflow.service.stmcmds.PostSaveHook;
+
+/**
+ Contains customized post Save Hook for the State ID.
+*/
+public class {{#capitalize}}{{id}}{{/capitalize}}{{Service}}PostSaveHook implements PostSaveHook<{{Service}}>{
+	@Override
+    public void execute({{Service}} {{service}}, TransientMap map){
+    }
+}
+--END--
+        {{/states}}
+    {{/flows}}
+{{/workflow}}
