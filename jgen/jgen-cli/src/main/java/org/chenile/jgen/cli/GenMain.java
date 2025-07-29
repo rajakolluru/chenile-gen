@@ -34,15 +34,42 @@ public class GenMain implements Runnable {
     }
     @Override
     public void run() {
+        Scanner scanner = new Scanner(System.in);
         try {
             if (configFileToEmit != null){
                 emitConfigFile();
                 return;
             }
-            blueprint();
+            checkConfigFiles(scanner);
+            blueprint(scanner);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }finally{
+            scanner.close();
         }
+    }
+
+    /**
+     * Checks if there is a config folder. Gives an option to use one of the configs
+     * that are present in the folder.
+     */
+    private void checkConfigFiles(Scanner scanner) {
+        File config = new File("config");
+        if (!config.exists() || !config.isDirectory()) return;
+        File[] files = config.listFiles();
+        if (files == null || files.length == 0) return;
+        System.out.println("Found the following files in the config folder. Do you want to use them?");
+        List<String> fileNames = new ArrayList<>();
+        fileNames.add("Use Default Config");
+        for (File file : files){
+            fileNames.add(file.getName());
+        }
+        int c = captureOneOfMany(scanner,fileNames);
+        if (c == 1){
+            configFile = null;
+            return;
+        }
+        configFile = files[c-2];
     }
 
     private void emitConfigFile() throws Exception{
@@ -52,7 +79,7 @@ public class GenMain implements Runnable {
         System.out.println("Making a copy of the config file to " + targetFile);
     }
 
-    private void blueprint() throws Exception {
+    private void blueprint(Scanner scanner) throws Exception {
         Config config = obtainConfig();
         Map<String,Object> configMap = configProvider.getConfigAsMap(config);
         List<BlueprintConfig> list = List.copyOf(Registry.blueprints.values());
@@ -61,14 +88,12 @@ public class GenMain implements Runnable {
             return;
         }
         List<String> sList = list.stream().map(bp -> {return bp.description;}).toList();
-        Scanner scanner = new Scanner(System.in);
         System.out.println("Registered Blueprints:");
         int c = captureOneOfMany(scanner,sList);
         BlueprintConfig blueprintConfig = list.get(c-1);
         Map<String,Object> map = new HashMap<>();
         buildInputMap(map,blueprintConfig,configMap,scanner);
         blueprintExecutor.execute(blueprintConfig, config, map);
-        scanner.close();
     }
 
 
