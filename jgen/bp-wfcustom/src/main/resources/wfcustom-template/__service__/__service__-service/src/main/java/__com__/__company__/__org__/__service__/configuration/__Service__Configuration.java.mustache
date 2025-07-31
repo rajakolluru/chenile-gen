@@ -140,7 +140,7 @@ public class {{Service}}Configuration {
     @Bean
     STMTransitionActionResolver {{service}}TransitionActionResolver(
     @Qualifier("default{{service}}STMTransitionAction") STMTransitionAction<{{Service}}> defaultSTMTransitionAction){
-        return new STMTransitionActionResolver(PREFIX_FOR_RESOLVER,defaultSTMTransitionAction);
+        return new STMTransitionActionResolver(PREFIX_FOR_RESOLVER,defaultSTMTransitionAction,true);
     }
 
     @Bean @Autowired StmBodyTypeSelector {{service}}BodyTypeSelector(
@@ -182,7 +182,7 @@ public class {{Service}}Configuration {
 
     // Create the specific transition actions here. Make sure that these actions are inheriting from
     // AbstractSTMTransitionMachine (The sample classes provide an example of this). To automatically wire
-    // them into the STM use the convention of "{{service}}" + eventId for the method name. ({{service}} is the
+    // them into the STM use the convention of "{{service}}" + eventId + "Action" for the method name. ({{service}} is the
     // prefix passed to the TransitionActionResolver above.)
     // This will ensure that these are detected automatically by the Workflow system.
     // The payload types will be detected as well so that there is no need to introduce an <event-information/>
@@ -191,8 +191,9 @@ public class {{Service}}Configuration {
     {{#workflow}}
         {{#flows}}
                 {{#events}}
+
     @Bean {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Action
-            {{service}}{{#capitalize}}{{eventId}}{{/capitalize}}(){
+            {{service}}{{#capitalize}}{{eventId}}{{/capitalize}}Action(){
         return new {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Action();
     }
                 {{/events}}
@@ -200,6 +201,7 @@ public class {{Service}}Configuration {
     {{/workflow}}
 
 {{#enablement}}
+
     @Bean ConfigProviderImpl {{service}}ConfigProvider() {
         return new ConfigProviderImpl();
     }
@@ -214,6 +216,7 @@ public class {{Service}}Configuration {
 {{/enablement}}
 
 {{#security}}
+
     @Bean @Autowired Function<ChenileExchange, String[]> {{service}}EventAuthoritiesSupplier(
         @Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider)
                     throws Exception{
@@ -226,12 +229,29 @@ public class {{Service}}Configuration {
     {{#workflow}}
         {{#flows}}
             {{#states}}
+                {{#manualState}}
+
     @Bean {{#capitalize}}{{id}}{{/capitalize}}{{Service}}PostSaveHook
-        {{service}}{{#capitalize}}{{id}}{{/capitalize}}(){
+        {{service}}{{#capitalize}}{{id}}{{/capitalize}}PostSaveHook(){
             return new {{#capitalize}}{{id}}{{/capitalize}}{{Service}}PostSaveHook();
-        }
+    }
+                {{/manualState}}
             {{/states}}
         {{/flows}}
     {{/workflow}}
 {{/genDefaultPostSaveHook}}
+
+{{#workflow}}
+{{#flows}}
+    {{#states}}
+        {{#componentNameNotDefined}}
+
+   @Bean {{#capitalize}}{{id}}{{/capitalize}}AutoState
+   {{service}}{{#capitalize}}{{id}}{{/capitalize}}AutoState() {
+        return new {{#capitalize}}{{id}}{{/capitalize}}AutoState();
+    }
+        {{/componentNameNotDefined}}
+    {{/states}}
+{{/flows}}
+{{/workflow}}
 }

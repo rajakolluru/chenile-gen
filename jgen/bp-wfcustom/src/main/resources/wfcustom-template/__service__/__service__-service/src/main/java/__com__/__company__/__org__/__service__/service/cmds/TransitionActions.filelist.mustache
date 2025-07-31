@@ -12,10 +12,15 @@ import {{chenilePackage}}.stm.model.Transition;
 import {{chenilePackage}}.workflow.service.stmcmds.AbstractSTMTransitionAction;
 import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
 {{#genCustomizedPayload}}
-import {{com}}.{{company}}.{{org}}.{{service}}.model. {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Payload;
+    {{#manualTransition}}
+import {{com}}.{{company}}.{{org}}.{{service}}.dto.{{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Payload;
+    {{/manualTransition}}
+    {{^manualTransition}}
+import {{chenilePackage}}.workflow.param.MinimalPayload;
+    {{/manualTransition}}
 {{/genCustomizedPayload}}
 {{^genCustomizedPayload}}
-    import {{chenilePackage}}.workflow.param.MinimalPayload;
+import {{chenilePackage}}.workflow.param.MinimalPayload;
 {{/genCustomizedPayload}}
 
 /**
@@ -24,9 +29,16 @@ import {{com}}.{{company}}.{{org}}.{{service}}.model. {{#capitalize}}{{eventId}}
  <p>Use a customized payload if required instead of MinimalPayload</p>
 */
 public class {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Action extends AbstractSTMTransitionAction<{{Service}},
+
 {{#genCustomizedPayload}}
+{{#manualTransition}}
     {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Payload>{
+{{/manualTransition}}
+{{^manualTransition}}
+    MinimalPayload>{
+{{/manualTransition}}
 {{/genCustomizedPayload}}
+
 {{^genCustomizedPayload}}
     MinimalPayload>{
 {{/genCustomizedPayload}}
@@ -34,7 +46,12 @@ public class {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Action extends 
 	@Override
 	public void transitionTo({{Service}} {{service}},
 {{#genCustomizedPayload}}
+    {{#manualTransition}}
             {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Payload payload,
+    {{/manualTransition}}
+    {{^manualTransition}}
+            MinimalPayload payload,
+    {{/manualTransition}}
 {{/genCustomizedPayload}}
 {{^genCustomizedPayload}}
             MinimalPayload payload,
@@ -48,7 +65,6 @@ public class {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Action extends 
 
 }
 --END--
-
         {{/events}}
     {{/flows}}
 {{/workflow}}

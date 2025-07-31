@@ -1,6 +1,7 @@
 {{#workflow}}
     {{#flows}}
         {{#states}}
+            {{#manualState}}
 
 --START--{{#capitalize}}{{id}}{{/capitalize}}{{Service}}PostSaveHook.java
 package {{com}}.{{company}}.{{org}}.{{service}}.service.postSaveHooks;
@@ -18,6 +19,7 @@ public class {{#capitalize}}{{id}}{{/capitalize}}{{Service}}PostSaveHook impleme
     }
 }
 --END--
+            {{/manualState}}
         {{/states}}
     {{/flows}}
 {{/workflow}}

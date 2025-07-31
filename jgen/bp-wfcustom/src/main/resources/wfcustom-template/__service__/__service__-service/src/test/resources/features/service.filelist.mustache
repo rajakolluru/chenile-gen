@@ -4,6 +4,7 @@
 Feature: Testcase ID {{id}}
 Tests the {{service}} Workflow Service using a REST client. {{Service}} service exists and is under test.
 It helps to create a {{service}} and manages the state of the {{service}} as documented in states xml
+
 Scenario: Create a new {{service}}
 {{#steps}}
     {{#first}}
@@ -38,6 +39,7 @@ And the REST response key "mutatedEntity.id" is "${id}"
 And the REST response key "mutatedEntity.currentState.stateId" is "${currentState}"
 
 {{#steps}}
+
 Scenario: Send the {{event}} event to the {{service}} with comments
 Given that "comment" equals "Comment for {{event}}"
 And that "event" equals "{{event}}"
