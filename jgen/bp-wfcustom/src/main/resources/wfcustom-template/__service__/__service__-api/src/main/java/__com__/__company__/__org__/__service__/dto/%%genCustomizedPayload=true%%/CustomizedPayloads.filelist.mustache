@@ -1,7 +1,7 @@
 {{#workflow}}
     {{#flows}}
         {{#events}}
-            {{#manualTransition}}
+            {{#isManualTransition}}
 --START--{{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Payload.java
 package {{com}}.{{company}}.{{org}}.{{service}}.dto;
 
@@ -14,7 +14,7 @@ public class {{#capitalize}}{{eventId}}{{/capitalize}}{{Service}}Payload extends
 
 }
 --END--
-            {{/manualTransition}}
+            {{/isManualTransition}}
         {{/events}}
     {{/flows}}
 {{/workflow}}
