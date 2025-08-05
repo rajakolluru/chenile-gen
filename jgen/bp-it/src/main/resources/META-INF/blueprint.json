@@ -2,7 +2,7 @@
   "initHook" : "org.chenile.jgen.blueprint.it.InitItBlueprint",
   "name" : "it",
   "description" : "Generates a New Integration Test case",
-  "templateFolder": "it-template",
+  "templateFolder": "bdd-it",
   "inputFields" :[
     {
       "name" : "app",
