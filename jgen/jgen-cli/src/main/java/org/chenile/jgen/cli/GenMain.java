@@ -1,5 +1,7 @@
 package org.chenile.jgen.cli;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.commons.text.StringSubstitutor;
 import org.chenile.jgen.CopyFromJar;
 import org.chenile.jgen.blueprints.BlueprintConfig;
@@ -14,19 +16,33 @@ import org.chenile.workflow.cli.VersionProvider;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+/**
+ * Main method for the Java based Code Generator. It allows the user to identify the
+ * blue print and supply parameters to it.
+ */
 @CommandLine.Command(name = "jgen", mixinStandardHelpOptions = true,
         versionProvider = VersionProvider.class,
         description = "Java Based Blueprint Generator with support for plugins")
 public class GenMain implements Runnable {
     public static final String DEFAULT_CONFIG_FILE = "config/jgen-config.json";
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    ObjectWriter prettyWriter = objectMapper.writerWithDefaultPrettyPrinter();
     @CommandLine.Option(names = {"-c", "--config"}, description = "Name of config file.")
     private File configFile;
     @CommandLine.Option(names = {"-e", "--emit-config"}, description = "Emits a config file for customization")
     private File configFileToEmit;
+    @CommandLine.Option(names = {"-f", "--input-file"}, description = "Uses the input file instead of prompting")
+    private File inputFile;
+    @CommandLine.Option(names = {"-o", "--output-file"}, description = "Writes to the output file (applicable for the g option")
+    private File outputFile;
+    @CommandLine.Option(names = {"-g", "--generate-blueprint-file"}, description = "Generates a sample input file for the specified blueprint")
+    private String generateBluePrint;
     private final BlueprintExecutor  blueprintExecutor = new BlueprintExecutor();
     private final ConfigProvider configProvider = new ConfigProvider();
     public static void main(String... args) {
@@ -34,20 +50,53 @@ public class GenMain implements Runnable {
     }
     @Override
     public void run() {
-        Scanner scanner = new Scanner(System.in);
-        try {
-            if (configFileToEmit != null){
+        try (Scanner scanner = new Scanner(System.in)) {
+            if (configFileToEmit != null) {
                 emitConfigFile();
                 return;
             }
-            checkConfigFiles(scanner);
+            if (generateBluePrint != null){
+                generateBluePrintFile();
+                return;
+            }
+            if(inputFile == null)
+                checkConfigFiles(scanner);
             blueprint(scanner);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }finally{
-            scanner.close();
         }
     }
+
+    private void generateBluePrintFile() throws Exception{
+        List<BlueprintConfig> list = List.copyOf(Registry.blueprints.values());
+        if (list.isEmpty()){
+            System.err.println("No blueprints found!");
+            return;
+        }
+        Optional<BlueprintConfig> bpc = list.stream().filter(bp -> bp.name.equals(generateBluePrint)).findFirst();
+        if (bpc.isEmpty()){
+            System.err.println("Specified blue print " + generateBluePrint + " does not exist!");
+            return;
+        }
+        BlueprintConfig blueprintConfig = bpc.get();
+        Map<String,String> expectedMap = new HashMap<>();
+        expectedMap.put("blueprint",generateBluePrint);
+        for(InputField inf: blueprintConfig.inputFields){
+            expectedMap.put(inf.name,inf.defaultValue);
+        }
+        String s = prettyWriter.writeValueAsString(expectedMap);
+        if (outputFile == null) {
+            System.out.println(s);
+            return;
+        }
+        try (FileWriter writer = new FileWriter(outputFile)) {
+            writer.write(s);
+            System.out.println("The file " + outputFile + " generated successfully with the inputs expected from blueprint " + generateBluePrint);
+        } catch (IOException e) {
+            System.err.println("An error occurred while writing to the file: " + e.getMessage());
+        }
+    }
+
 
     /**
      * Checks if there is a config folder. Gives an option to use one of the configs
@@ -87,13 +136,43 @@ public class GenMain implements Runnable {
             System.err.println("No blueprints found!");
             return;
         }
-        List<String> sList = list.stream().map(bp -> {return bp.description;}).toList();
+        BlueprintConfig blueprintConfig;
+        Map<String,String> inputMap = null;
+        if (inputFile == null)
+            blueprintConfig = captureBlueprint(scanner,list);
+        else {
+            inputMap = readJson(inputFile);
+            blueprintConfig = getBlueprintFromInput(inputMap,list);
+            if (blueprintConfig == null) {
+                System.err.println("No blueprints specified in the file. Quitting!");
+                return;
+            }
+        }
+
+        Map<String,Object> map = new HashMap<>();
+        buildInputMap(map,blueprintConfig,configMap,scanner,inputMap);
+        blueprintExecutor.execute(blueprintConfig, config, map);
+    }
+
+    private Map<String,String> readJson(File inputFile){
+        try {
+            return objectMapper.readValue(inputFile, Map.class);
+        }catch(Exception e){
+            return null;
+        }
+    }
+
+    private BlueprintConfig getBlueprintFromInput(Map<String,String> map, List<BlueprintConfig> list) {
+        Optional<BlueprintConfig> optional = list.stream().filter(bp -> bp.name.equals(map.get("blueprint"))).findFirst();
+        return optional.orElse(null);
+    }
+
+
+    private BlueprintConfig captureBlueprint(Scanner scanner,List<BlueprintConfig> list){
+        List<String> sList = list.stream().map(bp -> bp.description + " (" + bp.name + ")").toList();
         System.out.println("Registered Blueprints:");
         int c = captureOneOfMany(scanner,sList);
-        BlueprintConfig blueprintConfig = list.get(c-1);
-        Map<String,Object> map = new HashMap<>();
-        buildInputMap(map,blueprintConfig,configMap,scanner);
-        blueprintExecutor.execute(blueprintConfig, config, map);
+        return list.get(c-1);
     }
 
 
@@ -124,9 +203,10 @@ public class GenMain implements Runnable {
     }
 
     private void buildInputMap(Map<String,Object> map,BlueprintConfig blueprintConfig,
-                               Map<String,Object> configMap,Scanner scanner){
+                               Map<String,Object> configMap,Scanner scanner,
+                               Map<String,String> inputMap){
         for(InputField field: blueprintConfig.inputFields){
-            String value = captureField(field,configMap,scanner);
+            String value = captureField(field,configMap,scanner,inputMap);
             if(field.type == FieldType.BOOLEAN){
                 if(value.equals("y"))
                     map.put(field.name,"true");
@@ -135,9 +215,18 @@ public class GenMain implements Runnable {
         }
     }
 
-    private String captureField(InputField field, Map<String,Object> configMap,Scanner scanner) {
+    private String captureField(InputField field, Map<String,Object> configMap,Scanner scanner,
+                                Map<String,String> inputMap) {
         String defValue = substitute(configMap,field.defaultValue);
         String input = null;
+        if (inputMap != null){
+            String s = captureFromInputMap(field,inputMap,defValue);
+            if (!FieldUtils.isValid(field,s)){
+                String message = "Field " + field.name + " has an invalid value " + s + "specified.";
+                throw new RuntimeException(message);
+            }
+            return s;
+        }
         String prompt = field.description;
         if (field.type == FieldType.BOOLEAN) prompt += "(y/n)";
         prompt += "?";
@@ -151,6 +240,11 @@ public class GenMain implements Runnable {
             else input = in;
         }while(!FieldUtils.isValid(field,input));
         return input;
+    }
+
+    private String captureFromInputMap(InputField field, Map<String, String> inputMap, String defValue) {
+        String value = inputMap.get(field.name);
+        return (value == null)? defValue : value;
     }
 
     private String substitute(Map<String,Object> configMap,String value){

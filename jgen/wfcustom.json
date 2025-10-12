@@ -1,0 +1,15 @@
+{
+  "cloudSwitchEnabled" : "n",
+  "enablement" : "y",
+  "genCustomizedPayload" : "y",
+  "activity" : "n",
+  "xmlFile" : null,
+  "blueprint" : "wfcustom",
+  "serviceVersion" : "${defaultVersion}",
+  "security" : "n",
+  "genDefaultPostSaveHook" : "y",
+  "service" : null,
+  "jpa" : "y",
+  "destFolder" : "${defaultDestFolder}",
+  "genDefaultAutoState" : "y"
+}
