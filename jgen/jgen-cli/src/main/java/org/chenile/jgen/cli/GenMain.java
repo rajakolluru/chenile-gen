@@ -24,7 +24,7 @@ import java.util.*;
 
 /**
  * Main method for the Java based Code Generator. It allows the user to identify the
- * blue print and supply parameters to it.
+ * blueprint and supply parameters to it. This triggers the blueprint generation.
  */
 @CommandLine.Command(name = "jgen", mixinStandardHelpOptions = true,
         versionProvider = VersionProvider.class,
@@ -158,7 +158,7 @@ public class GenMain implements Runnable {
         try {
             return objectMapper.readValue(inputFile, Map.class);
         }catch(Exception e){
-            return null;
+            throw new RuntimeException("Cannot read the input file " + inputFile);
         }
     }
 
@@ -195,9 +195,20 @@ public class GenMain implements Runnable {
             for (String value : values) {
                 System.out.println(index++ + ")" + value);
             }
-            System.out.print("Choose one:");
+            System.out.print("Choose one:(q or Q to quit)");
             String in = scanner.nextLine();
-            input = Integer.parseInt(in);
+            if (in != null && in.equalsIgnoreCase("q")){
+                System.out.println("Quitting!");
+                System.exit(0);
+            }
+            try {
+                input = Integer.parseInt(in);
+            }catch(Exception e){
+                System.err.println("Invalid input " + in + ". Try again.");
+            }
+            if (input < 1 || input > max){
+                System.err.println("Invalid input. Value must be between 1 and " + max);
+            }
         }
         return input;
     }
@@ -220,12 +231,7 @@ public class GenMain implements Runnable {
         String defValue = substitute(configMap,field.defaultValue);
         String input = null;
         if (inputMap != null){
-            String s = captureFromInputMap(field,inputMap,defValue);
-            if (!FieldUtils.isValid(field,s)){
-                String message = "Field " + field.name + " has an invalid value " + s + "specified.";
-                throw new RuntimeException(message);
-            }
-            return s;
+           return captureFromInputMap(configMap,field,inputMap,defValue);
         }
         String prompt = field.description;
         if (field.type == FieldType.BOOLEAN) prompt += "(y/n)";
@@ -242,9 +248,17 @@ public class GenMain implements Runnable {
         return input;
     }
 
-    private String captureFromInputMap(InputField field, Map<String, String> inputMap, String defValue) {
+    private String captureFromInputMap(Map<String,Object> configMap,InputField field, Map<String, String> inputMap, String defValue) {
         String value = inputMap.get(field.name);
-        return (value == null)? defValue : value;
+        if(value != null)
+            value = substitute(configMap,value);
+        else
+            value = defValue;
+        if (!FieldUtils.isValid(field,value)){
+            String message = "Field " + field.name + " has an invalid value " + value + "specified.";
+            throw new RuntimeException(message);
+        }
+        return value;
     }
 
     private String substitute(Map<String,Object> configMap,String value){
