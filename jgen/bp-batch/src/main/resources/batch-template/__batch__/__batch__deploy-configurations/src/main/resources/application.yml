@@ -1,0 +1,58 @@
+logging:
+  level:
+    ROOT: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.jdbc.core: DEBUG
+    org.chenile.*: DEBUG
+
+process:
+  manager:
+    base-url: localhost:8000
+
+
+spring:
+  kafka:
+    bootstrap-server: localhost:9092
+  banner:
+    location: classpath:banner.txt
+  devtools:
+    restart:
+      enabled: true
+      additional-exclude: static/**,.h2.server.properties
+    livereload:
+      enabled: false # we use Webpack dev server + BrowserSync for livereload
+  jackson:
+    serialization:
+      indent-output: true
+  jpa:
+    hibernate:
+      ddl-auto: create
+      default_schema: ${CLIENT_NAME:lkt}
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:batch-template}
+    username: ${POSTGRES_USER:gaurav}
+    password: ${POSTGRES_PASSWORD:gaurav}
+    hikari:
+      poolName: Hikari
+      auto-commit: false
+
+server:
+  port: 8000
+  error:
+    whitelabel:
+      enabled: false
+
+pubsub:
+  topic:
+    separator: "_"
+  clientID: ${CLIENT_NAME:lkt}
+  enabled: true
+
+client:
+  name: ${CLIENT_NAME:lkt}

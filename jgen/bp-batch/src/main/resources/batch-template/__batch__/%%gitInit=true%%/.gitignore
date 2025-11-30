@@ -1,0 +1,31 @@
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Intellij
+.idea/
+*.iml
+*.iws
+.mvn
+
+# Mac
+.DS_Store
+*.swp*
+
+# Maven
+log/
+target/
+.factorypath
+.flattened-pom.xml
+ingestiondeploy-package/.flattened-pom.xml
+ingestion-service/.flattened-pom.xml
+
+# run time files
+*.log
+output/
+bin/
+
+# Others
+/shelf/
+/workspace.xml

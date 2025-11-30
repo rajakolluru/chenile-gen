@@ -1,0 +1,18 @@
+package {{com}}.{{company}}.{{org}}.{{batch}}.bdd;
+
+import cucumber.api.CucumberOptions;
+import cucumber.api.junit.Cucumber;
+import {{chenilePackage}}.mqtt.test.KafkaBaseTest;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ActiveProfiles;
+
+
+@RunWith(Cucumber.class)
+@CucumberOptions(features = "src/test/resources/features",
+		glue = {"classpath:{{com}}/{{company}}/{{org}}/{{batch}}/bdd", "classpath:org/chenile/cucumber/rest"},
+        plugin = {"pretty"}
+        )
+@ActiveProfiles("unittest")
+
+public class CukesRestTest extends KafkaBaseTest {
+}

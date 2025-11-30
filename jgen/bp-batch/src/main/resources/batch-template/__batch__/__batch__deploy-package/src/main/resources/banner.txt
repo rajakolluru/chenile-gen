@@ -1,0 +1,22 @@
+        CCCCCCCCCCCCChhhhhhh                                                     iiii  lllllll
+     CCC::::::::::::Ch:::::h                                                    i::::i l:::::l
+   CC:::::::::::::::Ch:::::h                                                     iiii  l:::::l
+  C:::::CCCCCCCC::::Ch:::::h                                                           l:::::l
+ C:::::C       CCCCCC h::::h hhhhh           eeeeeeeeeeee    nnnn  nnnnnnnn    iiiiiii  l::::l     eeeeeeeeeeee
+C:::::C               h::::hh:::::hhh      ee::::::::::::ee  n:::nn::::::::nn  i:::::i  l::::l   ee::::::::::::ee
+C:::::C               h::::::::::::::hh   e::::::eeeee:::::een::::::::::::::nn  i::::i  l::::l  e::::::eeeee:::::ee
+C:::::C               h:::::::hhh::::::h e::::::e     e:::::enn:::::::::::::::n i::::i  l::::l e::::::e     e:::::e
+C:::::C               h::::::h   h::::::he:::::::eeeee::::::e  n:::::nnnn:::::n i::::i  l::::l e:::::::eeeee::::::e
+C:::::C               h:::::h     h:::::he:::::::::::::::::e   n::::n    n::::n i::::i  l::::l e:::::::::::::::::e
+C:::::C               h:::::h     h:::::he::::::eeeeeeeeeee    n::::n    n::::n i::::i  l::::l e::::::eeeeeeeeeee
+ C:::::C       CCCCCC h:::::h     h:::::he:::::::e             n::::n    n::::n i::::i  l::::l e:::::::e
+  C:::::CCCCCCCC::::C h:::::h     h:::::he::::::::e            n::::n    n::::ni::::::il::::::le::::::::e
+   CC:::::::::::::::C h:::::h     h:::::h e::::::::eeeeeeee    n::::n    n::::ni::::::il::::::l e::::::::eeeeeeee
+     CCC::::::::::::C h:::::h     h:::::h  ee:::::::::::::e    n::::n    n::::ni::::::il::::::l  ee:::::::::::::e
+        CCCCCCCCCCCCC hhhhhhh     hhhhhhh    eeeeeeeeeeeeee    nnnnnn    nnnnnniiiiiiiillllllll    eeeeeeeeeeeeee
+▀
+                                                   Chenile Version: @chenile.version@
+                                                   Ingdeploy Version: @revision@
+---------------  ---------------  ---------------  ---------------
+-:::::::::::::-  -:::::::::::::-  -:::::::::::::-  -:::::::::::::-
+---------------  ---------------  ---------------  ---------------

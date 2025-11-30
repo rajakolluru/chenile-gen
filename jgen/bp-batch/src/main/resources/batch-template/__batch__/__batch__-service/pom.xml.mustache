@@ -1,0 +1,71 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>{{com}}.{{company}}.{{org}}.{{batch}}</groupId>
+        <artifactId>{{batch}}-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+	
+	<artifactId>{{batch}}-service</artifactId>
+	<packaging>jar</packaging>
+
+	<name>{{Batch}} Service Implementations</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>{{com}}.{{company}}.{{org}}.{{batch}}</groupId>
+			<artifactId>{{batch}}-api</artifactId>
+		</dependency>
+	    <dependency>
+			<groupId>{{chenilePackage}}</groupId>
+			<artifactId>chenile-http</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>{{chenilePackage}}</groupId>
+			<artifactId>cucumber-utils</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>{{chenilePackage}}.orchestrator.process</groupId>
+			<artifactId>process-utils</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>{{chenilePackage}}.orchestrator.process</groupId>
+			<artifactId>process-service</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>{{chenilePackage}}</groupId>
+			<artifactId>service-registry-service</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>{{chenilePackage}}.orchestrator.process</groupId>
+			<artifactId>q-based-process-starter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>{{chenilePackage}}</groupId>
+			<artifactId>chenile-kafka</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>kafka</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>{{chenilePackage}}</groupId>
+			<artifactId>cucumber-mqtt-utils</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

@@ -1,0 +1,33 @@
+package {{com}}.{{company}}.{{org}}.{{batch}};
+
+import {{chenilePackage}}.orchestrator.process.config.reader.ProcessConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.ActiveProfiles;
+
+
+@Configuration
+@PropertySource("classpath:{{com}}/{{company}}/{{org}}/{{batch}}/TestService.properties")
+@SpringBootApplication(scanBasePackages = {  "{{chenilePackage}}", "{{com}}.{{company}}.{{org}}.{{batch}}.configuration" })
+@ActiveProfiles("unittest")
+@EntityScan({"{{chenilePackage}}.**.**.model","{{com}}.{{company}}.**.**.model"})
+@EnableJpaRepositories(basePackages = {"{{chenilePackage}}.**.**.configuration.dao","{{com}}.{{company}}.**.**.configuration.dao"})
+public class SpringTestConfig extends SpringBootServletInitializer implements InitializingBean {
+    Logger logger = LoggerFactory.getLogger(SpringTestConfig.class);
+    @Autowired
+    ProcessConfigurator processConfigurator;
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        logger.debug("Registering the definitions ");
+        processConfigurator.read("{{batch}}-process-def.json");
+    }
+}
+

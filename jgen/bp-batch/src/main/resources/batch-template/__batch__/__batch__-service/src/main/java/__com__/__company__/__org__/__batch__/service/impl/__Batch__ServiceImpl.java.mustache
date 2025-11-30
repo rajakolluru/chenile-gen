@@ -1,0 +1,17 @@
+package {{com}}.{{company}}.{{org}}.{{batch}}.service.impl;
+
+import {{chenilePackage}}.orchestrator.process.model.Process;
+import {{chenilePackage}}.orchestrator.process.utils.base.BatchServiceBase;
+import {{com}}.{{company}}.{{org}}.{{batch}}.dto.{{Root}}Input;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * The first point of entry into the {{Batch}} Service.
+ */
+public class {{Batch}}ServiceImpl extends BatchServiceBase<{{Root}}Input> {
+    private static final Logger logger = LoggerFactory.getLogger({{Batch}}ServiceImpl.class);
+    public Process firstTrigger({{Root}}Input input){
+        return doFirstTrigger("{{root}}",input);
+    }
+}

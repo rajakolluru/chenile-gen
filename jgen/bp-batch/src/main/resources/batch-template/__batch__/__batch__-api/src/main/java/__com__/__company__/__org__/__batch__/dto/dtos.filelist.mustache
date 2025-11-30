@@ -1,0 +1,23 @@
+{{#processes}}
+--START--{{#capitalize}}{{processType}}{{/capitalize}}Input.java
+package {{com}}.{{company}}.{{org}}.{{batch}}.dto;
+
+/**
+    Input for Process type "{{processType}}"
+*/
+public class {{#capitalize}}{{processType}}{{/capitalize}}Input {
+
+}
+--END--
+--START--{{#capitalize}}{{processType}}{{/capitalize}}Output.java
+package {{com}}.{{company}}.{{org}}.{{batch}}.dto;
+
+import {{chenilePackage}}.orchestrator.process.utils.OutputBase;
+/**
+    Output for Process type "{{processType}}"
+*/
+public class {{#capitalize}}{{processType}}{{/capitalize}}Output extends OutputBase {
+
+}
+--END--
+{{/processes}}

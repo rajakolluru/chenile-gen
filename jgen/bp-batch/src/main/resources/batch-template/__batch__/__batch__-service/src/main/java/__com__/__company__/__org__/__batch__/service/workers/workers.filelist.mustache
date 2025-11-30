@@ -1,0 +1,98 @@
+{{#processes}}
+    {{#leaf}}
+--START--{{#capitalize}}{{processType}}{{/capitalize}}Executor.java
+package {{com}}.{{company}}.{{org}}.{{batch}}.service.workers;
+
+import {{chenilePackage}}.orchestrator.process.model.WorkerDto;
+import {{chenilePackage}}.orchestrator.process.utils.base.ExecutorBase;
+import {{com}}.{{company}}.{{org}}.{{batch}}.dto.{{#capitalize}}{{processType}}{{/capitalize}}Input;
+import {{com}}.{{company}}.{{org}}.{{batch}}.dto.{{#capitalize}}{{processType}}{{/capitalize}}Output;
+import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class {{#capitalize}}{{processType}}{{/capitalize}}Executor extends
+        ExecutorBase<{{#capitalize}}{{processType}}{{/capitalize}}Input,{{#capitalize}}{{processType}}{{/capitalize}}Output> {
+    private final Logger logger = LoggerFactory.getLogger({{#capitalize}}{{processType}}{{/capitalize}}Executor.class);
+    @Override
+    public {{#capitalize}}{{processType}}{{/capitalize}}Output doStart(WorkerDto workerDto,{{#capitalize}}{{processType}}{{/capitalize}}Input input) {
+        logger.debug("At the doStart() method. {{#capitalize}}{{processType}}{{/capitalize}}Input is " + input);
+        return new {{#capitalize}}{{processType}}{{/capitalize}}Output();
+    }
+}
+--END--
+    {{/leaf}}
+    {{^leaf}}
+--START--{{#capitalize}}{{processType}}{{/capitalize}}Splitter.java
+package {{com}}.{{company}}.{{org}}.{{batch}}.service.workers;
+
+import {{chenilePackage}}.orchestrator.process.model.WorkerDto;
+import {{chenilePackage}}.orchestrator.process.model.payload.SubProcessPayload;
+import {{chenilePackage}}.orchestrator.process.utils.base.SplitterBase;
+import {{com}}.{{company}}.{{org}}.{{batch}}.dto.{{#capitalize}}{{processType}}{{/capitalize}}Input;
+import {{com}}.{{company}}.{{org}}.{{batch}}.dto.{{#capitalize}}{{childProcessType}}{{/capitalize}}Input;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class {{#capitalize}}{{processType}}{{/capitalize}}Splitter extends SplitterBase<{{#capitalize}}{{processType}}{{/capitalize}}Input,
+                    {{#capitalize}}{{childProcessType}}{{/capitalize}}Input> {
+    Logger logger = LoggerFactory.getLogger({{#capitalize}}{{processType}}{{/capitalize}}Splitter.class);
+@Override
+    public List<SubProcessPayload> doStart(WorkerDto workerDto, {{#capitalize}}{{processType}}{{/capitalize}}Input input) {
+        logger.info("At the {{processType}} splitter. Input = {}. We will create sub processes of type {{childProcessType}}",input);
+        // Create a list of subprocess payloads.
+        List<SubProcessPayload> subProcessPayloads = new ArrayList<>();
+        // Create the input for the subprocess.
+        {{#capitalize}}{{childProcessType}}{{/capitalize}}Input cInput = new {{#capitalize}}{{childProcessType}}{{/capitalize}}Input();
+        // Make subprocesses
+        SubProcessPayload payload = makeSubProcessPayload(cInput,"{{childProcessType}}");
+        // Optionally send the newly created sub processes to the Process Manager in a partial split operation.
+        // Uncomment the line below if you desire to do that.
+        // splitPartiallyDone(workerDto.process.getId(), subProcessPayloads);
+        // In case you send a splitPartiallyDone event, be sure to reinitialize the subProcessPayloads list.
+        // subProcessPayloads = new ArrayList<>();
+        // Ultimately, return the created subprocess payloads list to complete the split.
+        return subProcessPayloads;
+    }
+}
+--END--
+--START--{{#capitalize}}{{processType}}{{/capitalize}}Aggregator.java
+package {{com}}.{{company}}.{{org}}.{{batch}}.service.workers;
+
+import {{chenilePackage}}.orchestrator.delegate.ProcessManagerClient;
+import {{chenilePackage}}.orchestrator.process.model.Process;
+import {{chenilePackage}}.orchestrator.process.model.WorkerDto;
+import {{chenilePackage}}.orchestrator.process.utils.base.AggregatorBase;
+import {{com}}.{{company}}.{{org}}.{{batch}}.dto.{{#capitalize}}{{childProcessType}}{{/capitalize}}Output;
+import {{com}}.{{company}}.{{org}}.{{batch}}.dto.{{#capitalize}}{{processType}}{{/capitalize}}Input;
+import {{com}}.{{company}}.{{org}}.{{batch}}.dto.{{#capitalize}}{{processType}}{{/capitalize}}Output;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+public class {{#capitalize}}{{processType}}{{/capitalize}}Aggregator extends AggregatorBase<{{#capitalize}}{{processType}}{{/capitalize}}Input,
+        {{#capitalize}}{{processType}}{{/capitalize}}Output,
+        {{#capitalize}}{{childProcessType}}{{/capitalize}}Output> {
+    Logger logger = LoggerFactory.getLogger({{#capitalize}}{{processType}}{{/capitalize}}Aggregator.class);
+    @Autowired ProcessManagerClient processManagerClient ;
+    @Override
+    public {{#capitalize}}{{processType}}{{/capitalize}}Output doStart(
+            {{#capitalize}}{{processType}}{{/capitalize}}Output output, {{#capitalize}}{{processType}}{{/capitalize}}Input input,
+            {{#capitalize}}{{childProcessType}}{{/capitalize}}Output cOutput,
+                        WorkerDto workerDto,
+                        Process process) {
+        // Create a new output or enhance to the existing output.
+        logger.debug("At the doStart method. The input is " + input);
+        if (output == null) {
+            output = new {{#capitalize}}{{processType}}{{/capitalize}}Output();
+        }
+        output.history.add("Output successfully done ");
+        return output;
+    }
+}
+--END--
+    {{/leaf}}
+{{/processes}}

@@ -1,0 +1,14 @@
+Feature: {{Batch}} Test - Test the {{batch}} initiation process
+Scenario: Init the first trigger
+
+When I POST a REST request to URL "/{{batch}}/firstTrigger" with payload
+"""json
+{
+}
+"""
+Then the REST response contains key "id"
+And store "$.payload.id" from response to "id"
+
+Scenario: Retrieve all the children of this process
+When I GET a REST request to URL "/processChildren/${id}"
+#Then the REST expression "payload" size is 7

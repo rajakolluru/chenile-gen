@@ -1,0 +1,49 @@
+package {{com}}.{{company}}.{{org}}.{{batch}}.configuration;
+
+import {{chenilePackage}}.orchestrator.process.utils.api.BatchService;
+import {{com}}.{{company}}.{{org}}.{{batch}}.dto.{{Root}}Input;
+import {{com}}.{{company}}.{{org}}.{{batch}}.service.healthcheck.{{Batch}}HealthChecker;
+import {{com}}.{{company}}.{{org}}.{{batch}}.service.impl.{{Batch}}ServiceImpl;
+import {{com}}.{{company}}.{{org}}.{{batch}}.service.workers.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ Initialize all the required classes in Spring. <br/>
+ Initialize all workers (using a convention).
+*/
+@Configuration
+public class {{Batch}}Configuration {
+	@Bean public BatchService<{{Root}}Input> _{{batch}}Service_() {
+		return new {{Batch}}ServiceImpl();
+	}
+
+	@Bean {{Batch}}HealthChecker {{batch}}HealthChecker(){
+    	return new {{Batch}}HealthChecker();
+    }
+
+	/**
+	 * The beans below are named appropriately so they can be auto discovered as
+	 * Process Starters. The main entry point for starting workers looks for these by convention.
+	 * See {@link BatchServiceBase}
+	 */
+{{#processes}}
+    {{#leaf}}
+    @Bean
+    {{#capitalize}}{{processType}}{{/capitalize}}Executor {{processType}}Executor(){
+        return new {{#capitalize}}{{processType}}{{/capitalize}}Executor();
+    }
+    {{/leaf}}
+    {{^leaf}}
+    @Bean
+    {{#capitalize}}{{processType}}{{/capitalize}}Splitter {{processType}}Splitter(){
+        return new {{#capitalize}}{{processType}}{{/capitalize}}Splitter();
+    }
+
+    @Bean
+    {{#capitalize}}{{processType}}{{/capitalize}}Aggregator {{processType}}Aggregator(){
+        return new {{#capitalize}}{{processType}}{{/capitalize}}Aggregator();
+    }
+    {{/leaf}}
+{{/processes}}
+}
