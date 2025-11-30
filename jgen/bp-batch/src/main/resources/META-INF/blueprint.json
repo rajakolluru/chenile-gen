@@ -1,0 +1,30 @@
+{
+  "initHook" : "org.chenile.jgen.blueprint.batch.InitBatchBlueprint",
+  "name" : "batch",
+  "description" : "Generates a New Batch Process",
+  "templateFolder": "batch-template",
+  "inputFields" :[
+    {
+      "name" : "batch",
+      "type" : "STRING",
+      "description": "Name of batch"
+    },
+    {
+    "name" : "batchVersion",
+    "type" : "STRING",
+    "description": "Version of batch",
+    "defaultValue" : "${defaultVersion}"
+    },
+    {
+      "name" : "destFolder",
+      "type" : "STRING",
+      "description": "Destination Folder",
+      "defaultValue" : "${defaultDestFolder}"
+    },
+    {
+      "name" : "batchJson",
+      "type" : "FILE",
+      "description": "JSON file that defines the batch hierarchy"
+    }
+  ]
+}

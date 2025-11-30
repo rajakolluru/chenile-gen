@@ -39,7 +39,7 @@ public class GenMain implements Runnable {
     private File configFileToEmit;
     @CommandLine.Option(names = {"-f", "--input-file"}, description = "Uses the input file instead of prompting")
     private File inputFile;
-    @CommandLine.Option(names = {"-o", "--output-file"}, description = "Writes to the output file (applicable for the g option")
+    @CommandLine.Option(names = {"-o", "--output-file"}, description = "Writes to the output file (applicable for the g option) ")
     private File outputFile;
     @CommandLine.Option(names = {"-g", "--generate-blueprint-file"}, description = "Generates a sample input file for the specified blueprint")
     private String generateBluePrint;
