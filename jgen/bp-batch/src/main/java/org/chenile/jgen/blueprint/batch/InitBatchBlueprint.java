@@ -28,7 +28,7 @@ public class InitBatchBlueprint implements InitHook {
         };
         blueprintConfig.postProcessHook = (Map<String,Object> map) -> {
             String batchJson = (String)map.get("batchJson");
-            String destPath  = "${destFolder}/${batch}/${batch}-service/src/test/resources/${com}/${company}/${org}/${batch}/${batch}-process-def.json";
+            String destPath  = "${destFolder}/${batch}/${batch}-service/src/test/resources/${batch}-process-def.json";
             StringSubstitutor stringSubstitutor = new StringSubstitutor(map);
             destPath = stringSubstitutor.replace(destPath);
             File dest = new File(destPath);
