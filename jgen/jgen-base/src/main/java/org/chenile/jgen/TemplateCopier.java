@@ -44,8 +44,8 @@ public class TemplateCopier {
     /**
      * Processes a folder of the form %%key=value%%
      * If the key value (in map) is equal to value then all the folders and files under this folder
-     * are copied to the parent of this folder. Else the folder is left untouched.
-     * The folder is deleted.
+     * are copied to the parent of this folder. Else the parent is left untouched.<br/>
+     * This folder is deleted irrespective
      * @param output output folder
      * @param map the input map
      * @throws Exception if there is an exception

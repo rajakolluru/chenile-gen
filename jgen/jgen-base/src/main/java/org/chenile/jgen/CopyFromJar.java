@@ -20,11 +20,9 @@ public class CopyFromJar {
 
         Files.walkFileTree(jarPath, new SimpleFileVisitor<>() {
 
-            private Path currentTarget;
-
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                currentTarget = target.resolve(jarPath.relativize(dir).toString());
+                Path currentTarget = target.resolve(jarPath.relativize(dir).toString());
                 Files.createDirectories(currentTarget);
                 return FileVisitResult.CONTINUE;
             }
