@@ -6,12 +6,12 @@
         <artifactId>jgen</artifactId>
         <groupId>org.chenile</groupId>
         <version>${revision}</version>
-				<relativePath>../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>jgen-base</artifactId>
-    <name>Base cases for Java code generation</name>
+    <name>Base classes for Java code generation</name>
 
     <dependencies>
         <dependency>

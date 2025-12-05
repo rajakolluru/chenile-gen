@@ -1,4 +1,4 @@
-package org.chenile.jgen;
+package org.chenile.jgen.util;
 
 import java.io.IOException;
 import java.net.URI;

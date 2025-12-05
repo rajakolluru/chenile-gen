@@ -7,6 +7,7 @@
 package {{com}}.{{company}}.{{org}}.{{service}}.service.postSaveHooks;
 
 import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+import {{chenilePackage}}.stm.State;
 import {{chenilePackage}}.workflow.model.TransientMap;
 import {{chenilePackage}}.workflow.service.stmcmds.PostSaveHook;
 
@@ -15,7 +16,7 @@ import {{chenilePackage}}.workflow.service.stmcmds.PostSaveHook;
 */
 public class {{#capitalize}}{{id}}{{/capitalize}}{{Service}}PostSaveHook implements PostSaveHook<{{Service}}>{
 	@Override
-    public void execute({{Service}} {{service}}, TransientMap map){
+    public void execute(State startState, State endState, {{Service}} {{service}}, TransientMap map){
     }
 }
 --END--

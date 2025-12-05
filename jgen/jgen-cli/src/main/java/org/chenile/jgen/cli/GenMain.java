@@ -3,7 +3,7 @@ package org.chenile.jgen.cli;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.commons.text.StringSubstitutor;
-import org.chenile.jgen.CopyFromJar;
+import org.chenile.jgen.util.CopyFromJar;
 import org.chenile.jgen.blueprints.BlueprintConfig;
 import org.chenile.jgen.blueprints.BlueprintExecutor;
 import org.chenile.jgen.blueprints.Registry;

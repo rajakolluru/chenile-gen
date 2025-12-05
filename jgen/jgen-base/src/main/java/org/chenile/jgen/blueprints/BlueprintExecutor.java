@@ -1,27 +1,29 @@
 package org.chenile.jgen.blueprints;
 
-import org.chenile.jgen.TemplateCopier;
 import org.chenile.jgen.config.Config;
-import org.chenile.jgen.config.ConfigProvider;
+import org.chenile.jgen.template.model.TemplateContext;
+import org.chenile.jgen.util.ProcessorFactory;
+import org.chenile.owiz.config.impl.XmlOrchConfigurator;
+import org.chenile.owiz.impl.OrchExecutorImpl;
 
 import java.util.Map;
 
 public class BlueprintExecutor {
-    ConfigProvider configProvider = new ConfigProvider();
-    TemplateCopier templateCopier = new TemplateCopier();
+    OrchExecutorImpl<TemplateContext> orchExecutor ;
+    public BlueprintExecutor(){
+        XmlOrchConfigurator<TemplateContext> configurator = new XmlOrchConfigurator<>();
+        ProcessorFactory pf = new ProcessorFactory();
+        configurator.setBeanFactoryAdapter(pf);
+        configurator.setFilename("org/chenile/jgen/template/processors.xml");
+        orchExecutor = new OrchExecutorImpl<>();
+        orchExecutor.setOrchConfigurator(configurator);
+    }
+
     public void execute(BlueprintConfig blueprintConfig, Config config, Map<String,Object> inputMap) throws Exception {
-        if (config == null){
-            config = configProvider.obtainDefaultConfig();
-        }
-        Map<String, Object> map = configProvider.getConfigAsMap(config);
-        map.putAll(inputMap);
-        if(blueprintConfig.postInputCaptureHook != null)
-            blueprintConfig.postInputCaptureHook.accept(map);
-        String destFolder = (String)inputMap.get("destFolder");
-        if (destFolder == null) throw new RuntimeException("Destination folder cannot be null");
-        System.out.println("Using the following map to generate code:\n " + map );
-        templateCopier.process(blueprintConfig.templateFolder,destFolder,true,map );
-       if(blueprintConfig.postProcessHook != null)
-          blueprintConfig.postProcessHook.accept(map);
+        TemplateContext templateContext = new TemplateContext();
+        templateContext.blueprintConfig = blueprintConfig;
+        templateContext.config = config;
+        templateContext.map = inputMap;
+        orchExecutor.execute(templateContext);
     }
 }

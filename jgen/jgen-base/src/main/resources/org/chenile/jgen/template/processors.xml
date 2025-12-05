@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<flows>
+    <flow id='processors' defaultFlow="true">
+        <processor-chain first="true">
+            <config-defaulter/>
+            <post-input-executor/>
+            <processor-chain id="template-chain">
+                <folder-copier/>
+                <lambda-loader/>
+                <file-template-executor/>
+                <file-splitter/>
+                <file-name-replacer/>
+                <conditional-processor/>
+            </processor-chain>
+            <post-process-executor/>
+        </processor-chain>
+    </flow>
+</flows>
