@@ -7,6 +7,8 @@ package {{com}}.{{company}}.{{org}}.{{batch}}.dto;
 */
 public class {{#capitalize}}{{processType}}{{/capitalize}}Input {
 
+    public String input;
+
 }
 --END--
 --START--{{#capitalize}}{{processType}}{{/capitalize}}Output.java
@@ -17,6 +19,7 @@ import {{chenilePackage}}.orchestrator.process.utils.OutputBase;
     Output for Process type "{{processType}}"
 */
 public class {{#capitalize}}{{processType}}{{/capitalize}}Output extends OutputBase {
+    public String output;
 
 }
 --END--
