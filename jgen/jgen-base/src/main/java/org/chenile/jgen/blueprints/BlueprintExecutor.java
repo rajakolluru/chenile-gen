@@ -12,7 +12,7 @@ public class BlueprintExecutor {
     OrchExecutorImpl<TemplateContext> orchExecutor ;
     public BlueprintExecutor(){
         XmlOrchConfigurator<TemplateContext> configurator = new XmlOrchConfigurator<>();
-        ProcessorFactory pf = new ProcessorFactory();
+        ProcessorFactory pf = new ProcessorFactory("org.chenile.jgen.template.chain.");
         configurator.setBeanFactoryAdapter(pf);
         configurator.setFilename("org/chenile/jgen/template/processors.xml");
         orchExecutor = new OrchExecutorImpl<>();

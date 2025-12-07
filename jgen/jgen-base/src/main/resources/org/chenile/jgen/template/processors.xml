@@ -2,17 +2,25 @@
 
 <flows>
     <flow id='processors' defaultFlow="true">
+        <!-- defines the set of processors that convert the blueprint to code -->
         <processor-chain first="true">
+            <!-- enhances the input map with configurations defined in a config file -->
             <config-defaulter/>
+            <!-- Allows the Blueprint author to manipulate the input map before we start the process -->
             <post-input-executor/>
-            <processor-chain id="template-chain">
-                <folder-copier/>
-                <lambda-loader/>
-                <file-template-executor/>
-                <file-splitter/>
-                <file-name-replacer/>
-                <conditional-processor/>
-            </processor-chain>
+            <!-- copies the blueprint folder to the destination folder. Blueprint folder is in the blueprint jar. -->
+            <folder-copier/>
+            <!-- Loads some lambda functions that might prove useful to Mustache -->
+            <lambda-loader/>
+            <!-- Uses Mustache to convert all .mustache files to the destination file.  -->
+            <file-template-executor/>
+            <!-- Breaks all .filelist files into multiple files. -->
+            <file-splitter/>
+            <!-- Replaces filenames of the form __xxx__ with contents from the map -->
+            <file-name-replacer/>
+            <!-- Processes conditional files. If a key in the map has a given value then the folder is copied. -->
+            <conditional-processor/>
+            <!-- Allows the blueprint author to change the destination folder if required with custom logic -->
             <post-process-executor/>
         </processor-chain>
     </flow>

@@ -10,6 +10,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 
+/**
+ * Looks for Mustache files. Treats them as templates and passes the map to mustache for execution.
+ * The mustache suffix is dropped from the processed file.
+ */
 public class FileTemplateExecutor extends FileProcessor {
     public static final String MUSTACHE_EXTENSION = ".mustache";
     MustacheFactory mf = new DefaultMustacheFactory();

@@ -6,6 +6,9 @@ import org.chenile.owiz.Command;
 
 import java.util.function.Function;
 
+/**
+ * Loads some useful Lambdas into the map for the templates to use.
+ */
 public class LambdaLoader implements Command<TemplateContext> {
     @Override
     public void execute(TemplateContext context) throws Exception {
