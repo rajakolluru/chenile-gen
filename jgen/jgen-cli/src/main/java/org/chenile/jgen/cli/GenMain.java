@@ -2,8 +2,6 @@ package org.chenile.jgen.cli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import org.apache.commons.text.StringSubstitutor;
-import org.chenile.jgen.util.CopyFromJar;
 import org.chenile.jgen.blueprints.BlueprintConfig;
 import org.chenile.jgen.blueprints.BlueprintExecutor;
 import org.chenile.jgen.blueprints.Registry;
@@ -11,7 +9,7 @@ import org.chenile.jgen.blueprints.model.FieldType;
 import org.chenile.jgen.blueprints.model.InputField;
 import org.chenile.jgen.config.Config;
 import org.chenile.jgen.config.ConfigProvider;
-import org.chenile.jgen.util.FieldUtils;
+import org.chenile.jgen.util.CopyFromJar;
 import org.chenile.workflow.cli.VersionProvider;
 import picocli.CommandLine;
 
@@ -21,6 +19,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+
+import static org.chenile.jgen.cli.InputCapture.captureField;
+import static org.chenile.jgen.cli.InputCapture.captureOneOfMany;
 
 /**
  * Main method for the Java based Code Generator. It allows the user to identify the
@@ -152,6 +153,8 @@ public class GenMain implements Runnable {
         Map<String,Object> map = new HashMap<>();
         buildInputMap(map,blueprintConfig,configMap,scanner,inputMap);
         blueprintExecutor.execute(blueprintConfig, config, map);
+        System.out.println("Blue print " + blueprintConfig.name + " generated for inputs: ");
+        System.out.println(map);
     }
 
     private Map<String,String> readJson(File inputFile){
@@ -187,32 +190,6 @@ public class GenMain implements Runnable {
         return configProvider.obtainDefaultConfig();
     }
 
-    public int captureOneOfMany(Scanner scanner, List<String> values){
-        int max = values.size();
-        int input = 0;
-        while (input < 1 || input > max) {
-            int index = 1;
-            for (String value : values) {
-                System.out.println(index++ + ")" + value);
-            }
-            System.out.print("Choose one:(q or Q to quit)");
-            String in = scanner.nextLine();
-            if (in != null && in.equalsIgnoreCase("q")){
-                System.out.println("Quitting!");
-                System.exit(0);
-            }
-            try {
-                input = Integer.parseInt(in);
-            }catch(Exception e){
-                System.err.println("Invalid input " + in + ". Try again.");
-            }
-            if (input < 1 || input > max){
-                System.err.println("Invalid input. Value must be between 1 and " + max);
-            }
-        }
-        return input;
-    }
-
     private void buildInputMap(Map<String,Object> map,BlueprintConfig blueprintConfig,
                                Map<String,Object> configMap,Scanner scanner,
                                Map<String,String> inputMap){
@@ -224,47 +201,6 @@ public class GenMain implements Runnable {
             }else
                 map.put(field.name,value);
         }
-    }
-
-    private String captureField(InputField field, Map<String,Object> configMap,Scanner scanner,
-                                Map<String,String> inputMap) {
-        String defValue = substitute(configMap,field.defaultValue);
-        String input = null;
-        if (inputMap != null){
-           return captureFromInputMap(configMap,field,inputMap,defValue);
-        }
-        String prompt = field.description;
-        if (field.type == FieldType.BOOLEAN) prompt += "(y/n)";
-        prompt += "?";
-        if (defValue != null)
-            prompt += " (" + defValue + ")";
-        prompt += " ";
-        do {
-            System.out.print(prompt);
-            String in = scanner.nextLine();
-            if (in == null || in.isEmpty()) input = defValue;
-            else input = in;
-        }while(!FieldUtils.isValid(field,input));
-        return input;
-    }
-
-    private String captureFromInputMap(Map<String,Object> configMap,InputField field, Map<String, String> inputMap, String defValue) {
-        String value = inputMap.get(field.name);
-        if(value != null)
-            value = substitute(configMap,value);
-        else
-            value = defValue;
-        if (!FieldUtils.isValid(field,value)){
-            String message = "Field " + field.name + " has an invalid value " + value + "specified.";
-            throw new RuntimeException(message);
-        }
-        return value;
-    }
-
-    private String substitute(Map<String,Object> configMap,String value){
-        if (value == null || value.isEmpty()) return null;
-        StringSubstitutor stringSubstitutor = new StringSubstitutor(configMap);
-        return stringSubstitutor.replace(value);
     }
 
 }

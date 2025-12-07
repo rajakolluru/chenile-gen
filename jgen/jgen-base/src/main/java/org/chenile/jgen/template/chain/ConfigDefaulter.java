@@ -18,7 +18,6 @@ public class ConfigDefaulter implements Command <TemplateContext>{
             context.config = configProvider.obtainDefaultConfig();
         }
         Map<String, Object> map = configProvider.getConfigAsMap(context.config);
-        map.putAll(context.map);
-        context.map = map;
+        map.forEach(context.map::putIfAbsent);
     }
 }
