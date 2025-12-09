@@ -8,7 +8,8 @@ When I POST a REST request to URL "/{{batch}}/firstTrigger" with payload
 """
 Then the REST response contains key "id"
 And store "$.payload.id" from response to "id"
+And wait for root process aggregation to be completed or timeout in 10 seconds
 
 Scenario: Retrieve all the children of this process
 When I GET a REST request to URL "/processChildren/${id}"
-#Then the REST expression "payload" size is 7
+# Then the REST expression "payload" size is 7

@@ -6,12 +6,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 import {{com}}.{{company}}.{{org}}.{{batch}}.SpringTestConfig;
+import {{com}}.{{company}}.{{org}}.{{batch}}.service.workers.{{Root}}Aggregator;
 
 import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
 
 import java.util.concurrent.TimeUnit;
-
-
 /**
     * This "steps" file's purpose is to hook up the SpringConfig to the test case.
     * It does not contain any methods currently but can be used for writing your own custom BDD steps
@@ -24,7 +24,14 @@ import java.util.concurrent.TimeUnit;
 @AutoConfigureMockMvc
 @ActiveProfiles("unittest")
 public class CukesSteps {
-	
 	@Given("dummy") public void dummy(){}
-
+    @Then("wait for root process aggregation to be completed or timeout in {int} seconds")
+    public void wait_for_chunk_done(Integer sleepTime) {
+        try {
+            boolean success = {{Root}}Aggregator.latch.await(sleepTime, TimeUnit.SECONDS);
+            if (!success) throw new RuntimeException("Time out before {{root}} process aggregation.");
+        }catch (InterruptedException ie){
+            System.out.println("Interrupted my sleep");
+        }
+    }
 }

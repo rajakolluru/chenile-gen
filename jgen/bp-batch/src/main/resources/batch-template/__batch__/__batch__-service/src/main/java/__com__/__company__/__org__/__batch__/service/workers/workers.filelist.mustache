@@ -49,6 +49,7 @@ public class {{#capitalize}}{{processType}}{{/capitalize}}Splitter extends Split
         {{#capitalize}}{{childProcessType}}{{/capitalize}}Input cInput = new {{#capitalize}}{{childProcessType}}{{/capitalize}}Input();
         // Make subprocesses
         SubProcessPayload payload = makeSubProcessPayload(cInput,"{{childProcessType}}");
+        subProcessPayloads.add(payload);
         // Optionally send the newly created sub processes to the Process Manager in a partial split operation.
         // Uncomment the line below if you desire to do that.
         // splitPartiallyDone(workerDto.process.getId(), subProcessPayloads);
@@ -72,12 +73,17 @@ import {{com}}.{{company}}.{{org}}.{{batch}}.dto.{{#capitalize}}{{processType}}{
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
+{{#root}}
+import java.util.concurrent.CountDownLatch;
+{{/root}}
 public class {{#capitalize}}{{processType}}{{/capitalize}}Aggregator extends AggregatorBase<{{#capitalize}}{{processType}}{{/capitalize}}Input,
         {{#capitalize}}{{processType}}{{/capitalize}}Output,
         {{#capitalize}}{{childProcessType}}{{/capitalize}}Output> {
     Logger logger = LoggerFactory.getLogger({{#capitalize}}{{processType}}{{/capitalize}}Aggregator.class);
     @Autowired ProcessManagerClient processManagerClient ;
+    {{#root}}
+    public static CountDownLatch latch = new CountDownLatch(1);
+    {{/root}}
     @Override
     public {{#capitalize}}{{processType}}{{/capitalize}}Output doStart(
             {{#capitalize}}{{processType}}{{/capitalize}}Output output, {{#capitalize}}{{processType}}{{/capitalize}}Input input,
@@ -90,6 +96,9 @@ public class {{#capitalize}}{{processType}}{{/capitalize}}Aggregator extends Agg
             output = new {{#capitalize}}{{processType}}{{/capitalize}}Output();
         }
         output.history.add("Output successfully done ");
+        {{#root}}
+        latch.countDown();
+        {{/root}}
         return output;
     }
 }
