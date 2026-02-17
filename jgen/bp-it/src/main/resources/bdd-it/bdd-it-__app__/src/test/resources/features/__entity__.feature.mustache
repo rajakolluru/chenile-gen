@@ -17,7 +17,7 @@ Feature: Tests the {{entity}} Service using a REST client.
 	"""
     Then success is true
     And the http status code is 200
-    And store "$.payload.id" from  response to "id"
+    And store "$.payload.id" from response to "id"
 
   Scenario: Retrieve the saved {{entity}}
     Given that "entity" equals "{{entity}}"

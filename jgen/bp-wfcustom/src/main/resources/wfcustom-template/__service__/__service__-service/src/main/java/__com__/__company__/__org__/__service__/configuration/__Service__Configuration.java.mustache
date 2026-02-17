@@ -53,13 +53,13 @@ public class {{Service}}Configuration {
 		return stmFlowStore;
 	}
 	
-	@Bean @Autowired STM<{{Service}}> {{service}}EntityStm(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore) throws Exception{
+	@Bean  STM<{{Service}}> {{service}}EntityStm(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore) throws Exception{
 		STMImpl<{{Service}}> stm = new STMImpl<>();		
 		stm.setStmFlowStore(stmFlowStore);
 		return stm;
 	}
 	
-	@Bean @Autowired STMActionsInfoProvider {{service}}ActionsInfoProvider(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore) {
+	@Bean  STMActionsInfoProvider {{service}}ActionsInfoProvider(@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore) {
 		STMActionsInfoProvider provider =  new STMActionsInfoProvider(stmFlowStore);
         WorkflowRegistry.addSTMActionsInfoProvider("{{service}}",provider);
         return provider;
@@ -69,7 +69,7 @@ public class {{Service}}Configuration {
 		return new {{Service}}EntityStore();
 	}
 	
-	@Bean @Autowired StateEntityServiceImpl<{{Service}}> _{{service}}StateEntityService_(
+	@Bean  StateEntityServiceImpl<{{Service}}> _{{service}}StateEntityService_(
 			@Qualifier("{{service}}EntityStm") STM<{{Service}}> stm,
 			@Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider,
 			@Qualifier("{{service}}EntityStore") EntityStore<{{Service}}> entityStore){
@@ -79,7 +79,7 @@ public class {{Service}}Configuration {
 	// Now we start constructing the STM Components 
 
 {{^genDefaultPostSaveHook}}
-	@Bean @Autowired GenericEntryAction<{{Service}}> {{service}}EntryAction(@Qualifier("{{service}}EntityStore") EntityStore<{{Service}}> entityStore,
+	@Bean  GenericEntryAction<{{Service}}> {{service}}EntryAction(@Qualifier("{{service}}EntityStore") EntityStore<{{Service}}> entityStore,
 			@Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider,
             @Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
         GenericEntryAction<{{Service}}> entryAction =  new GenericEntryAction<{{Service}}>(entityStore,{{service}}InfoProvider);
@@ -89,13 +89,13 @@ public class {{Service}}Configuration {
 {{/genDefaultPostSaveHook}}
 
 {{#genDefaultPostSaveHook}}
-    @Bean @Autowired DefaultPostSaveHook<{{Service}}> {{service}}DefaultPostSaveHook(
+    @Bean  DefaultPostSaveHook<{{Service}}> {{service}}DefaultPostSaveHook(
     @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver){
     DefaultPostSaveHook<{{Service}}> postSaveHook = new DefaultPostSaveHook<>(stmTransitionActionResolver);
     return postSaveHook;
     }
 
-    @Bean @Autowired GenericEntryAction<{{Service}}> {{service}}EntryAction(@Qualifier("{{service}}EntityStore") EntityStore<{{Service}}> entityStore,
+    @Bean  GenericEntryAction<{{Service}}> {{service}}EntryAction(@Qualifier("{{service}}EntityStore") EntityStore<{{Service}}> entityStore,
     @Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider,
     @Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore,
     @Qualifier("{{service}}DefaultPostSaveHook") DefaultPostSaveHook<{{Service}}> postSaveHook)  {
@@ -106,7 +106,7 @@ public class {{Service}}Configuration {
 {{/genDefaultPostSaveHook}}
 
 {{#genDefaultAutoState}}
-    @Bean @Autowired DefaultAutomaticStateComputation<{{Service}}> {{service}}DefaultAutoState(
+    @Bean  DefaultAutomaticStateComputation<{{Service}}> {{service}}DefaultAutoState(
     @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver,
     @Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
     DefaultAutomaticStateComputation<{{Service}}> autoState = new DefaultAutomaticStateComputation<>(stmTransitionActionResolver);
@@ -143,14 +143,14 @@ public class {{Service}}Configuration {
         return new STMTransitionActionResolver(PREFIX_FOR_RESOLVER,defaultSTMTransitionAction,true);
     }
 
-    @Bean @Autowired StmBodyTypeSelector {{service}}BodyTypeSelector(
+    @Bean  StmBodyTypeSelector {{service}}BodyTypeSelector(
     @Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider,
     @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver) {
         return new StmBodyTypeSelector({{service}}InfoProvider,stmTransitionActionResolver);
     }
 
 {{^activity}}
-    @Bean @Autowired STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(
+    @Bean  STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(
         @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver,
         @Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
         BaseTransitionAction<{{Service}}> baseTransitionAction = new BaseTransitionAction<>(stmTransitionActionResolver);
@@ -160,7 +160,7 @@ public class {{Service}}Configuration {
 {{/activity}}
 
 {{#activity}}
-    @Bean @Autowired STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(
+    @Bean  STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(
         @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver,
         @Qualifier("{{service}}ActivityChecker") ActivityChecker activityChecker,
         @Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore){
@@ -217,7 +217,7 @@ public class {{Service}}Configuration {
 
 {{#security}}
 
-    @Bean @Autowired Function<ChenileExchange, String[]> {{service}}EventAuthoritiesSupplier(
+    @Bean  Function<ChenileExchange, String[]> {{service}}EventAuthoritiesSupplier(
         @Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider)
                     throws Exception{
         StmAuthoritiesBuilder builder = new StmAuthoritiesBuilder({{service}}InfoProvider);
