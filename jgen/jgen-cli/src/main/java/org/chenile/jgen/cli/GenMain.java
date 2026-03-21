@@ -124,9 +124,32 @@ public class GenMain implements Runnable {
 
     private void emitConfigFile() throws Exception{
         CopyFromJar copyFromJar = new CopyFromJar();
+        if (!configFileToEmit.getPath().startsWith("config/")){
+            if(!createConfigFolder()){
+                System.exit(1);
+            };
+            System.out.println("Creating the file in the config folder (by convention)");
+            configFileToEmit = new File("config/" + configFileToEmit.getPath());
+        }
+        if (!configFileToEmit.getPath().endsWith(".json")){
+            configFileToEmit = new File(configFileToEmit.getPath() + ".json");
+        }
         Path targetFile = Paths.get(configFileToEmit.getPath());
         copyFromJar.copyFromJar("config.json",targetFile);
         System.out.println("Making a copy of the config file to " + targetFile);
+    }
+
+    private boolean createConfigFolder(){
+        File configFolder = new File("config");
+        if (configFolder.exists() && configFolder.isDirectory()){
+            System.out.println("Found a config file which is not a folder. Make sure you have a config folder");
+            return false;
+        }
+
+        if (!configFolder.exists() ){
+            return configFolder.mkdirs();
+        }
+        return true;
     }
 
     private void blueprint(Scanner scanner) throws Exception {
