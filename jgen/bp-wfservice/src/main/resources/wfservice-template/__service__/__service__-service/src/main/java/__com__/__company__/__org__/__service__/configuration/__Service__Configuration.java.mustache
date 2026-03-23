@@ -114,6 +114,13 @@ public class {{Service}}Configuration {
         return new StmBodyTypeSelector({{service}}InfoProvider,stmTransitionActionResolver);
     }
 
+{{#enableMCP}}
+    @Bean ProcessIdPolymorph {{service}}ProcessIdPolymorph(
+    @Qualifier("{{service}}BodyTypeSelector") StmBodyTypeSelector {{service}}BodyTypeSelector) {
+        return new ProcessIdPolymorph("{{service}}", {{service}}BodyTypeSelector);
+    }
+{{/enableMCP}}
+
 {{^activity}}
     @Bean  STMTransitionAction<{{Service}}> {{service}}BaseTransitionAction(
     @Qualifier("{{service}}TransitionActionResolver") STMTransitionActionResolver stmTransitionActionResolver){

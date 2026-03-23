@@ -18,11 +18,22 @@
 	<dependencies>
 
 		<!-- Chenile Dependencies Starts -->
-		<dependency>
-			<groupId>{{chenilePackage}}</groupId>
-			<artifactId>chenile-http</artifactId>
-		</dependency>
-		<!-- Chenile Dependencies Ends -->
+			<dependency>
+				<groupId>{{chenilePackage}}</groupId>
+				<artifactId>chenile-http</artifactId>
+			</dependency>
+			{{#enableMCP}}
+			<dependency>
+				<groupId>{{chenilePackage}}</groupId>
+				<artifactId>chenile-mcp</artifactId>
+				<version>{{chenileVersion}}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.ai</groupId>
+				<artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
+			</dependency>
+			{{/enableMCP}}
+			<!-- Chenile Dependencies Ends -->
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>

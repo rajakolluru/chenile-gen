@@ -9,6 +9,10 @@ import {{chenilePackage}}.http.annotation.BodyTypeSelector;
 import {{chenilePackage}}.http.annotation.ChenileController;
 import {{chenilePackage}}.http.annotation.ChenileParamType;
 import {{chenilePackage}}.http.handler.ControllerSupport;
+{{#enableMCP}}
+import {{chenilePackage}}.mcp.model.ChenileMCP;
+import {{chenilePackage}}.mcp.model.ChenilePolymorph;
+{{/enableMCP}}
 import org.springframework.http.ResponseEntity;
 
 import {{chenilePackage}}.stm.StateEntity;
@@ -34,6 +38,9 @@ public class {{Service}}Controller extends ControllerSupport{
 {{#security}}
     @SecurityConfig(authorities = {"some_premium_scope","test.premium"})
 {{/security}}
+{{#enableMCP}}
+    @ChenileMCP(name = "{{service}}RetrieveById", description = "Retrieve {{service}} by id")
+{{/enableMCP}}
 	public ResponseEntity<GenericResponse<StateEntityServiceResponse<{{Service}}>>> retrieve(
 			HttpServletRequest httpServletRequest,
 			@PathVariable String id){
@@ -44,6 +51,9 @@ public class {{Service}}Controller extends ControllerSupport{
 {{#security}}
     @SecurityConfig(authorities = {"some_premium_scope","test.premium"})
 {{/security}}
+{{#enableMCP}}
+    @ChenileMCP(name = "{{service}}Create", description = "Create a new {{service}}")
+{{/enableMCP}}
 	public ResponseEntity<GenericResponse<StateEntityServiceResponse<{{Service}}>>> create(
 			HttpServletRequest httpServletRequest,
 			@ChenileParamType(StateEntity.class)
@@ -54,6 +64,10 @@ public class {{Service}}Controller extends ControllerSupport{
 	
 	@PatchMapping("/{{service}}/{id}/{eventID}")
 	@BodyTypeSelector("{{service}}BodyTypeSelector")
+{{#enableMCP}}
+	@ChenileMCP(name = "{{service}}ProcessById", description = "Process {{service}} workflow event by id")
+	@ChenilePolymorph("{{service}}ProcessIdPolymorph")
+{{/enableMCP}}
 {{#security}}
     @SecurityConfig(authoritiesSupplier = "{{service}}EventAuthoritiesSupplier")
 {{/security}}

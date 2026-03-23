@@ -14,6 +14,9 @@ import {{chenilePackage}}.security.model.SecurityConfig;
 {{/security}}
 import {{chenilePackage}}.http.annotation.ChenileController;
 import {{chenilePackage}}.http.handler.ControllerSupport;
+{{#enableMCP}}
+import {{chenilePackage}}.mcp.model.ChenileMCP;
+{{/enableMCP}}
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +26,10 @@ import org.springframework.web.bind.annotation.*;
 public class {{Service}}Controller extends ControllerSupport{
 	
 {{^jpa}}
-@PostMapping("/{{service}}/op1")
+	@PostMapping("/{{service}}/op1")
+    {{#enableMCP}}
+    @ChenileMCP(name = "{{service}}Op1", description = "Execute op1 on {{service}}")
+    {{/enableMCP}}
     {{#security}}
     @SecurityConfig(authorities = {"some_premium_scope","test.premium"})
     {{/security}}
@@ -35,6 +41,9 @@ public class {{Service}}Controller extends ControllerSupport{
 {{/jpa}}
 {{#jpa}}
     @PostMapping("/{{service}}")
+    {{#enableMCP}}
+    @ChenileMCP(name = "{{service}}Save", description = "Save {{service}}")
+    {{/enableMCP}}
     {{#cloudEdgeSwitch}}
     @InterceptedBy("cloudEdgeSwitch")
     @CloudEdgeSwitchConfig
@@ -49,6 +58,9 @@ public class {{Service}}Controller extends ControllerSupport{
         }
 
     @GetMapping("/{{service}}/{id}")
+    {{#enableMCP}}
+    @ChenileMCP(name = "{{service}}RetrieveById", description = "Retrieve {{service}} by id")
+    {{/enableMCP}}
     {{#security}}
     @SecurityConfig(authorities = {"some_premium_scope","test.premium"})
     {{/security}}

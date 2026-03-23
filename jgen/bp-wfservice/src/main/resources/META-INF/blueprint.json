@@ -56,6 +56,12 @@
         "type" : "BOOLEAN",
         "description": "Enable Security",
         "defaultValue" : "n"
+    },
+    {
+        "name" : "enableMCP",
+        "type" : "BOOLEAN",
+        "description": "Enable MCP support",
+        "defaultValue" : "n"
     }
   ]
 }

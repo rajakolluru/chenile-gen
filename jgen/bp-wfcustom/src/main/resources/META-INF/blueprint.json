@@ -76,6 +76,12 @@
       "type" : "BOOLEAN",
       "description": "Generate Default Auto State",
       "defaultValue" : "y"
+    },
+    {
+      "name" : "enableMCP",
+      "type" : "BOOLEAN",
+      "description": "Enable MCP support",
+      "defaultValue" : "n"
     }
   ]
 }

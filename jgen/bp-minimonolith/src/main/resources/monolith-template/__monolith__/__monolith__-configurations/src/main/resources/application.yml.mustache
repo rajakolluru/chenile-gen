@@ -13,6 +13,24 @@ chenile:
 spring:
   application:
     name: {{monolith}}
+{{#enableMCP}}
+  ai:
+    mcp:
+      server:
+        enabled: true
+        name: {{monolith}}
+        type: SYNC
+        version: {{monolithVersion}}
+        protocol: STREAMABLE
+        instructions: "This server exposes MCP tools from the {{monolith}} mini monolith"
+        capabilities:
+          tool: true
+          resource: true
+          prompt: true
+          completion: true
+        streamable-http:
+          mcp-endpoint: /mcp
+{{/enableMCP}}
   security:
     oauth2:
       resourceserver:
