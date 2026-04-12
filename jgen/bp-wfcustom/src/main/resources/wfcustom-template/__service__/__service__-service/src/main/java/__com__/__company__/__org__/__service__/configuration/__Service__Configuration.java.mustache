@@ -17,6 +17,7 @@ import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
 import {{com}}.{{company}}.{{org}}.{{service}}.service.cmds.*;
 import {{com}}.{{company}}.{{org}}.{{service}}.service.healthcheck.{{Service}}HealthChecker;
 import {{com}}.{{company}}.{{org}}.{{service}}.service.store.{{Service}}EntityStore;
+import {{com}}.{{company}}.{{org}}.{{service}}.service.impl.{{Service}}ServiceImpl;
 import {{chenilePackage}}.workflow.api.WorkflowRegistry;
 {{#security}}
 import {{chenilePackage}}.workflow.service.stmcmds.StmAuthoritiesBuilder;
@@ -73,7 +74,7 @@ public class {{Service}}Configuration {
 			@Qualifier("{{service}}EntityStm") STM<{{Service}}> stm,
 			@Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider,
 			@Qualifier("{{service}}EntityStore") EntityStore<{{Service}}> entityStore){
-		return new StateEntityServiceImpl<>(stm, {{service}}InfoProvider, entityStore);
+		return new {{Service}}ServiceImpl(stm, {{service}}InfoProvider, entityStore);
 	}
 	
 	// Now we start constructing the STM Components 

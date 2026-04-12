@@ -1,0 +1,11 @@
+package {{com}}.{{company}}.{{org}}.{{service}}.api;
+
+import {{chenilePackage}}.workflow.api.StateEntityService;
+import {{com}}.{{company}}.{{org}}.{{service}}.dto.{{Service}}In;
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+import {{chenilePackage}}.workflow.dto.StateEntityServiceResponse;
+
+
+public interface {{Service}}Service extends StateEntityService<{{Service}}> {
+    public StateEntityServiceResponse<{{Service}}> create{{Service}}({{Service}}In {{service}}In);
+}

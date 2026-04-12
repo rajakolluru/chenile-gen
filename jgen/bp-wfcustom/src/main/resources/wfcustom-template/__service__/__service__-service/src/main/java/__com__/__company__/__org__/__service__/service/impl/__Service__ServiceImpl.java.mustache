@@ -1,0 +1,30 @@
+package {{com}}.{{company}}.{{org}}.{{service}}.service.impl;
+
+import {{com}}.{{company}}.{{org}}.{{service}}.dto.{{Service}}In;
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+import {{com}}.{{company}}.{{org}}.{{service}}.api.{{Service}}Service;
+import {{chenilePackage}}.workflow.service.impl.StateEntityServiceImpl;
+import {{chenilePackage}}.stm.*;
+import {{chenilePackage}}.stm.impl.*;
+import {{chenilePackage}}.utils.entity.service.EntityStore;
+import {{chenilePackage}}.workflow.dto.StateEntityServiceResponse;
+
+public class {{Service}}ServiceImpl extends StateEntityServiceImpl<{{Service}}> implements {{Service}}Service {
+
+    public {{Service}}ServiceImpl(
+         STM<{{Service}}> stm,
+         STMActionsInfoProvider {{service}}InfoProvider,
+         EntityStore<{{Service}}> entityStore
+        ){
+        super(stm,{{service}}InfoProvider,entityStore);
+    }
+
+    public StateEntityServiceResponse<{{Service}}> create{{Service}}({{Service}}In {{service}}In){
+        {{Service}} {{service}} = new {{Service}}();
+        {{service}}.description = {{service}}In.description;
+        {{service}}.id = {{service}}In.id;
+        // copy the other attributes here as well.
+        return create({{service}});
+    }
+
+}

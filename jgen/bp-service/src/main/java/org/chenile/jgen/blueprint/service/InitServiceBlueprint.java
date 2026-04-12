@@ -11,7 +11,7 @@ public class InitServiceBlueprint implements InitHook {
     @Override
     public void init(BlueprintConfig blueprintConfig) {
         blueprintConfig.postInputCaptureHook = (Map<String,Object> map) -> {
-            String serviceName = (String)map.get("service");
+            String serviceName = (String)map.get("api");
             map.put("Service", CapUtils.capitalizeFirst(serviceName));
         };
     }

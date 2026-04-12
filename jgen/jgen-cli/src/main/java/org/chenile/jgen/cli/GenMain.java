@@ -141,7 +141,7 @@ public class GenMain implements Runnable {
 
     private boolean createConfigFolder(){
         File configFolder = new File("config");
-        if (configFolder.exists() && configFolder.isDirectory()){
+        if (configFolder.exists() && !configFolder.isDirectory()){
             System.out.println("Found a config file which is not a folder. Make sure you have a config folder");
             return false;
         }

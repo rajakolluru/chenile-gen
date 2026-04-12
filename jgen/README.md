@@ -103,7 +103,7 @@ The input file must include:
 
 ```json
 {
-  "blueprint": "chenile-service"
+  "blueprint": "chenile-api"
 }
 ```
 
@@ -115,7 +115,7 @@ A typical non-interactive input file for `chenile-service` looks like this:
 
 ```json
 {
-  "blueprint": "chenile-service",
+  "blueprint": "chenile-api",
   "service": "orders",
   "serviceVersion": "0.0.1-SNAPSHOT",
   "destFolder": "./output",
@@ -134,13 +134,13 @@ The `-g` option emits a sample JSON file for a named blueprint based on that blu
 Example:
 
 ```bash
-jgen-cli/bin/jgen.sh -g chenile-service -o service-input.json
+jgen-cli/bin/jgen.sh -g chenile-api -o api-input.json
 ```
 
 That file can then be edited and used for non-interactive generation:
 
 ```bash
-jgen-cli/bin/jgen.sh -f service-input.json
+jgen-cli/bin/jgen.sh -f api-input.json
 ```
 
 This is the safest way to learn a blueprint because the generated JSON shows exactly which fields the blueprint expects.
@@ -296,14 +296,14 @@ make all
 2. Generate a sample input file:
 
 ```bash
-jgen-cli/bin/jgen.sh -g chenile-service -o orders.json
+jgen-cli/bin/jgen.sh -g chenile-api -o orders.json
 ```
 
 3. Edit `orders.json`:
 
 ```json
 {
-  "blueprint": "chenile-service",
+  "blueprint": "chenile-api",
   "service": "orders",
   "serviceVersion": "0.0.1-SNAPSHOT",
   "destFolder": "./output",

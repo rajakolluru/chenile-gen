@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import {{chenilePackage}}.workflow.dto.StateEntityServiceResponse;
 import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+import {{com}}.{{company}}.{{org}}.{{service}}.dto.{{Service}}In;
 {{#security}}
 import {{chenilePackage}}.security.model.SecurityConfig;
 {{/security}}
@@ -54,10 +55,9 @@ public class {{Service}}Controller extends ControllerSupport{
 {{#enableMCP}}
     @ChenileMCP(name = "{{service}}Create", description = "Create a new {{service}}")
 {{/enableMCP}}
-	public ResponseEntity<GenericResponse<StateEntityServiceResponse<{{Service}}>>> create(
+	public ResponseEntity<GenericResponse<StateEntityServiceResponse<{{Service}}>>> create{{Service}}(
 			HttpServletRequest httpServletRequest,
-			@ChenileParamType(StateEntity.class)
-			@RequestBody {{Service}} entity){
+			@RequestBody {{Service}}In entity){
 		return process(httpServletRequest,entity);
 	}
 
