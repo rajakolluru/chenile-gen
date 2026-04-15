@@ -16,10 +16,10 @@ public class InitMinimonolithBlueprint implements InitHook {
             String minimonolith = (String)map.get("monolith");
             map.put("Monolith", CapUtils.capitalizeFirst(minimonolith));
             // populate with a dummy api
-            map.put("api","myService");
+            map.put("service","myService");
             map.put("serviceVersion","myServiceVersion");
             List<String> list = new ArrayList<>();
-            list.add("myService-api");
+            list.add("myService-service");
             map.put("services",list);
         };
     }

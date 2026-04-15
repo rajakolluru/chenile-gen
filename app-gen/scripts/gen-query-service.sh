@@ -58,12 +58,12 @@ then
 fi
 
 json_file=/tmp/$prog.$$
-service=${1}
+api=${1}
 Service=$(camelCase $service)
 serviceVersion=${2:-$defaultVersion}
 dest_folder=${3:-$defaultDestFolder}
 
 [[ ! -d $dest_folder ]] && mkdir $dest_folder
-echo "Creating service ${service}(${serviceVersion}) in folder $dest_folder" >&2
+echo "Creating service ${api}(${serviceVersion}) in folder $dest_folder" >&2
 generateService
 _exit 0

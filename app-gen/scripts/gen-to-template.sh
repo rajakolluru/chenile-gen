@@ -46,7 +46,7 @@ function generateArtifact(){
 function generateCurlScript(){
 	tmpfile=/tmp/$RANDOM.$$.${prog}
 	cur_curl_script=${dest_folder}/${monolith}/scripts/curl-scripts.sh
-	service_curl_script=${dest_folder}/${service}/scripts/curl-scripts.sh
+	service_curl_script=${dest_folder}/${api}/scripts/curl-scripts.sh
 
 	[[ ! -f ${cur_curl_script} ]] && return
 	[[ ! -f ${service_curl_script} ]] && return
@@ -88,7 +88,7 @@ function constructJsonfile(){
 ## Finds the list of services that have been exposed by the serviceTemplate
 function getServiceList(){
 	tmpfile=/tmp/$RANDOM.$$.${prog}
-	filename=${template_folder_base}/${serviceTemplate}/.meta/service-modules.txt
+	filename=${template_folder_base}/${serviceTemplate}/.meta/api-modules.txt
 	$scripts_folder/node_modules/mustache/bin/mustache $json_file $filename > $tmpfile
 	services=$(sed 's/^\(.*\)$/"\1"/' $tmpfile  | tr '\n' ',') # surround each line with double-quotes
 	constructJsonfile > $json_file
@@ -107,7 +107,7 @@ shift
 json_file=/tmp/$prog.$$
 monolithVersion=${defaultVersion}
 dest_folder=${defaultDestFolder}
-service=${defaultServiceName}
+api=${defaultServiceName}
 serviceVersion=${defaultVersion}
 gitInit=false
 cloudSwitchEnabled=false
@@ -122,7 +122,7 @@ while getopts ":sjd:v:S:V:gc" opts; do
             cloudSwitchEnabled=true
             ;;
         S)
-            service=${OPTARG}
+            api=${OPTARG}
             ;;
         g)
             gitInit=true

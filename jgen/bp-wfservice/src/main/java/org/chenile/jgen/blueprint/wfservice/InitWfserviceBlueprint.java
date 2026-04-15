@@ -11,7 +11,7 @@ public class InitWfserviceBlueprint implements InitHook {
     @Override
     public void init(BlueprintConfig blueprintConfig) {
         blueprintConfig.postInputCaptureHook = (Map<String,Object> map) -> {
-            String wfservice = (String)map.get("api");
+            String wfservice = (String)map.get("service");
             map.put("Service", CapUtils.capitalizeFirst(wfservice));
         };
     }

@@ -33,7 +33,7 @@ function setenv(){
 
 
 function generateAll(){
-	template_folder=$template_folder_base/monolith-with-service-international
+	template_folder=$template_folder_base/monolith-with-api-international
   	generateModule $template_folder $dest_folder $json_file "monolith com org company Monolith service Service"
   	doGitInit $dest_folder/$service $serviceVersion
 }
@@ -69,10 +69,10 @@ monolith=${1}
 Monolith=$(camelCase $monolith)
 monolithVersion=${2:-$defaultVersion}
 dest_folder=${3:-$defaultDestFolder}
-service=${4:-defaultServiceName}
+api=${4:-defaultServiceName}
 Service=$(camelCase $service)
 serviceVersion=${5:-$defaultVersion}
-services="\"${service}-service-base\", \"${service}-service-can\", \"${service}-service-us\", \"${service}-service-mx\""
+services="\"${api}-service-base\", \"${api}-service-can\", \"${api}-service-us\", \"${api}-service-mx\""
 
 [[ ! -d $dest_folder ]] && mkdir $dest_folder
 echo "Creating monolith ${monolith}(${monolithVersion}) with included service $service($serviceVersion) in folder $dest_folder" >&2

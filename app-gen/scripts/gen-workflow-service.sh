@@ -140,7 +140,7 @@ while getopts ":sjd:v:gcae" opts; do
 done
 shift $((OPTIND-1))
 
-service=${1}
+api=${1}
 [[ -z $service ]] && {
 	echo "Service is not specified."
 	usage
@@ -150,6 +150,6 @@ Service=$(camelCase $service)
 
 
 [[ ! -d $dest_folder ]] && mkdir $dest_folder
-echo "Creating service ${service}(${serviceVersion}) in folder $dest_folder. (security = $securityEnabled, jpa = $jpa)" >&2
+echo "Creating service ${api}(${serviceVersion}) in folder $dest_folder. (security = $securityEnabled, jpa = $jpa)" >&2
 generateService
 _exit 0

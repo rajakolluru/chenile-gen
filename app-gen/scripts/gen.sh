@@ -2,23 +2,23 @@
 
 function generateInternationalServiceMonolith(){
     export serviceTemplate="monolith-with-service-international"
-    service=$(captureNonNullField "Service Name")
+    api=$(captureNonNullField "Service Name")
     serviceVersion=$(captureFieldWithDefaultValue "Service Version" "$defaultVersion")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
-    defaultMonolithName=${service}deploy
+    defaultMonolithName=${api}deploy
     monolith=$(captureFieldWithDefaultValue "Mini Monolith" $defaultMonolithName)
     monolithVersion=${serviceVersion}
-    $scripts_folder/gen-service-monolith-international.sh $monolith $monolithVersion $outfolder $service $serviceVersion 
+    $scripts_folder/gen-api-monolith-international.sh $monolith $monolithVersion $outfolder $service $serviceVersion
 }
 
 function generateService(){   
-    service=$(captureNonNullField "Service Name")
+    api=$(captureNonNullField "Service Name")
     serviceVersion=$(captureFieldWithDefaultValue "Service Version" "$defaultVersion")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
     security=$(captureFieldWithDefaultValue "Enable Security?" "n")
     jpa=$(captureFieldWithDefaultValue "Enable JPA?" "y")
     cmdline=$(generateCommandLine $serviceVersion $outfolder $security $jpa)
-    $scripts_folder/gen-service.sh $cmdline $service
+    $scripts_folder/gen-api.sh $cmdline $service
 }
 
 function generateBdd(){
@@ -41,16 +41,16 @@ function generateMybatisQuery(){
 }
 
 function generateQueryService(){   
-    service=$(captureNonNullField "Service Name")
+    api=$(captureNonNullField "Service Name")
     serviceVersion=$(captureFieldWithDefaultValue "Service Version" "$defaultVersion")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
     security=$(captureFieldWithDefaultValue "Security Enabled?" "n")
     generateQueryController=$(captureFieldWithDefaultValue "Generate Query Controller?" "n")
-    $scripts_folder/gen-query-service.sh $service $serviceVersion $outfolder $security $generateQueryController
+    $scripts_folder/gen-query-api.sh $service $serviceVersion $outfolder $security $generateQueryController
 }
 
 function generateWorkflowService(){   
-    service=$(captureNonNullField "Workflow Entity Service Name")
+    api=$(captureNonNullField "Workflow Entity Service Name")
     serviceVersion=$(captureFieldWithDefaultValue "Workflow Entity Service Version" "$defaultVersion")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
     security=$(captureFieldWithDefaultValue "Enable Security?" "n")
@@ -58,11 +58,11 @@ function generateWorkflowService(){
     activity=$(captureFieldWithDefaultValue "Enable Activity Tracking?" "n")
     enablement=$(captureFieldWithDefaultValue "Generate Enablement Code?" "n")
     cmdline=$(generateCommandLine $serviceVersion $outfolder $security $jpa )
-    $scripts_folder/gen-workflow-service.sh $cmdline $service
+    $scripts_folder/gen-workflow-api.sh $cmdline $service
 }
 
 function generateWorkflowServiceFromXml(){
-    service=$(captureNonNullField "Workflow Entity Service Name")
+    api=$(captureNonNullField "Workflow Entity Service Name")
     serviceVersion=$(captureFieldWithDefaultValue "Workflow Entity Service Version" "$defaultVersion")
     xmlFile=$(captureFile "Workflow XML File")
     outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
@@ -72,10 +72,10 @@ function generateWorkflowServiceFromXml(){
     enablement=$(captureFieldWithDefaultValue "Generate Enablement Code?" "n")
     genCustomizedPayload=$(captureFieldWithDefaultValue "Generate Customized Payload for each event?" "n")
     cmdline=$(generateCommandLine $serviceVersion $outfolder $security $jpa )
-    $scripts_folder/gen-workflow-service-custom.sh $cmdline $service
+    $scripts_folder/gen-workflow-api-custom.sh $cmdline $service
 }
 
-# Usage: generateCommandLine version outfolder security persistenceEnabled [included-service [included-service-version]]
+# Usage: generateCommandLine version outfolder security persistenceEnabled [included-api [included-api-version]]
 function generateCommandLine(){
     cmdline="-v $1 -d $2"
     if [[ $3 == "y" ]]
@@ -126,7 +126,7 @@ function generateMiniMonolith(){
     monolith=$(captureNonNullField "Mini Monolith Name")
     monolithVersion=$(captureFieldWithDefaultValue "Mini Monolith Version" $defaultVersion)
     [[ -z $outfolder ]] && outfolder=$(captureFieldWithDefaultValue "Output Folder" $defaultDestFolder)
-    [[ -z $service ]] && service=$(captureFieldWithDefaultValue "Service Name to bundle" $defaultServiceName)
+    [[ -z $service ]] && api=$(captureFieldWithDefaultValue "Service Name to bundle" $defaultServiceName)
     [[ -z $serviceVersion ]] && serviceVersion=$(captureFieldWithDefaultValue "Service Version" $defaultVersion)
     [[ -z $jpa ]] && jpa=$(captureFieldWithDefaultValue "Enable JPA?" "y")
     [[ -z $security ]] && security=$(captureFieldWithDefaultValue "Enable Security?" "n")

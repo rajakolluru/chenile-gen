@@ -35,7 +35,7 @@ function setenv(){
 
 function generateService(){
     constructJsonfile > $json_file
-    template_folder=$template_folder_base/service
+    template_folder=$template_folder_base/api
     generateModule $template_folder $dest_folder $json_file "service com org company Service"
     if [[ $gitInit == "true" ]]
     then
@@ -121,7 +121,7 @@ while getopts ":sjd:v:gc" opts; do
 done
 shift $((OPTIND-1))
 
-service=${1}
+api=${1}
 [[ -z $service ]] && {
 	echo "Service is not specified."
 	usage
@@ -130,6 +130,6 @@ service=${1}
 Service=$(camelCase $service)
 
 [[ ! -d $dest_folder ]] && mkdir $dest_folder
-echo "Creating service ${service}(${serviceVersion}) in folder $dest_folder" >&2
+echo "Creating service ${api}(${serviceVersion}) in folder $dest_folder" >&2
 generateService
 _exit 0

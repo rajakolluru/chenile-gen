@@ -41,7 +41,7 @@ function generateService(){
 	constructJsFile > $json_file
 	template_folder=$template_folder_base/workflowservice_custom
   generateModule $template_folder $dest_folder $json_file "service com org company Service"
-  cp $xmlFile $dest_folder/${service}/${service}-service/src/main/resources/${com}/${company}/${org}/${service}/${service}-states.xml
+  cp $xmlFile $dest_folder/${api}/${api}-api/src/main/resources/${com}/${company}/${org}/${api}/${api}-states.xml
   if [[ $gitInit == "true" ]]
   then
   	doGitInit $dest_folder/$service $serviceVersion
@@ -173,7 +173,7 @@ while getopts ":sjd:v:x:gcaep" opts; do
 done
 shift $((OPTIND-1))
 
-service=${1}
+api=${1}
 [[ -z $service ]] && {
 	echo "Service is not specified."
 	usage
@@ -188,6 +188,6 @@ Service=$(camelCase $service)
 }
 
 [[ ! -d $dest_folder ]] && mkdir $dest_folder
-echo "Creating service ${service}(${serviceVersion}) in folder $dest_folder. (security = $securityEnabled, jpa = $jpa)" >&2
+echo "Creating service ${api}(${serviceVersion}) in folder $dest_folder. (security = $securityEnabled, jpa = $jpa)" >&2
 generateService
 _exit 0
