@@ -8,4 +8,5 @@ public class InputField {
     public String defaultValue;
     public FieldType type;
     public List<String> validValues;
+    public List<InputField> childFields;
 }

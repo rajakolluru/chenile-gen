@@ -45,6 +45,69 @@
       "type" : "BOOLEAN",
       "description": "Enable MCP support",
       "defaultValue" : "n"
+    },
+    {
+      "name" : "enableServiceRegistry",
+      "type" : "BOOLEAN",
+      "description": "Host the Chenile service registry in this monolith",
+      "defaultValue" : "n"
+    },
+    {
+      "name" : "enableServiceRegistryDelegate",
+      "type" : "BOOLEAN",
+      "description": "Use the Chenile service registry delegate in this monolith",
+      "defaultValue" : "n"
+    },
+    {
+      "name" : "serviceRegistryUrl",
+      "type" : "STRING",
+      "description": "Remote Chenile service registry URL when delegate mode is enabled"
+    },
+    {
+      "name" : "dependencies",
+      "type" : "RECORD_ARRAY",
+      "description": "Maven dependencies",
+      "childFields" :[
+        {
+          "name" : "dependencyName",
+          "type" : "STRING",
+          "description": "Dependency artifactId"
+        },
+        {
+          "name" : "dependencyGroup",
+          "type" : "STRING",
+          "description": "Dependency groupId"
+        },
+        {
+          "name" : "dependencyVersion",
+          "type" : "STRING",
+          "description": "Dependency version"
+        }
+      ]
+    },
+    {
+      "name" : "enableQueryController",
+      "type" : "BOOLEAN",
+      "description": "Include the Chenile query controller in this monolith",
+      "defaultValue" : "n"
+    },
+    {
+      "name" : "enableH2Console",
+      "type" : "BOOLEAN",
+      "description": "Enable the Spring Boot H2 console for JPA-based monoliths",
+      "defaultValue" : "n"
+    },
+    {
+      "name" : "mcpServerName",
+      "type" : "STRING",
+      "description": "MCP server name when MCP is enabled",
+      "defaultValue" : "${monolith}"
+    },
+    {
+      "name" : "mcpInstructions",
+      "type" : "STRING",
+      "description": "MCP server instructions when MCP is enabled",
+      "defaultValue" : "This server exposes MCP tools from the ${monolith} mini monolith"
     }
   ]
 }

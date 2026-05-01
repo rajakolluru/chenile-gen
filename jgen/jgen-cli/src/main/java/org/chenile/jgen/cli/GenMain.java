@@ -80,10 +80,10 @@ public class GenMain implements Runnable {
             return;
         }
         BlueprintConfig blueprintConfig = bpc.get();
-        Map<String,String> expectedMap = new HashMap<>();
+        Map<String,Object> expectedMap = new HashMap<>();
         expectedMap.put("blueprint",generateBluePrint);
         for(InputField inf: blueprintConfig.inputFields){
-            expectedMap.put(inf.name,inf.defaultValue);
+            expectedMap.put(inf.name, inf.type == FieldType.RECORD_ARRAY ? List.of() : inf.defaultValue);
         }
         String s = prettyWriter.writeValueAsString(expectedMap);
         if (outputFile == null) {
@@ -97,7 +97,6 @@ public class GenMain implements Runnable {
             System.err.println("An error occurred while writing to the file: " + e.getMessage());
         }
     }
-
 
     /**
      * Checks if there is a config folder. Gives an option to use one of the configs
@@ -161,7 +160,7 @@ public class GenMain implements Runnable {
             return;
         }
         BlueprintConfig blueprintConfig;
-        Map<String,String> inputMap = null;
+        Map<String,Object> inputMap = null;
         if (inputFile == null)
             blueprintConfig = captureBlueprint(scanner,list);
         else {
@@ -180,7 +179,7 @@ public class GenMain implements Runnable {
         System.out.println(map);
     }
 
-    private Map<String,String> readJson(File inputFile){
+    private Map<String,Object> readJson(File inputFile){
         try {
             return objectMapper.readValue(inputFile, Map.class);
         }catch(Exception e){
@@ -188,11 +187,10 @@ public class GenMain implements Runnable {
         }
     }
 
-    private BlueprintConfig getBlueprintFromInput(Map<String,String> map, List<BlueprintConfig> list) {
+    private BlueprintConfig getBlueprintFromInput(Map<String,Object> map, List<BlueprintConfig> list) {
         Optional<BlueprintConfig> optional = list.stream().filter(bp -> bp.name.equals(map.get("blueprint"))).findFirst();
         return optional.orElse(null);
     }
-
 
     private BlueprintConfig captureBlueprint(Scanner scanner,List<BlueprintConfig> list){
         List<String> sList = list.stream().map(bp -> bp.description + " (" + bp.name + ")").toList();
@@ -200,7 +198,6 @@ public class GenMain implements Runnable {
         int c = captureOneOfMany(scanner,sList);
         return list.get(c-1);
     }
-
 
     private Config obtainConfig(){
         if (configFile != null){
@@ -215,14 +212,15 @@ public class GenMain implements Runnable {
 
     private void buildInputMap(Map<String,Object> map,BlueprintConfig blueprintConfig,
                                Map<String,Object> configMap,Scanner scanner,
-                               Map<String,String> inputMap){
+                               Map<String,Object> inputMap){
+
         for(InputField field: blueprintConfig.inputFields){
-            String value = captureField(field,configMap,scanner,inputMap);
+            Object value = captureField(field,map,scanner,inputMap);
             if(field.type == FieldType.BOOLEAN){
-                if(value.equals("y"))
-                    map.put(field.name,"true");
-            }else
+                map.put(field.name, value.equals("y") ? "true" : "false");
+            }else {
                 map.put(field.name,value);
+            }
         }
     }
 

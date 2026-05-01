@@ -15,6 +15,9 @@ public class InitMinimonolithBlueprint implements InitHook {
         blueprintConfig.postInputCaptureHook = (Map<String,Object> map) -> {
             String minimonolith = (String)map.get("monolith");
             map.put("Monolith", CapUtils.capitalizeFirst(minimonolith));
+            map.putIfAbsent("mcpServerName", minimonolith);
+            map.putIfAbsent("mcpInstructions",
+                    "This server exposes MCP tools from the " + minimonolith + " mini monolith");
             // populate with a dummy api
             map.put("service","myService");
             map.put("serviceVersion","myServiceVersion");

@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 {{/jpa}}
 
 @SpringBootApplication(scanBasePackages = { "{{com}}.{{company}}.{{org}}.**.configuration",
+{{#enableServiceRegistry}}
+		"{{chenilePackage}}.service.registry.configuration",
+{{/enableServiceRegistry}}
 		"{{chenilePackage}}.configuration" })
 {{#jpa}}
 @EntityScan("{{com}}.{{company}}.{{org}}.**.model")

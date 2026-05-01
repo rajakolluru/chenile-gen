@@ -1,5 +1,10 @@
 
 chenile:
+{{#enableServiceRegistryDelegate}}
+  remote:
+    service:
+      registry: {{serviceRegistryUrl}}
+{{/enableServiceRegistryDelegate}}
   security:
     client:
       id: "authz-servlet"
@@ -18,11 +23,11 @@ spring:
     mcp:
       server:
         enabled: true
-        name: {{monolith}}
+        name: {{mcpServerName}}
         type: SYNC
         version: {{monolithVersion}}
         protocol: STREAMABLE
-        instructions: "This server exposes MCP tools from the {{monolith}} mini monolith"
+        instructions: "{{mcpInstructions}}"
         capabilities:
           tool: true
           resource: true
@@ -31,6 +36,11 @@ spring:
         streamable-http:
           mcp-endpoint: /mcp
 {{/enableMCP}}
+{{#enableH2Console}}
+  h2:
+    console:
+      enabled: true
+{{/enableH2Console}}
   security:
     oauth2:
       resourceserver:
@@ -45,3 +55,9 @@ logging:
     org:
       chenile:
         security: DEBUG
+{{#enableQueryController}}
+
+query:
+  mapperFiles: classpath*:{{com}}/{{company}}/{{org}}/**/mapper/*.xml
+  definitionFiles: classpath*:{{com}}/{{company}}/{{org}}/**/mapper/*.json
+{{/enableQueryController}}

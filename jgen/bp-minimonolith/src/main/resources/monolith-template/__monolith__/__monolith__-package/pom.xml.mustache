@@ -33,6 +33,24 @@
 				<artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
 			</dependency>
 			{{/enableMCP}}
+			{{#enableServiceRegistry}}
+			<dependency>
+				<groupId>{{chenilePackage}}</groupId>
+				<artifactId>service-registry-service</artifactId>
+			</dependency>
+			{{/enableServiceRegistry}}
+			{{#enableServiceRegistryDelegate}}
+			<dependency>
+				<groupId>{{chenilePackage}}</groupId>
+				<artifactId>service-registry-delegate</artifactId>
+			</dependency>
+			{{/enableServiceRegistryDelegate}}
+			{{#enableQueryController}}
+			<dependency>
+				<groupId>{{chenilePackage}}</groupId>
+				<artifactId>chenile-query-controller</artifactId>
+			</dependency>
+			{{/enableQueryController}}
 			<!-- Chenile Dependencies Ends -->
 
 		<dependency>
@@ -59,6 +77,12 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
+        {{#enableH2Console}}
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-h2console</artifactId>
+        </dependency>
+        {{/enableH2Console}}
         {{/jpa}}
 
         {{#security}}
@@ -73,13 +97,14 @@
         {{/security}}
 
 		<!-- Start including all the services that need to be packaged with this mini monolith -->
-		{{#services}}
-  			<dependency>
-				<groupId>{{com}}.{{company}}.{{org}}.{{service}}</groupId>
-				<artifactId>{{.}}</artifactId>
-				<version>{{serviceVersion}}</version>
+		
+		{{#dependencies}}
+			<dependency>
+				<groupId>{{dependencyGroup}}</groupId>
+				<artifactId>{{dependencyName}}</artifactId>
+				{{#dependencyVersion}}<version>{{dependencyVersion}}</version>{{/dependencyVersion}}
 			</dependency>
-  		{{/services}}
+		{{/dependencies}}
 		
 	</dependencies>
 
