@@ -16,10 +16,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@ChenileController(value = "{{service}}StateEntityInfoService", serviceName = "_{{service}}StateEntityInfoService_")
+@ChenileController(value = "{{service}}StateEntityInfoService", serviceName = "_{{service}}StateEntityInfoService_",
+		healthCheckerName = "{{service}}HealthChecker")
 public class {{Service}}StateEntityInfoController extends ControllerSupport {
     @PostMapping("/{{service}}/info/state-diagram")
-    public ResponseEntity<GenericResponse<WorkflowInfoResponse<String>>> renderStateDiagram(
+    public ResponseEntity<GenericResponse<WorkflowInfoResponse<byte[]>>> renderStateDiagram(
             HttpServletRequest request,
             @RequestBody(required = false) StateEntityInfoRequest workflowInfoRequest) {
         return process("renderStateDiagram", request, workflowInfoRequest);
@@ -54,7 +55,7 @@ public class {{Service}}StateEntityInfoController extends ControllerSupport {
     }
 
     @PostMapping("/{{service}}/info/test-state-diagrams")
-    public ResponseEntity<GenericResponse<WorkflowInfoResponse<Map<String, String>>>> renderTestsAsStateDiagram(
+    public ResponseEntity<GenericResponse<WorkflowInfoResponse<Map<String, byte[]>>>> renderTestsAsStateDiagram(
             HttpServletRequest request,
             @RequestBody(required = false) StateEntityInfoRequest workflowInfoRequest) {
         return process("renderTestsAsStateDiagram", request, workflowInfoRequest);

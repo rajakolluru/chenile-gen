@@ -222,6 +222,7 @@ The generated controller layer also includes a per-service `StateEntityInfoContr
 - testcase state-diagram rendering
 
 This controller is generated per service instead of being shared globally so that the Chenile `serviceName` remains service-qualified, matching the rest of the workflow blueprint naming convention.
+The state-diagram endpoints return PNG bytes in the payload, which allows admin UIs to render workflow visuals directly without a second PlantUML conversion step.
 
 ## Generation Pipeline
 
