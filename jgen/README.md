@@ -203,6 +203,26 @@ Examples of blueprint-specific hook behavior in this repository:
 - `bp-wfcustom` parses a workflow XML file and injects workflow/testcase data into the template map
 - `bp-batch` parses a batch definition file and computes root and child process metadata before generation
 
+## Workflow Blueprint Notes
+
+The workflow blueprints `bp-wfservice` and `bp-wfcustom` now generate two Chenile service layers around the same STM wiring:
+
+- the primary workflow mutation service, backed by `_serviceStateEntityService_`
+- a runtime workflow introspection service, backed by `_serviceStateEntityInfoService_`
+
+The generated configuration instantiates `StateEntityInfoServiceImpl` from the same `STMFlowStoreImpl` and `STMActionsInfoProvider` used by the main workflow service.
+
+The generated controller layer also includes a per-service `StateEntityInfoController` under the service's `configuration.controller` package. It exposes admin-style endpoints under `/{service}/info/...` for:
+
+- state diagram rendering
+- allowed action lookup
+- workflow JSON rendering
+- generated testcase output
+- testcase visualization
+- testcase state-diagram rendering
+
+This controller is generated per service instead of being shared globally so that the Chenile `serviceName` remains service-qualified, matching the rest of the workflow blueprint naming convention.
+
 ## Generation Pipeline
 
 The shared execution pipeline lives in:

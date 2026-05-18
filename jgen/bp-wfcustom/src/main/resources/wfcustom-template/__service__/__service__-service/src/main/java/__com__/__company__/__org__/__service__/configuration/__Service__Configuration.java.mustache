@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import {{chenilePackage}}.utils.entity.service.EntityStore;
+import {{chenilePackage}}.configuration.workflow.info.service.StateEntityInfoServiceImpl;
 import {{chenilePackage}}.workflow.service.impl.StateEntityServiceImpl;
 import {{chenilePackage}}.workflow.service.stmcmds.*;
 import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
@@ -75,6 +76,12 @@ public class {{Service}}Configuration {
 			@Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider,
 			@Qualifier("{{service}}EntityStore") EntityStore<{{Service}}> entityStore){
 		return new {{Service}}ServiceImpl(stm, {{service}}InfoProvider, entityStore);
+	}
+
+	@Bean StateEntityInfoServiceImpl _{{service}}StateEntityInfoService_(
+			@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore,
+			@Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider){
+		return new StateEntityInfoServiceImpl(stmFlowStore, {{service}}InfoProvider);
 	}
 	
 	// Now we start constructing the STM Components 
