@@ -222,17 +222,20 @@ public class GenMain implements Runnable {
         return InputCapture.captureField(field, configMap, null, Map.of()).toString();
     }
 
+    static Object normalizeFieldValue(InputField field, Object value) {
+        if (field.type != FieldType.BOOLEAN) {
+            return value;
+        }
+        return "y".equalsIgnoreCase(value.toString());
+    }
+
     private void buildInputMap(Map<String,Object> map,BlueprintConfig blueprintConfig,
                                Map<String,Object> configMap,Scanner scanner,
                                Map<String,Object> inputMap){
 
         for(InputField field: blueprintConfig.inputFields){
             Object value = captureField(field,map,scanner,inputMap);
-            if(field.type == FieldType.BOOLEAN){
-                map.put(field.name, value.equals("y") ? "true" : "false");
-            }else {
-                map.put(field.name,value);
-            }
+            map.put(field.name, normalizeFieldValue(field, value));
         }
     }
 

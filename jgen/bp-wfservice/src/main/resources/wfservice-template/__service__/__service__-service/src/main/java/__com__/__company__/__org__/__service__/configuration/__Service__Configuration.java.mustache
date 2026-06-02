@@ -189,7 +189,7 @@ public class {{Service}}Configuration {
     @Bean  Function<ChenileExchange, String[]> {{service}}EventAuthoritiesSupplier(
         @Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider)
                     throws Exception{
-        StmAuthoritiesBuilder builder = new StmAuthoritiesBuilder({{service}}InfoProvider);
+        StmAuthoritiesBuilder builder = new StmAuthoritiesBuilder({{service}}InfoProvider,false);
         return builder.build();
     }
 {{/security}}

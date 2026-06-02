@@ -28,6 +28,17 @@ class InputCaptureTest {
     }
 
     @Test
+    void booleanInputsAreNormalizedToRealBooleans() {
+        InputField field = new InputField();
+        field.name = "security";
+        field.type = FieldType.BOOLEAN;
+        field.description = "Enable Security";
+
+        assertEquals(Boolean.TRUE, GenMain.normalizeFieldValue(field, "y"));
+        assertEquals(Boolean.FALSE, GenMain.normalizeFieldValue(field, "n"));
+    }
+
+    @Test
     void defaultValueCanReferenceEarlierCapturedField() {
         Map<String, Object> resolutionMap = new HashMap<>();
         resolutionMap.put("monolith", "agent");
