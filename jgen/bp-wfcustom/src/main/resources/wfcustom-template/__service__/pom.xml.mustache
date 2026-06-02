@@ -18,7 +18,7 @@
 		<revision>{{serviceVersion}}</revision>
 	</properties>
 	
-	<groupId>{{com}}.{{company}}.{{org}}.{{service}}</groupId>
+	<groupId>{{com}}.{{company}}.{{org}}.{{servicePackage}}</groupId>
 	<version>${revision}</version>
 	<artifactId>{{service}}-parent</artifactId>
 	<name>All Modules that belong to the {{Service}} </name>
@@ -27,12 +27,12 @@
 	<dependencyManagement>
 	<dependencies>
 		<dependency>
-			<groupId>{{com}}.{{company}}.{{org}}.{{service}}</groupId>
+			<groupId>{{com}}.{{company}}.{{org}}.{{servicePackage}}</groupId>
 			<version>${revision}</version>
 			<artifactId>{{service}}-service</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>{{com}}.{{company}}.{{org}}.{{service}}</groupId>
+			<groupId>{{com}}.{{company}}.{{org}}.{{servicePackage}}</groupId>
 			<version>${revision}</version>
 			<artifactId>{{service}}-api</artifactId>
 		</dependency>

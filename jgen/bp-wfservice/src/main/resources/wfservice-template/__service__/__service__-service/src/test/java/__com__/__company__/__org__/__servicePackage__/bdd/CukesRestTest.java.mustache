@@ -1,0 +1,26 @@
+package {{com}}.{{company}}.{{org}}.{{servicePackage}}.bdd;
+
+import org.springframework.test.context.ActiveProfiles;
+
+import io.cucumber.junit.Cucumber;
+import io.cucumber.junit.CucumberOptions;
+import org.junit.runner.RunWith;
+
+@RunWith(Cucumber.class)
+
+@CucumberOptions(features = "src/test/resources/features",
+    glue = {"classpath:{{com}}/{{company}}/{{org}}/{{servicePackage}}/bdd",
+{{#security}}
+    "classpath:org/chenile/cucumber/security/rest",
+{{/security}}
+{{#enablement}}
+    "classpath:org/chenile/cucumber/workflow",
+{{/enablement}}
+    "classpath:org/chenile/cucumber/rest"},
+
+        plugin = {"pretty"}
+        )
+@ActiveProfiles("unittest")
+public class CukesRestTest {
+
+}

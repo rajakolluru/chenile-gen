@@ -1,0 +1,23 @@
+package {{com}}.{{company}}.{{org}}.{{servicePackage}};
+
+
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.test.context.ActiveProfiles;
+
+import {{chenilePackage}}.utils.entity.service.EntityStore;
+import {{com}}.{{company}}.{{org}}.{{servicePackage}}.model.{{Service}};
+
+
+@Configuration
+@PropertySource("classpath:{{com}}/{{company}}/{{org}}/{{servicePackage}}/TestService.properties")
+@SpringBootApplication(scanBasePackages = { "{{chenilePackage}}.configuration", "{{com}}.{{company}}.{{org}}.{{servicePackage}}.configuration" })
+@ActiveProfiles("unittest")
+public class SpringTestConfig extends SpringBootServletInitializer{
+	
+}
+

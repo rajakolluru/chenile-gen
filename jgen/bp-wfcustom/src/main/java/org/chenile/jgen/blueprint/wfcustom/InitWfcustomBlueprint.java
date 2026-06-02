@@ -5,6 +5,7 @@ import org.apache.commons.text.StringSubstitutor;
 import org.chenile.jgen.blueprints.BlueprintConfig;
 import org.chenile.jgen.blueprints.InitHook;
 import org.chenile.jgen.util.CapUtils;
+import org.chenile.jgen.util.JavaNameUtils;
 import org.chenile.workflow.cli.CLIHelper;
 import org.chenile.workflow.cli.CLIParams;
 import org.chenile.workflow.testcases.Testcase;
@@ -20,12 +21,14 @@ public class InitWfcustomBlueprint implements InitHook {
         blueprintConfig.postInputCaptureHook = (Map<String,Object> map) -> {
             String service = (String)map.get("service");
             map.put("Service", CapUtils.capitalizeFirst(service));
+            map.put("servicePackage", JavaNameUtils.safePackageSegment(service));
+            map.put("serviceVar", JavaNameUtils.safeVariableName(service));
             String xmlFile = (String)map.get("xmlFile");
             processXmlFile(xmlFile,map);
         };
         blueprintConfig.postProcessHook = (Map<String,Object> map) -> {
                 String xmlFile = (String)map.get("xmlFile");
-                String destPath  = "${destFolder}/${service}/${service}-service/src/main/resources/${com}/${company}/${org}/${service}/${service}-states.xml";
+                String destPath  = "${destFolder}/${service}/${service}-service/src/main/resources/${com}/${company}/${org}/${servicePackage}/${service}-states.xml";
                 StringSubstitutor stringSubstitutor = new StringSubstitutor(map);
                 destPath = stringSubstitutor.replace(destPath);
                 File dest = new File(destPath);

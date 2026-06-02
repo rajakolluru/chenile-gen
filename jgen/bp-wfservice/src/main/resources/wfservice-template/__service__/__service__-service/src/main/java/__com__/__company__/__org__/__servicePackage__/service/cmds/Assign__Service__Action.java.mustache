@@ -1,0 +1,25 @@
+package {{com}}.{{company}}.{{org}}.{{servicePackage}}.service.cmds;
+
+import {{chenilePackage}}.stm.STMInternalTransitionInvoker;
+import {{chenilePackage}}.stm.State;
+import {{chenilePackage}}.stm.model.Transition;
+import {{chenilePackage}}.workflow.service.stmcmds.AbstractSTMTransitionAction;
+
+import {{com}}.{{company}}.{{org}}.{{servicePackage}}.model.Assign{{Service}}Payload;
+import {{com}}.{{company}}.{{org}}.{{servicePackage}}.model.{{Service}};
+
+/**
+    This class implements the assign action. It will need to inherit from the AbstractSTMTransitionAction for
+    auto wiring into STM to work properly. Be sure to use the PayloadType as the second argument and
+    override the transitionTo method accordingly as shown below.
+*/
+public class Assign{{Service}}Action extends AbstractSTMTransitionAction<{{Service}},Assign{{Service}}Payload>{
+
+	@Override
+	public void transitionTo({{Service}} {{serviceVar}}, Assign{{Service}}Payload payload, State startState, String eventId,
+			State endState, STMInternalTransitionInvoker<?> stm, Transition transition) throws Exception {
+		{{serviceVar}}.assignee = payload.assignee;
+		{{serviceVar}}.assignComment = payload.getComment();
+	}
+
+}

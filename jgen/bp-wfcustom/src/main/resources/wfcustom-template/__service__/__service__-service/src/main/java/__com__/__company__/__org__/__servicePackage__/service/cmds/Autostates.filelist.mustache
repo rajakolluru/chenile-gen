@@ -1,0 +1,23 @@
+{{#workflow}}
+    {{#flows}}
+        {{#states}}
+                {{#componentNameNotDefined}}
+
+--START--{{#capitalize}}{{id}}{{/capitalize}}AutoState.java
+package {{com}}.{{company}}.{{org}}.{{servicePackage}}.service.cmds;
+
+import {{com}}.{{company}}.{{org}}.{{servicePackage}}.model.{{Service}};
+import {{chenilePackage}}.stm.action.STMAutomaticStateComputation;
+
+public class {{#capitalize}}{{id}}{{/capitalize}}AutoState implements STMAutomaticStateComputation<{{Service}}> {
+    @Override
+    public String execute({{Service}} {{serviceVar}}) throws Exception {
+        // TODO - Replace the below snippet with relevant code. Test cases will fail till then
+        return "write-code-here-to-generate-events";
+    }
+}
+--END--
+                {{/componentNameNotDefined}}
+        {{/states}}
+    {{/flows}}
+{{/workflow}}

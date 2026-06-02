@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>{{com}}.{{company}}.{{org}}.{{service}}</groupId>
+		<groupId>{{com}}.{{company}}.{{org}}.{{servicePackage}}</groupId>
 		<artifactId>{{service}}-parent</artifactId>
 		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
@@ -16,7 +16,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>{{com}}.{{company}}.{{org}}.{{service}}</groupId>
+			<groupId>{{com}}.{{company}}.{{org}}.{{servicePackage}}</groupId>
 			<artifactId>{{service}}-api</artifactId>
 		</dependency>
 	
@@ -27,6 +27,7 @@
 			<dependency>
 				<groupId>{{chenilePackage}}</groupId>
 				<artifactId>workflow-info</artifactId>
+				<version>{{chenileVersion}}</version>
 			</dependency>
 			{{#enableMCP}}
 			<dependency>
@@ -91,15 +92,16 @@
             <plugin>
                 <groupId>org.chenile</groupId>
                 <artifactId>stm-generate-puml</artifactId>
+                <version>{{chenileVersion}}</version>
                 <executions>
                     <execution>
                         <goals>
                             <goal>generate-puml</goal>
                         </goals>
                         <configuration>
-                            <stylingPropertiesFile>{{com}}/{{company}}/{{org}}/{{service}}/styling.json</stylingPropertiesFile>
+                            <stylingPropertiesFile>{{com}}/{{company}}/{{org}}/{{servicePackage}}/styling.json</stylingPropertiesFile>
                             {{#enablement}}
-                            <enablementPropertiesFile>{{com}}/{{company}}/{{org}}/{{service}}/enablement.properties</enablementPropertiesFile>
+                            <enablementPropertiesFile>{{com}}/{{company}}/{{org}}/{{servicePackage}}/enablement.properties</enablementPropertiesFile>
                             <prefix>{{Service}}</prefix>
                             {{/enablement}}
                         </configuration>
