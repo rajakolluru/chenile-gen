@@ -31,7 +31,7 @@ import {{chenilePackage}}.security.model.SecurityConfig;
 
 @RestController
 @ChenileController(value = "{{service}}Service", serviceName = "_{{service}}StateEntityService_",
-		healthCheckerName = "{{service}}HealthChecker")
+		healthCheckerName = "{{service}}HealthChecker", bluePrintName = "wfservice")
 public class {{Service}}Controller extends ControllerSupport{
 	
 	@GetMapping("/{{service}}/{id}")

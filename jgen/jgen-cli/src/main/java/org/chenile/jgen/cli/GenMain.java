@@ -69,6 +69,8 @@ public class GenMain implements Runnable {
     }
 
     private void generateBluePrintFile() throws Exception{
+        Config config = obtainConfig();
+        Map<String,Object> configMap = configProvider.getConfigAsMap(config);
         List<BlueprintConfig> list = List.copyOf(Registry.blueprints.values());
         if (list.isEmpty()){
             System.err.println("No blueprints found!");
@@ -83,7 +85,7 @@ public class GenMain implements Runnable {
         Map<String,Object> expectedMap = new HashMap<>();
         expectedMap.put("blueprint",generateBluePrint);
         for(InputField inf: blueprintConfig.inputFields){
-            expectedMap.put(inf.name, inf.type == FieldType.RECORD_ARRAY ? List.of() : inf.defaultValue);
+            expectedMap.put(inf.name, inf.type == FieldType.RECORD_ARRAY ? List.of() : resolveDefaultValue(inf, configMap));
         }
         String s = prettyWriter.writeValueAsString(expectedMap);
         if (outputFile == null) {
@@ -172,7 +174,7 @@ public class GenMain implements Runnable {
             }
         }
 
-        Map<String,Object> map = new HashMap<>();
+        Map<String,Object> map = new HashMap<>(configMap);
         buildInputMap(map,blueprintConfig,configMap,scanner,inputMap);
         blueprintExecutor.execute(blueprintConfig, config, map);
         System.out.println("Blue print " + blueprintConfig.name + " generated for inputs: ");
@@ -208,6 +210,16 @@ public class GenMain implements Runnable {
             return configProvider.obtainConfig(configFile);
         }
         return configProvider.obtainDefaultConfig();
+    }
+
+    static String resolveDefaultValue(InputField field, Map<String,Object> configMap){
+        if (field.defaultValue == null || field.defaultValue.isEmpty()) {
+            return null;
+        }
+        if (configMap == null || configMap.isEmpty()) {
+            return field.defaultValue;
+        }
+        return InputCapture.captureField(field, configMap, null, Map.of()).toString();
     }
 
     private void buildInputMap(Map<String,Object> map,BlueprintConfig blueprintConfig,

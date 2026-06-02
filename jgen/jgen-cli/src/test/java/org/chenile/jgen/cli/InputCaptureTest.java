@@ -14,6 +14,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class InputCaptureTest {
 
     @Test
+    void generatedBlueprintDefaultsResolveConfigVariables() {
+        Map<String, Object> configMap = new HashMap<>();
+        configMap.put("defaultDestFolder", "./output");
+
+        InputField field = new InputField();
+        field.name = "destFolder";
+        field.type = FieldType.STRING;
+        field.description = "Destination Folder";
+        field.defaultValue = "${defaultDestFolder}";
+
+        assertEquals("./output", GenMain.resolveDefaultValue(field, configMap));
+    }
+
+    @Test
     void defaultValueCanReferenceEarlierCapturedField() {
         Map<String, Object> resolutionMap = new HashMap<>();
         resolutionMap.put("monolith", "agent");
