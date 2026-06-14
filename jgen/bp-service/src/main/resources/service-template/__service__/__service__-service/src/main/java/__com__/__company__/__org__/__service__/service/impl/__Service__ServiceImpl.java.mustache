@@ -42,7 +42,7 @@ public class {{Service}}ServiceImpl implements {{Service}}Service{
     public {{Service}} retrieve(String id) {
         Optional<{{Service}}> entity = {{service}}Repository.findById(id);
         if (entity.isPresent()) return entity.get();
-        throw new NotFoundException(1500,"Unable to find {{service}} with ID " + id);
+        throw new NotFoundException("1500","Unable to find {{service}} with ID " + id);
     }
     {{/jpa}}
 }

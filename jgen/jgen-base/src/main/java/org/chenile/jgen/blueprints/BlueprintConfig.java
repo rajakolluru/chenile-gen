@@ -9,6 +9,8 @@ import java.util.function.Consumer;
 public class BlueprintConfig {
     public String name;
     public String description;
+    public String category;
+    public String version;
     public Class<InitHook> initHook;
     public Consumer<Map<String,Object>> postInputCaptureHook;
     public String templateFolder;

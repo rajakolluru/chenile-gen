@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JGen Portal</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <div class="workbench">
+    <aside class="activity-bar" aria-label="Primary navigation">
+      <div class="activity-logo">JG</div>
+      <button class="activity-item active" data-activity="generators" title="Generators">GEN</button>
+      <button class="activity-item" data-activity="workspace" title="Workspace">WS</button>
+      <button class="activity-item" data-activity="terminal" title="Terminal">TERM</button>
+    </aside>
+
+    <aside class="sidebar">
+      <header class="sidebar-header">
+        <div>
+          <div class="eyebrow">Generator Portal</div>
+          <h1>JGen Workbench</h1>
+        </div>
+      </header>
+      <div class="sidebar-search">
+        <input id="generatorSearch" class="search" type="search" placeholder="Search generators">
+      </div>
+      <div id="generatorList" class="generator-list" aria-label="Generator catalog"></div>
+    </aside>
+
+    <main class="main">
+      <section class="editor-surface">
+        <div class="editor-tabs">
+          <button class="editor-tab active">generator.json</button>
+          <button class="editor-tab muted">workspace</button>
+        </div>
+        <div class="configure">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow">Blueprint Configuration</div>
+              <h2 id="generatorTitle">Select a generator</h2>
+              <p id="generatorDescription">Choose a generator from the catalog to configure inputs.</p>
+            </div>
+            <button id="generateBtn" class="primary" disabled>Generate</button>
+          </div>
+          <form id="generatorForm" class="form-grid"></form>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="panel-tabs">
+          <button class="tab active" data-tab="logs">Generation</button>
+          <button class="tab" data-tab="files">Explorer</button>
+          <button class="tab" data-tab="tests">Tests</button>
+          <button class="tab" data-tab="build">Build</button>
+        </div>
+
+        <div class="tab-panel active" id="logsPanel">
+          <div class="toolbar terminal-toolbar">
+            <span id="operationStatus" class="status-pill idle">Idle</span>
+            <input id="logSearch" class="search small" type="search" placeholder="Search generation output">
+            <button id="copyLogBtn">Copy</button>
+            <a id="downloadLogBtn" class="button disabled" href="#">Download</a>
+          </div>
+          <div id="logViewer" class="terminal" role="log" aria-live="polite"></div>
+        </div>
+
+        <div class="tab-panel split" id="filesPanel">
+          <aside class="explorer">
+            <div class="toolbar">
+              <span class="panel-title">Explorer</span>
+              <button id="refreshTreeBtn">Refresh</button>
+              <a id="downloadProjectBtn" class="button disabled" href="#">ZIP</a>
+            </div>
+            <div id="fileTree" class="tree"></div>
+          </aside>
+          <section class="viewer">
+            <div class="toolbar editor-toolbar">
+              <span id="fileName" class="file-title">No file selected</span>
+              <input id="fileSearch" class="search small" type="search" placeholder="Search file">
+            </div>
+            <div id="fileViewer" class="code editor-empty">Open a generated file from Explorer.</div>
+          </section>
+        </div>
+
+        <div class="tab-panel" id="testsPanel">
+          <div class="toolbar terminal-toolbar">
+            <span class="status-pill idle" id="testStatus">Idle</span>
+            <button id="runTestsBtn">Run Tests</button>
+            <button id="rerunTestsBtn">Rerun</button>
+            <input id="testFilter" class="search small" type="text" placeholder="Optional -Dtest pattern">
+          </div>
+          <div id="testConsole" class="terminal" role="log" aria-live="polite"></div>
+        </div>
+
+        <div class="tab-panel" id="buildPanel">
+          <div class="toolbar terminal-toolbar">
+            <span class="status-pill idle" id="buildStatus">Idle</span>
+            <button id="runBuildBtn">Run Build</button>
+            <button id="rerunBuildBtn">Rerun</button>
+          </div>
+          <div id="buildConsole" class="terminal" role="log" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="status-bar">
+      <span>JGen Portal</span>
+      <span id="sessionStatus">Session starting</span>
+    </footer>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -22,6 +22,7 @@
 		<module>bp-it</module>
 		<module>bp-batch</module>
 		<module>jgen-cli</module>
+		<module>jgen-portal</module>
 	</modules>
 
 	<name>Java based Code Generator</name>
@@ -84,6 +85,11 @@
 			<dependency>
 				<groupId>org.chenile</groupId>
 				<artifactId>bp-batch</artifactId>
+				<version>${jgen.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>jgen-portal</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 		</dependencies>
