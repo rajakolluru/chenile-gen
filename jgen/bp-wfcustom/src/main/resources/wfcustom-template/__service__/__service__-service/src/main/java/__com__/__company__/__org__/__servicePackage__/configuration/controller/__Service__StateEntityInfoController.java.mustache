@@ -11,53 +11,98 @@ import {{chenilePackage}}.workflow.info.model.StateEntityAllowedActionsRequest;
 import {{chenilePackage}}.workflow.info.model.StateEntityInfoRequest;
 import {{chenilePackage}}.workflow.info.model.WorkflowInfoResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @ChenileController(value = "{{service}}StateEntityInfoService", serviceName = "_{{service}}StateEntityInfoService_",
         healthCheckerName = "{{service}}HealthChecker", bluePrintName = "wfcustom")
 public class {{Service}}StateEntityInfoController extends ControllerSupport {
-    @PostMapping("/{{service}}/info/state-diagram")
+    @RequestMapping(value = "/{{service}}/info/state-diagram", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<GenericResponse<WorkflowInfoResponse<byte[]>>> renderStateDiagram(
             HttpServletRequest request,
-            @RequestBody(required = false) StateEntityInfoRequest workflowInfoRequest) {
-        return process("renderStateDiagram", request, workflowInfoRequest);
+            @RequestBody(required = false) StateEntityInfoRequest workflowInfoRequest,
+            @RequestParam(required = false) String stylingPropertiesText,
+            @RequestParam(required = false) String flowId) {
+        return process("renderStateDiagram", request,
+                mergeStateEntityInfoRequest(workflowInfoRequest, stylingPropertiesText, flowId));
     }
 
-    @PostMapping("/{{service}}/info/allowed-actions")
+    @RequestMapping(value = "/{{service}}/info/allowed-actions", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<GenericResponse<WorkflowInfoResponse<List<String>>>> allowedActions(
             HttpServletRequest request,
-            @RequestBody StateEntityAllowedActionsRequest workflowInfoRequest) {
-        return process("allowedActions", request, workflowInfoRequest);
+            @RequestBody(required = false) StateEntityAllowedActionsRequest workflowInfoRequest,
+            @RequestParam(required = false) String stylingPropertiesText,
+            @RequestParam(required = false) String flowId,
+            @RequestParam(required = false) String state) {
+        return process("allowedActions", request,
+                mergeAllowedActionsRequest(workflowInfoRequest, stylingPropertiesText, flowId, state));
     }
 
-    @PostMapping("/{{service}}/info/json")
+    @RequestMapping(value = "/{{service}}/info/json", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<GenericResponse<WorkflowInfoResponse<Map<String, Object>>>> toJson(
             HttpServletRequest request,
-            @RequestBody(required = false) StateEntityInfoRequest workflowInfoRequest) {
-        return process("toJson", request, workflowInfoRequest);
+            @RequestBody(required = false) StateEntityInfoRequest workflowInfoRequest,
+            @RequestParam(required = false) String stylingPropertiesText,
+            @RequestParam(required = false) String flowId) {
+        return process("toJson", request,
+                mergeStateEntityInfoRequest(workflowInfoRequest, stylingPropertiesText, flowId));
     }
 
-    @PostMapping("/{{service}}/info/test-cases")
+    @RequestMapping(value = "/{{service}}/info/test-cases", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<GenericResponse<WorkflowInfoResponse<String>>> generateTestCases(
             HttpServletRequest request,
-            @RequestBody(required = false) StateEntityInfoRequest workflowInfoRequest) {
-        return process("generateTestCases", request, workflowInfoRequest);
+            @RequestBody(required = false) StateEntityInfoRequest workflowInfoRequest,
+            @RequestParam(required = false) String stylingPropertiesText,
+            @RequestParam(required = false) String flowId) {
+        return process("generateTestCases", request,
+                mergeStateEntityInfoRequest(workflowInfoRequest, stylingPropertiesText, flowId));
     }
 
-    @PostMapping("/{{service}}/info/test-visualization")
+    @RequestMapping(value = "/{{service}}/info/test-visualization", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<GenericResponse<WorkflowInfoResponse<String>>> visualizeTestCases(
             HttpServletRequest request,
-            @RequestBody(required = false) StateEntityInfoRequest workflowInfoRequest) {
-        return process("visualizeTestCases", request, workflowInfoRequest);
+            @RequestBody(required = false) StateEntityInfoRequest workflowInfoRequest,
+            @RequestParam(required = false) String stylingPropertiesText,
+            @RequestParam(required = false) String flowId) {
+        return process("visualizeTestCases", request,
+                mergeStateEntityInfoRequest(workflowInfoRequest, stylingPropertiesText, flowId));
     }
 
-    @PostMapping("/{{service}}/info/test-state-diagrams")
+    @RequestMapping(value = "/{{service}}/info/test-state-diagrams", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<GenericResponse<WorkflowInfoResponse<Map<String, byte[]>>>> renderTestsAsStateDiagram(
             HttpServletRequest request,
-            @RequestBody(required = false) StateEntityInfoRequest workflowInfoRequest) {
-        return process("renderTestsAsStateDiagram", request, workflowInfoRequest);
+            @RequestBody(required = false) StateEntityInfoRequest workflowInfoRequest,
+            @RequestParam(required = false) String stylingPropertiesText,
+            @RequestParam(required = false) String flowId) {
+        return process("renderTestsAsStateDiagram", request,
+                mergeStateEntityInfoRequest(workflowInfoRequest, stylingPropertiesText, flowId));
+    }
+
+    private StateEntityInfoRequest mergeStateEntityInfoRequest(StateEntityInfoRequest request,
+                                                               String stylingPropertiesText, String flowId) {
+        StateEntityInfoRequest stateEntityInfoRequest = request == null ? new StateEntityInfoRequest() : request;
+        if (stylingPropertiesText != null) {
+            stateEntityInfoRequest.setStylingPropertiesText(stylingPropertiesText);
+        }
+        if (flowId != null) {
+            stateEntityInfoRequest.setFlowId(flowId);
+        }
+        return stateEntityInfoRequest;
+    }
+
+    private StateEntityAllowedActionsRequest mergeAllowedActionsRequest(StateEntityAllowedActionsRequest request,
+                                                                        String stylingPropertiesText,
+                                                                        String flowId, String state) {
+        StateEntityAllowedActionsRequest allowedActionsRequest =
+                request == null ? new StateEntityAllowedActionsRequest() : request;
+        mergeStateEntityInfoRequest(allowedActionsRequest, stylingPropertiesText, flowId);
+        if (state != null) {
+            allowedActionsRequest.setState(state);
+        }
+        return allowedActionsRequest;
     }
 }

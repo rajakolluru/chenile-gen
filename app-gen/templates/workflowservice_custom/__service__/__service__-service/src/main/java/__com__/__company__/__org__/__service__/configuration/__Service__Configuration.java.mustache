@@ -79,6 +79,7 @@ public class {{Service}}Configuration {
 
 	@Bean StateEntityInfoServiceImpl _{{service}}StateEntityInfoService_(
 			@Qualifier("{{service}}FlowStore") STMFlowStoreImpl stmFlowStore,
+			@Autowired XmlFlowReader {{service}}FlowReader,
 			@Qualifier("{{service}}ActionsInfoProvider") STMActionsInfoProvider {{service}}InfoProvider){
 		return new StateEntityInfoServiceImpl(stmFlowStore, {{service}}InfoProvider);
 	}
