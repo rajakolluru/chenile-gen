@@ -1,0 +1,42 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.mycompany.myorg.s1</groupId>
+		<artifactId>s1-parent</artifactId>
+		<version>${revision}</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	
+	<artifactId>s1-service</artifactId>
+	<packaging>jar</packaging>
+
+	<name>S1 Service Implementations</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.mycompany.myorg.s1</groupId>
+			<artifactId>s1-api</artifactId>
+		</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>chenile-http</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>cucumber-utils</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+	</dependencies>
+</project>

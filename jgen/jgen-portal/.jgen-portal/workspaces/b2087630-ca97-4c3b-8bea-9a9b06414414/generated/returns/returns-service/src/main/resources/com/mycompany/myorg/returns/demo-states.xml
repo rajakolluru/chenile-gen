@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- An example states xml file that demonstrates the following features:
+ 1. The progression of Returns from OPENED to CLOSED 
+ 2. How to define and use a custom DSL to define the workflow.
+-->
+<states>
+    <enablement-strategy componentName="returnsConfigBasedEnablementStrategy"/>
+	<default-transition-action componentName="returnsBaseTransitionAction"/>
+    <add-state-tag tag="status" manualState="true"/>
+    <add-transition-tag tag="on-action" eventIdTag="id" newStateIdTag="move-to"
+                    />
+
+	<flow id='ReturnsFlow' default='true'>
+		<entry-action componentName="returnsEntryAction"/>
+		<exit-action componentName="returnsExitAction"/>
+		<status id='OPENED' initialState='true'>
+			<on-action id='assign'  move-to='ASSIGNED'/>
+		</status>
+
+		<status id='ASSIGNED'>
+			<on-action id='resolve' move-to='RESOLVED' />
+		</status>
+
+        <status id='RESOLVED'>
+			<on-action id='close' move-to='CLOSED'/>
+        </status>
+        <status id='CLOSED' />
+
+
+	</flow>
+	
+</states>
