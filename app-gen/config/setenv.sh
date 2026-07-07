@@ -1,5 +1,5 @@
 export chenilePackage=org.chenile
-export chenileVersion=2.1.26
+export chenileVersion=2.1.27
 export chenileBddVersion=0.1.1
 
 export com=com
