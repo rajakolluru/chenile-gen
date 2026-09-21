@@ -56,6 +56,7 @@ public class PortalController {
             map.put("description", bp.description);
             map.put("category", bp.category == null ? "JGen" : bp.category);
             map.put("version", bp.version == null ? "2.1.5" : bp.version);
+			map.put("sinceVersion", bp.sinceVersion);
             return map;
         }).toList();
     }
@@ -69,6 +70,7 @@ public class PortalController {
         map.put("description", blueprint.description);
         map.put("category", blueprint.category == null ? "JGen" : blueprint.category);
         map.put("version", blueprint.version == null ? "2.1.5" : blueprint.version);
+		map.put("sinceVersion", blueprint.sinceVersion);
         map.put("fields", inputService.describeFields(blueprint, config));
         return map;
     }

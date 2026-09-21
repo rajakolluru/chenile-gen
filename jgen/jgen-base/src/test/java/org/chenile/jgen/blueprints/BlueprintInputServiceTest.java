@@ -3,9 +3,11 @@ package org.chenile.jgen.blueprints;
 import org.chenile.jgen.blueprints.model.FieldType;
 import org.chenile.jgen.blueprints.model.InputField;
 import org.chenile.jgen.config.Config;
+import org.chenile.jgen.template.chain.VersionValidator;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,6 +59,33 @@ class BlueprintInputServiceTest {
         assertEquals(false, values.get("enabled"));
         assertEquals(false, values.containsKey("hiddenValue"));
     }
+
+	@Test
+	void owizChainRejectsBlueprintWhenConfiguredChenileVersionIsTooOld() {
+		BlueprintConfig blueprint = new BlueprintConfig();
+		blueprint.name = "headless";
+		blueprint.sinceVersion = "2.1.31";
+		Config config = config();
+		config.chenileVersion = "2.1.8";
+
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> new BlueprintExecutor().execute(blueprint, config, new HashMap<>()));
+
+		assertEquals("Blueprint 'headless' requires Chenile version 2.1.31 or later, but the selected config declares 2.1.8.",
+				exception.getMessage());
+	}
+
+	@Test
+	void acceptsEqualOrNewerChenileVersions() {
+		BlueprintConfig blueprint = new BlueprintConfig();
+		blueprint.name = "headless";
+		blueprint.sinceVersion = "2.1.31";
+		Config config = config();
+		config.chenileVersion = "2.1.31";
+		VersionValidator.validate(blueprint, config);
+		config.chenileVersion = "2.2.0";
+		VersionValidator.validate(blueprint, config);
+	}
 
     private InputField field(String name, FieldType type, String defaultValue) {
         InputField field = new InputField();

@@ -1,0 +1,33 @@
+{
+  "initHook" : "org.chenile.jgen.blueprint.headlessservice.InitHeadlessServiceBlueprint",
+  "name" : "chenile-headless-service",
+  "description" : "Generates a non-HTTP Chenile service",
+  "sinceVersion" : "2.1.31",
+  "templateFolder": "headless-service-template",
+  "inputFields" :[
+    {
+      "name" : "service",
+      "type" : "STRING",
+      "description": "Name of Service",
+      "defaultValue": "${defaultServiceName}"
+    },
+    {
+      "name" : "serviceVersion",
+      "type" : "STRING",
+      "description": "Service Version",
+      "defaultValue": "${defaultVersion}"
+    },
+    {
+      "name" : "destFolder",
+      "type" : "STRING",
+      "description": "Destination Folder",
+      "defaultValue" : "${defaultDestFolder}"
+    },
+    {
+      "name" : "registerInServiceRegistry",
+      "type" : "BOOLEAN",
+      "description": "Publish this service to the Chenile Service Registry",
+      "defaultValue" : "y"
+    }
+  ]
+}

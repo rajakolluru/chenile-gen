@@ -23,6 +23,7 @@ At a high level:
 The repository currently packages these built-in blueprints:
 
 - `chenile-service`: generates a Chenile service
+- `chenile-headless-service`: generates a non-HTTP Chenile service
 - `wfservice`: generates a workflow service
 - `wfcustom`: generates a custom workflow service from a workflow XML file
 - `chenile-interceptor`: generates a Chenile interceptor
@@ -127,6 +128,19 @@ A typical non-interactive input file for `chenile-service` looks like this:
 
 Boolean values are expected in the CLI's own `y` and `n` format at input time. During processing, enabled booleans are normalized into the template map as `"true"`.
 
+### Headless Chenile Services
+
+`chenile-headless-service` creates a Spring-managed Chenile controller without
+`@RestController` or a `chenile-http` dependency. Its generated controller uses
+`@ChenileOperation` and `@ChenileBody`, so it can be invoked by Chenile's core
+runtime or receive events without an HTTP endpoint.
+
+The `registerInServiceRegistry` prompt controls the generated
+`@ChenileController(registerInServiceRegistry = ...)` value. It defaults to
+`y`; choose `n` for ephemeral, event-only, or serverless services that should
+remain in the local Chenile configuration but must not be published to the
+remote service registry.
+
 ## Generating a Sample Input File
 
 The `-g` option emits a sample JSON file for a named blueprint based on that blueprint's declared input fields.
@@ -172,6 +186,77 @@ For example, a blueprint field may declare:
 
 At runtime, that placeholder is resolved from the selected config file before prompting or validation.
 
+## Blueprint Runtime Compatibility
+
+Blueprints can declare the minimum Chenile runtime they need with the optional
+`sinceVersion` property. Use it when a blueprint generates code that relies on
+an API, annotation, configuration option, or behavior introduced in a specific
+Chenile release.
+
+```json
+{
+  "name": "chenile-headless-service",
+  "description": "Generates a non-HTTP Chenile service",
+  "sinceVersion": "2.1.31",
+  "templateFolder": "headless-service-template"
+}
+```
+
+The selected JGen config supplies the installed-runtime target through
+`chenileVersion`:
+
+```json
+{
+  "chenilePackage": "org.chenile",
+  "chenileVersion": "2.1.31"
+}
+```
+
+During generation, JGen compares these values using Maven version ordering.
+Generation proceeds when the config version is equal to or newer than
+`sinceVersion`. A blueprint with no `sinceVersion` remains compatible with any
+config version.
+
+| Blueprint `sinceVersion` | Config `chenileVersion` | Result |
+| --- | --- | --- |
+| omitted | `2.1.8` | generation proceeds |
+| `2.1.31` | `2.1.8` | rejected |
+| `2.1.31` | `2.1.31` | generation proceeds |
+| `2.1.31` | `2.2.0` | generation proceeds |
+
+For example, this command rejects a headless-service blueprint when
+`config/chenile-2.1.8.json` declares `"chenileVersion": "2.1.8"`:
+
+```bash
+jgen-cli/bin/jgen.sh -c config/chenile-2.1.8.json -f headless-service-input.json
+```
+
+The error identifies the blueprint, required version, and configured version:
+
+```text
+Blueprint 'chenile-headless-service' requires Chenile version 2.1.31 or later,
+but the selected config declares 2.1.8.
+```
+
+The check is an OWIZ processor named `version-validator`. It runs after JGen
+has resolved the selected config and before blueprint hooks, template copying,
+or generated-file changes. The portal uses the same execution chain; an
+incompatible portal generation finishes as a failed operation without creating
+the blueprint output.
+
+`jgen.sh -g` only emits a sample input file and does not execute the generation
+chain. Compatibility is enforced when that input file is subsequently run with
+`jgen.sh -f`.
+
+### Choosing `sinceVersion` as a Blueprint Author
+
+Set `sinceVersion` to the first Chenile version that supplies every framework
+feature the template uses—not necessarily the current JGen version. Keep it
+omitted when the template has no release-specific dependency. When a template
+starts using a newer Chenile API, raise `sinceVersion` in the same change and
+test generation against both the minimum accepted config and the immediately
+older rejected config.
+
 ## How Blueprints Plug In
 
 Blueprint discovery is handled by the registry in `jgen-base`. It scans the classpath for every `META-INF/blueprint.json`, deserializes each file into a blueprint definition, and invokes the blueprint's optional init hook.
@@ -180,6 +265,7 @@ Each blueprint declares:
 
 - `name`
 - `description`
+- optional `sinceVersion`, the minimum supported `chenileVersion` in the selected config
 - `templateFolder`
 - `inputFields`
 - an optional `initHook`
@@ -196,6 +282,12 @@ bp-something/
 ```
 
 The JSON file is declarative. It defines the blueprint's public contract. The Java init hook is imperative. It adds any computed values that the templates need.
+
+When a blueprint sets `sinceVersion`, JGen compares it with the selected
+configuration's `chenileVersion` using Maven version ordering before it emits
+any files. Generation is rejected when the selected version is older or absent.
+For example, a blueprint declaring `"sinceVersion": "2.1.31"` cannot run
+against a config declaring `"chenileVersion": "2.1.8"`.
 
 Examples of blueprint-specific hook behavior in this repository:
 
@@ -233,14 +325,15 @@ The shared execution pipeline lives in:
 The pipeline performs these steps:
 
 1. merge config defaults into the input map
-2. run blueprint pre-generation hooks
-3. copy the template folder into the destination
-4. load helper lambdas for templates
-5. render `.mustache` files
-6. expand `.filelist` outputs into multiple files
-7. replace placeholders in file and folder names such as `__service__`
-8. process conditional folders such as `%%jpa=true%%`
-9. run blueprint post-processing hooks
+2. validate the blueprint's optional `sinceVersion`
+3. run blueprint pre-generation hooks
+4. copy the template folder into the destination
+5. load helper lambdas for templates
+6. render `.mustache` files
+7. expand `.filelist` outputs into multiple files
+8. replace placeholders in file and folder names such as `__service__`
+9. process conditional folders such as `%%jpa=true%%`
+10. run blueprint post-processing hooks
 
 The execution path in code is:
 
@@ -475,6 +568,11 @@ For example, if your blueprint generates an invoice module, you might want field
 - `jpa`
 
 If your blueprint needs an external definition file, you can add a `FILE` field.
+
+If the generated template depends on a Chenile capability introduced after the
+oldest supported release, add a top-level `sinceVersion` property. JGen will
+then reject generation before it invokes the blueprint hook or copies templates
+for a config whose `chenileVersion` is too old.
 
 ### Step 5: Fix and Extend the Init Hook
 

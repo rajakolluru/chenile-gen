@@ -1,0 +1,21 @@
+package {{com}}.{{company}}.{{org}}.{{service}}.configuration;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import {{com}}.{{company}}.{{org}}.{{service}}.configuration.controller.{{Service}}Controller;
+import {{com}}.{{company}}.{{org}}.{{service}}.service.{{Service}}Service;
+import {{com}}.{{company}}.{{org}}.{{service}}.service.impl.{{Service}}ServiceImpl;
+
+@Configuration
+public class {{Service}}Configuration {
+	@Bean
+	public {{Service}}Service _{{service}}Service_() {
+		return new {{Service}}ServiceImpl();
+	}
+
+	@Bean
+	public {{Service}}Controller {{service}}Controller() {
+		return new {{Service}}Controller();
+	}
+}

@@ -58,6 +58,10 @@
         </dependency>
         <dependency>
             <groupId>org.chenile</groupId>
+            <artifactId>bp-headless-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.chenile</groupId>
             <artifactId>bp-jgen-blueprint</artifactId>
         </dependency>
         <dependency>

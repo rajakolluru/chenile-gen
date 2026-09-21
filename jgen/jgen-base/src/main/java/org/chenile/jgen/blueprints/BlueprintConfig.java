@@ -11,6 +11,8 @@ public class BlueprintConfig {
     public String description;
     public String category;
     public String version;
+    /** Minimum Chenile runtime version required by this blueprint, if any. */
+    public String sinceVersion;
     public Class<InitHook> initHook;
     public Consumer<Map<String,Object>> postInputCaptureHook;
     public String templateFolder;

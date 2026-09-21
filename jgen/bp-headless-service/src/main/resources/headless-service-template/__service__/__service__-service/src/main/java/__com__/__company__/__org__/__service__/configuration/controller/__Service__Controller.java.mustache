@@ -1,0 +1,22 @@
+package {{com}}.{{company}}.{{org}}.{{service}}.configuration.controller;
+
+import {{chenilePackage}}.core.annotation.ChenileBody;
+import {{chenilePackage}}.core.annotation.ChenileOperation;
+import {{chenilePackage}}.http.annotation.ChenileController;
+import {{com}}.{{company}}.{{org}}.{{service}}.model.{{Service}};
+
+@ChenileController(
+		value = "{{service}}",
+		serviceName = "_{{service}}Service_",
+		bluePrintName = "chenile-headless-service",
+		registerInServiceRegistry = {{registerInServiceRegistry}})
+public class {{Service}}Controller {
+	/**
+	 * Declares the Chenile operation metadata. The runtime invokes the matching
+	 * method on the service bean named in {@link ChenileController#serviceName()}.
+	 */
+	@ChenileOperation
+	public {{Service}} process(@ChenileBody {{Service}} request) {
+		return request;
+	}
+}

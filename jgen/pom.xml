@@ -14,6 +14,7 @@
 		<module>jgen-base</module>
 		<module>bp-interceptor</module>
 		<module>bp-service</module>
+		<module>bp-headless-service</module>
 		<module>bp-jgen-blueprint</module>
 		<module>bp-wfservice</module>
 		<module>bp-wfcustom</module>
@@ -50,6 +51,11 @@
 			<dependency>
 				<groupId>org.chenile</groupId>
 				<artifactId>bp-service</artifactId>
+				<version>${jgen.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>bp-headless-service</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>

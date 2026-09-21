@@ -6,6 +6,8 @@
         <processor-chain first="true">
             <!-- enhances the input map with configurations defined in a config file -->
             <config-defaulter/>
+            <!-- rejects blueprints that require a newer Chenile runtime than the selected config -->
+            <version-validator/>
             <!-- Allows the Blueprint author to manipulate the input map before we start the process -->
             <post-input-executor/>
             <!-- copies the blueprint folder to the destination folder. Blueprint folder is in the blueprint jar. -->
