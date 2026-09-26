@@ -59,9 +59,16 @@
       "defaultValue" : "n"
     },
     {
+      "name" : "enableCconfig",
+      "type" : "BOOLEAN",
+      "description": "Include the Chenile cconfig service",
+      "defaultValue" : "n"
+    },
+    {
       "name" : "serviceRegistryUrl",
       "type" : "STRING",
-      "description": "Remote Chenile service registry URL when delegate mode is enabled"
+      "description": "Remote Chenile service registry URL when delegate mode is enabled",
+      "visibleWhen" : { "enableServiceRegistryDelegate" : "true" }
     },
     {
       "name" : "dependencies",

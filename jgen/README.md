@@ -24,6 +24,7 @@ The repository currently packages these built-in blueprints:
 
 - `chenile-service`: generates a Chenile service
 - `chenile-headless-service`: generates a non-HTTP Chenile service
+- `chenile-ecosystem`: composes service, mini-monolith, registry, cconfig, headless-service, and query blueprints
 - `wfservice`: generates a workflow service
 - `wfcustom`: generates a custom workflow service from a workflow XML file
 - `chenile-interceptor`: generates a Chenile interceptor
@@ -140,6 +141,32 @@ The `registerInServiceRegistry` prompt controls the generated
 `y`; choose `n` for ephemeral, event-only, or serverless services that should
 remain in the local Chenile configuration but must not be published to the
 remote service registry.
+
+### Complete Chenile Ecosystems
+
+`chenile-ecosystem` composes the established JGen blueprints rather than
+maintaining a second set of project templates. It always generates an HTTP
+`chenile-service` and the primary `minimonolith` that packages it. Its prompts
+then allow the following additions:
+
+- a separate service-registry mini monolith and registry delegates in the
+  generated application mini monoliths;
+- cconfig in the primary mini monolith;
+- a `chenile-headless-service` and a dedicated mini monolith that packages it;
+- a `mybatisQuery` service and a mini monolith with the query controller.
+
+For non-interactive use, first emit the current input contract, then edit it:
+
+```bash
+jgen-cli/bin/jgen.sh -g chenile-ecosystem -o ecosystem-input.json
+jgen-cli/bin/jgen.sh -f ecosystem-input.json
+```
+
+Use `y` or `n` for the option fields in an input JSON file. When service
+registry support is selected, `serviceRegistryUrl` identifies the generated
+registry endpoint. Each generated project is a sibling under `destFolder` and
+has its own README. Set distinct server ports before starting multiple mini
+monoliths together.
 
 ## Generating a Sample Input File
 

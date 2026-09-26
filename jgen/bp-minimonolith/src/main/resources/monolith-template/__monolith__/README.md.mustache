@@ -39,6 +39,9 @@ Please see {{monolith}}-package/target/service-registry to see the Chenile gener
 - You must set `chenile.remote.service.registry` in `{{monolith}}-configurations/src/main/resources/application.yml`.
 - The generated value is taken from `serviceRegistryUrl` and should point to the hosted registry endpoint.
 {{/enableServiceRegistryDelegate}}
+{{#enableCconfig}}
+- The Chenile cconfig service is included in this mini monolith.
+{{/enableCconfig}}
 {{#enableQueryController}}
 - Chenile query controller support is enabled. Review the generated `query.*` settings in `{{monolith}}-configurations/src/main/resources/application.yml`.
 {{/enableQueryController}}

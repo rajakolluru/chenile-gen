@@ -45,6 +45,12 @@
 				<artifactId>service-registry-delegate</artifactId>
 			</dependency>
 			{{/enableServiceRegistryDelegate}}
+			{{#enableCconfig}}
+			<dependency>
+				<groupId>org.chenile.cconfig</groupId>
+				<artifactId>cconfig-db</artifactId>
+			</dependency>
+			{{/enableCconfig}}
 			{{#enableQueryController}}
 			<dependency>
 				<groupId>{{chenilePackage}}</groupId>

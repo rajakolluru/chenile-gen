@@ -13,10 +13,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 {{#enableServiceRegistry}}
 		"{{chenilePackage}}.service.registry.configuration",
 {{/enableServiceRegistry}}
+		{{#enableCconfig}}
+		"org.chenile.cconfig.configuration",
+		{{/enableCconfig}}
 		"{{chenilePackage}}.configuration" })
 {{#jpa}}
-@EntityScan("{{com}}.{{company}}.{{org}}.**.model")
-@EnableJpaRepositories(basePackages = "{{com}}.{{company}}.{{org}}.**.configuration.dao")
+@EntityScan({ "{{com}}.{{company}}.{{org}}.**.model"{{#enableCconfig}}, "org.chenile.cconfig.model"{{/enableCconfig}} })
+@EnableJpaRepositories(basePackages = { "{{com}}.{{company}}.{{org}}.**.configuration.dao"{{#enableCconfig}}, "org.chenile.cconfig.configuration.dao"{{/enableCconfig}} })
 @EnableTransactionManagement
 {{/jpa}}
 public class {{Monolith}}Application extends SpringBootServletInitializer {

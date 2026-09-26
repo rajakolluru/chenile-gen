@@ -10,29 +10,37 @@ import java.util.Collections;
 public class CopyFromJar {
     public void copyFromJar(String source, final Path target) throws URISyntaxException, IOException {
         URI resource = getClass().getClassLoader().getResource(source).toURI();
-        FileSystem fileSystem = FileSystems.newFileSystem(
-                resource,
-                Collections.<String, String>emptyMap()
-        );
+        FileSystem fileSystem;
+        boolean closeFileSystem = false;
+        try {
+            fileSystem = FileSystems.newFileSystem(resource, Collections.emptyMap());
+            closeFileSystem = true;
+        } catch (FileSystemAlreadyExistsException ignored) {
+            // Composite blueprints can copy several templates from one executable JAR.
+            fileSystem = FileSystems.getFileSystem(resource);
+        }
 
+        try {
+            final Path jarPath = fileSystem.getPath(source);
 
-        final Path jarPath = fileSystem.getPath(source);
+            Files.walkFileTree(jarPath, new SimpleFileVisitor<>() {
 
-        Files.walkFileTree(jarPath, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    Path currentTarget = target.resolve(jarPath.relativize(dir).toString());
+                    Files.createDirectories(currentTarget);
+                    return FileVisitResult.CONTINUE;
+                }
 
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                Path currentTarget = target.resolve(jarPath.relativize(dir).toString());
-                Files.createDirectories(currentTarget);
-                return FileVisitResult.CONTINUE;
-            }
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.copy(file, target.resolve(jarPath.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
+                    return FileVisitResult.CONTINUE;
+                }
 
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                Files.copy(file, target.resolve(jarPath.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
-                return FileVisitResult.CONTINUE;
-            }
-
-        });
+            });
+        } finally {
+            if (closeFileSystem) fileSystem.close();
+        }
     }
 }

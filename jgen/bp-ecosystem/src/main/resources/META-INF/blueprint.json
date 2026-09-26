@@ -1,0 +1,26 @@
+{
+  "initHook" : "org.chenile.jgen.blueprint.ecosystem.InitEcosystemBlueprint",
+  "name" : "chenile-ecosystem",
+  "description" : "Generates a Chenile service ecosystem from the existing service and mini-monolith blueprints",
+  "sinceVersion" : "2.1.31",
+  "templateFolder" : "ecosystem-template",
+  "inputFields" :[
+    { "name" : "ecosystem", "type" : "STRING", "description" : "Name of the ecosystem", "required" : true },
+    { "name" : "ecosystemVersion", "type" : "STRING", "description" : "Version for generated projects", "defaultValue" : "${defaultVersion}" },
+    { "name" : "destFolder", "type" : "STRING", "description" : "Destination Folder", "defaultValue" : "${defaultDestFolder}" },
+    { "name" : "service", "type" : "STRING", "description" : "Name of the HTTP service", "defaultValue" : "${ecosystem}Service" },
+    { "name" : "monolith", "type" : "STRING", "description" : "Name of the primary mini monolith", "defaultValue" : "${ecosystem}Monolith" },
+    { "name" : "security", "type" : "BOOLEAN", "description" : "Enable security in generated mini monoliths", "defaultValue" : "n" },
+    { "name" : "jpa", "type" : "BOOLEAN", "description" : "Enable JPA in generated mini monoliths", "defaultValue" : "y" },
+    { "name" : "includeServiceRegistry", "type" : "BOOLEAN", "description" : "Generate a separate service registry mini monolith and configure the primary monolith as its delegate", "defaultValue" : "n" },
+    { "name" : "serviceRegistryMonolith", "type" : "STRING", "description" : "Name of the service registry mini monolith", "defaultValue" : "${ecosystem}Registry", "visibleWhen" : { "includeServiceRegistry" : "true" } },
+    { "name" : "serviceRegistryUrl", "type" : "STRING", "description" : "URL for the generated service registry", "defaultValue" : "http://localhost:8080", "visibleWhen" : { "includeServiceRegistry" : "true" } },
+    { "name" : "includeCconfig", "type" : "BOOLEAN", "description" : "Include the cconfig service in the primary mini monolith", "defaultValue" : "n" },
+    { "name" : "includeHeadlessService", "type" : "BOOLEAN", "description" : "Generate a headless service and its mini monolith", "defaultValue" : "n" },
+    { "name" : "headlessService", "type" : "STRING", "description" : "Name of the headless service", "defaultValue" : "${ecosystem}Headless", "visibleWhen" : { "includeHeadlessService" : "true" } },
+    { "name" : "headlessMonolith", "type" : "STRING", "description" : "Name of the headless-service mini monolith", "defaultValue" : "${ecosystem}HeadlessMonolith", "visibleWhen" : { "includeHeadlessService" : "true" } },
+    { "name" : "includeQueryService", "type" : "BOOLEAN", "description" : "Generate a MyBatis query service and its mini monolith", "defaultValue" : "n" },
+    { "name" : "queryNamespace", "type" : "STRING", "description" : "Namespace of the query service", "defaultValue" : "${ecosystem}Query", "visibleWhen" : { "includeQueryService" : "true" } },
+    { "name" : "queryMonolith", "type" : "STRING", "description" : "Name of the query-service mini monolith", "defaultValue" : "${ecosystem}QueryMonolith", "visibleWhen" : { "includeQueryService" : "true" } }
+  ]
+}

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.chenile.jgen.blueprints.BlueprintConfig;
 import org.chenile.jgen.blueprints.BlueprintExecutor;
+import org.chenile.jgen.blueprints.BlueprintInputService;
 import org.chenile.jgen.blueprints.Registry;
 import org.chenile.jgen.blueprints.model.FieldType;
 import org.chenile.jgen.blueprints.model.InputField;
@@ -45,6 +46,7 @@ public class GenMain implements Runnable {
     @CommandLine.Option(names = {"-g", "--generate-blueprint-file"}, description = "Generates a sample input file for the specified blueprint")
     private String generateBluePrint;
     private final BlueprintExecutor  blueprintExecutor = new BlueprintExecutor();
+    private final BlueprintInputService blueprintInputService = new BlueprintInputService();
     private final ConfigProvider configProvider = new ConfigProvider();
     public static void main(String... args) {
         System.exit(new CommandLine(new GenMain()).execute(args));
@@ -226,7 +228,10 @@ public class GenMain implements Runnable {
         if (field.type != FieldType.BOOLEAN) {
             return value;
         }
-        return "y".equalsIgnoreCase(value.toString());
+        if (value instanceof Boolean bool) {
+            return bool;
+        }
+        return "y".equalsIgnoreCase(value.toString()) || "true".equalsIgnoreCase(value.toString());
     }
 
     private void buildInputMap(Map<String,Object> map,BlueprintConfig blueprintConfig,
@@ -234,6 +239,7 @@ public class GenMain implements Runnable {
                                Map<String,Object> inputMap){
 
         for(InputField field: blueprintConfig.inputFields){
+            if (!blueprintInputService.isVisible(field, map)) continue;
             Object value = captureField(field,map,scanner,inputMap);
             map.put(field.name, normalizeFieldValue(field, value));
         }

@@ -62,6 +62,10 @@
         </dependency>
         <dependency>
             <groupId>org.chenile</groupId>
+            <artifactId>bp-ecosystem</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.chenile</groupId>
             <artifactId>bp-jgen-blueprint</artifactId>
         </dependency>
         <dependency>
