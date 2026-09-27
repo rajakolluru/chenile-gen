@@ -7,11 +7,21 @@
 		<module>{{service}}-api</module>
 		<module>{{service}}-service</module>
 	</modules>
+	{{#parentArtifactId}}
+	<parent>
+		<groupId>{{parentGroupId}}</groupId>
+		<artifactId>{{parentArtifactId}}</artifactId>
+		<version>{{parentVersion}}</version>
+		<relativePath>{{parentRelativePath}}</relativePath>
+	</parent>
+	{{/parentArtifactId}}
+	{{^parentArtifactId}}
 	<parent>
 		<groupId>{{chenilePackage}}</groupId>
 		<version>{{chenileVersion}}</version>
 		<artifactId>chenile-parent</artifactId>
 	</parent>
+	{{/parentArtifactId}}
 
 	<properties>
 		<{{service}}.version>${revision}</{{service}}.version>

@@ -164,9 +164,11 @@ jgen-cli/bin/jgen.sh -f ecosystem-input.json
 
 Use `y` or `n` for the option fields in an input JSON file. When service
 registry support is selected, `serviceRegistryUrl` identifies the generated
-registry endpoint. Each generated project is a sibling under `destFolder` and
-has its own README. Set distinct server ports before starting multiple mini
-monoliths together.
+registry endpoint. JGen creates one `<ecosystem>` folder under `destFolder`.
+Its `pom.xml` is the Maven reactor parent for every generated project, so run
+`mvn install` from that folder to build the ecosystem. Each generated project
+also has its own README. Set distinct server ports before starting multiple
+mini monoliths together.
 
 ## Generating a Sample Input File
 

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>{{chenilePackage}}</groupId>
+        <artifactId>chenile-parent</artifactId>
+        <version>{{chenileVersion}}</version>
+    </parent>
+
+    <groupId>{{com}}.{{company}}.{{org}}.{{ecosystem}}</groupId>
+    <artifactId>{{ecosystem}}-parent</artifactId>
+    <version>{{ecosystemVersion}}</version>
+    <packaging>pom</packaging>
+    <name>{{ecosystem}} Chenile ecosystem</name>
+
+    <properties>
+        <revision>{{ecosystemVersion}}</revision>
+    </properties>
+
+    <modules>
+        <module>{{service}}</module>
+        <module>{{monolith}}</module>
+{{#includeServiceRegistry}}        <module>{{serviceRegistryMonolith}}</module>
+{{/includeServiceRegistry}}{{#includeHeadlessService}}        <module>{{headlessService}}</module>
+        <module>{{headlessMonolith}}</module>
+{{/includeHeadlessService}}{{#includeQueryService}}        <module>{{queryNamespace}}</module>
+        <module>{{queryMonolith}}</module>
+{{/includeQueryService}}    </modules>
+</project>

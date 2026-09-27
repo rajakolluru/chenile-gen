@@ -21,6 +21,8 @@ public class EcosystemGenerator {
     public void generate(BlueprintConfig ecosystemBlueprint, Map<String, Object> input) {
         Config config = config(input);
         try {
+            Path ecosystemDirectory = Paths.get(string(input, "destFolder"), string(input, "ecosystem"));
+            input.put("destFolder", ecosystemDirectory.toString());
             generateProject("chenile-service", config, serviceInput(input), string(input, "service"));
             generateProject("minimonolith", config, monolithInput(input, string(input, "monolith"),
                     dependency(config, string(input, "service"), "-service", string(input, "ecosystemVersion")), false, false),
@@ -55,7 +57,9 @@ public class EcosystemGenerator {
         Path staging = Files.createTempDirectory(destination, ".jgen-ecosystem-");
         try {
             supplied.put("destFolder", staging.toString());
-            new BlueprintExecutor().execute(blueprint, config, inputService.buildInputMap(blueprint, config, supplied));
+            Map<String, Object> childInput = inputService.buildInputMap(blueprint, config, supplied);
+            copyParentCoordinates(supplied, childInput);
+            new BlueprintExecutor().execute(blueprint, config, childInput);
             Path project = staging.resolve(projectName);
             if (!Files.isDirectory(project)) {
                 throw new IllegalStateException("Blueprint " + name + " did not generate expected project " + projectName);
@@ -76,6 +80,12 @@ public class EcosystemGenerator {
                     throw new IllegalStateException("Unable to remove ecosystem staging directory", e);
                 }
             });
+        }
+    }
+
+    private void copyParentCoordinates(Map<String, Object> supplied, Map<String, Object> childInput) {
+        for (String key : List.of("parentGroupId", "parentArtifactId", "parentVersion", "parentRelativePath")) {
+            childInput.put(key, supplied.get(key));
         }
     }
 
@@ -121,6 +131,10 @@ public class EcosystemGenerator {
     private Map<String, Object> common(Map<String, Object> input) {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("destFolder", string(input, "destFolder"));
+        result.put("parentGroupId", string(input, "com") + "." + string(input, "company") + "." + string(input, "org") + "." + string(input, "ecosystem"));
+        result.put("parentArtifactId", string(input, "ecosystem") + "-parent");
+        result.put("parentVersion", string(input, "ecosystemVersion"));
+        result.put("parentRelativePath", "../pom.xml");
         return result;
     }
 
