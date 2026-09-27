@@ -1,8 +1,0 @@
-{
-  "rules": [
-    {
-      "expression": "highlight==true",
-      "style": {"color": "Fuchsia","thickness": 2.5}
-    }
-  ]
-}
