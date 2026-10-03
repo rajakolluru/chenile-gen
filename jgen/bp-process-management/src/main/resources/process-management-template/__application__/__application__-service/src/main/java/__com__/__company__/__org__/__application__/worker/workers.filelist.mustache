@@ -1,0 +1,94 @@
+{{#processes}}
+{{#leaf}}
+--START--{{name}}Executor.java
+package {{packageName}}.worker;
+
+import {{packageName}}.model.*;
+import org.chenile.orchestrator.process.model.WorkerDto;
+import org.chenile.orchestrator.process.utils.base.ExecutorBase;
+
+public class {{name}}Executor extends ExecutorBase<{{inputType}},ProcessResult> {
+{{#fileRead}}
+    private final FileWork files;
+    public {{name}}Executor(FileWork files) { this.files = files; }
+{{/fileRead}}
+    @Override protected ProcessResult doStart(WorkerDto worker, {{inputType}} input) {
+{{#fileRead}}
+        return files.process(input.filename);
+{{/fileRead}}
+{{#custom}}
+        // Implement the domain work. ExecutorBase reports success, or failure if this throws.
+        throw new UnsupportedOperationException("Implement {{name}}Executor.doStart");
+{{/custom}}
+    }
+}
+--END--
+{{/leaf}}
+{{#composite}}
+--START--{{name}}Splitter.java
+package {{packageName}}.worker;
+
+import {{packageName}}.model.*;
+import org.chenile.orchestrator.process.model.WorkerDto;
+import org.chenile.orchestrator.process.model.payload.SubProcessPayload;
+import org.chenile.orchestrator.process.utils.base.SplitterBase;
+import java.util.ArrayList;
+import java.util.List;
+
+public class {{name}}Splitter extends SplitterBase<{{inputType}},Object> {
+{{#fileSplit}}
+    private final FileWork files;
+    public {{name}}Splitter(FileWork files) { this.files = files; }
+{{/fileSplit}}
+    @Override protected List<SubProcessPayload> doStart(WorkerDto worker, {{inputType}} input) {
+{{#fileSplit}}
+        var result = new ArrayList<SubProcessPayload>();
+        int bytes = Integer.parseInt(worker.execDef.getOrDefault("chunkBytes", "1048576"));
+        for (String filename : files.split(input.filename, worker.process.id, bytes)) {
+{{#children}}
+            var child = new {{inputType}}(); child.filename = filename;
+            result.add(makeSubProcessPayload(child, "{{name}}"));
+{{/children}}
+        }
+        return result;
+{{/fileSplit}}
+{{#custom}}
+        // Return makeSubProcessPayload(typedChildInput, childProcessType) for every child.
+        // Supported children:
+{{#children}}
+        // {{name}} accepts {{inputType}}
+{{/children}}
+        // SplitterBase reports splitDone/splitDoneWithErrors and the manager starts the children.
+        throw new UnsupportedOperationException("Implement {{name}}Splitter.doStart");
+{{/custom}}
+    }
+}
+--END--
+--START--{{name}}Aggregator.java
+package {{packageName}}.worker;
+
+import {{packageName}}.model.*;
+import org.chenile.orchestrator.process.model.WorkerDto;
+import org.chenile.orchestrator.process.model.Process;
+import org.chenile.orchestrator.process.utils.base.AggregatorBase;
+
+/** Runs once every direct child is terminal, including failed children. */
+public class {{name}}Aggregator extends AggregatorBase<{{inputType}},ProcessResult,ProcessResult> {
+    @Override protected ProcessResult doStart(ProcessResult out, {{inputType}} input,
+            ProcessResult childOutput, WorkerDto worker, Process child) {
+        if (out == null) out = new ProcessResult();
+        out.completedChildren++;
+        if (childOutput != null) out.bytesProcessed += childOutput.bytesProcessed;
+        if (!child.errors.isEmpty()) {
+            out.failedChildren++;
+            for (var error : child.errors) {
+                out.errors.add(child.processType + ":" + child.id + ": " + error.exceptionMessage);
+                if (error.errors != null) out.errors.addAll(error.errors);
+            }
+        }
+        return out;
+    }
+}
+--END--
+{{/composite}}
+{{/processes}}

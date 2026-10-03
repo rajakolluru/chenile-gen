@@ -1,0 +1,25 @@
+{{#processes}}
+--START--{{name}}Controller.java
+package {{packageName}}.configuration.controller;
+
+import {{packageName}}.api.{{name}}Service;
+import {{packageName}}.model.{{inputType}};
+import org.chenile.orchestrator.process.model.Process;
+import org.chenile.http.annotation.ChenileController;
+import org.chenile.http.handler.ControllerSupport;
+import org.chenile.base.response.GenericResponse;
+import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@ChenileController(value="{{serviceId}}", serviceName="_{{serviceId}}Service_", interfaceClass={{name}}Service.class,
+    bluePrintName="chenile-process-management", registerInServiceRegistry={{registerInServiceRegistry}})
+public class {{name}}Controller extends ControllerSupport {
+    @PostMapping("/{{serviceId}}")
+    public ResponseEntity<GenericResponse<Process>> start(HttpServletRequest request, @RequestBody {{inputType}} input) {
+        return process(request,input);
+    }
+}
+--END--
+{{/processes}}

@@ -1,0 +1,34 @@
+package {{packageName}}.configuration;
+
+import {{packageName}}.service.*;
+import {{packageName}}.worker.*;
+import org.chenile.orchestrator.delegate.ProcessManagerClient;
+import org.chenile.orchestrator.delegate.ProcessManagerClientImpl;
+import org.chenile.orchestrator.process.jdbc.JdbcProcessWorkerRunner;
+import org.springframework.context.annotation.*;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+@Configuration
+@EnableScheduling
+public class {{Application}}ProcessConfiguration {
+    // Local invocation uses the same process workflow; no remote service registry is needed for workers.
+    @Bean static org.springframework.beans.factory.config.BeanFactoryPostProcessor localProcessClientAlias() {
+        return factory -> factory.registerAlias("_processStateEntityService_", "processServiceProxy");
+    }
+    @Bean ProcessManagerClient processManagerClient() { return new ProcessManagerClientImpl(); }
+    @Bean ProcessWorkers processWorkers() { return new ProcessWorkers(); }
+    @Bean ProcessWorkerPoller processWorkerPoller(JdbcProcessWorkerRunner runner) { return new ProcessWorkerPoller(runner); }
+{{#hasFileWorkers}}
+    @Bean FileWork fileWork(@org.springframework.beans.factory.annotation.Value("${process.application.work-root:./work}") String root) { return new FileWork(root); }
+{{/hasFileWorkers}}
+{{#processes}}
+    @Bean {{name}}ServiceImpl _{{serviceId}}Service_(ProcessWorkers workers) { return new {{name}}ServiceImpl(workers); }
+{{#leaf}}
+    @Bean {{name}}Executor {{name}}Executor({{#fileRead}}FileWork files{{/fileRead}}) { return new {{name}}Executor({{#fileRead}}files{{/fileRead}}); }
+{{/leaf}}
+{{#composite}}
+    @Bean {{name}}Splitter {{name}}Splitter({{#fileSplit}}FileWork files{{/fileSplit}}) { return new {{name}}Splitter({{#fileSplit}}files{{/fileSplit}}); }
+    @Bean {{name}}Aggregator {{name}}Aggregator() { return new {{name}}Aggregator(); }
+{{/composite}}
+{{/processes}}
+}

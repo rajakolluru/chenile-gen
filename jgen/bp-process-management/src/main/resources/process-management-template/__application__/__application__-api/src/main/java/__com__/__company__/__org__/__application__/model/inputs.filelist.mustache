@@ -1,0 +1,27 @@
+{{#processes}}
+--START--{{inputType}}.java
+package {{packageName}}.model;
+
+/** Typed input for {{name}}. */
+public class {{inputType}} {
+{{#fields}}
+    public {{javaType}} {{name}};
+{{/fields}}
+}
+--END--
+{{/processes}}
+--START--ProcessResult.java
+package {{packageName}}.model;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/** Default leaf output and composite summary; extend this for your domain. */
+public class ProcessResult {
+    public long bytesProcessed;
+    public int completedChildren;
+    public int failedChildren;
+    public String sha256;
+    public List<String> errors = new ArrayList<>();
+}
+--END--

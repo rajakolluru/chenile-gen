@@ -29,6 +29,7 @@ The repository currently packages these built-in blueprints:
 - `wfcustom`: generates a custom workflow service from a workflow XML file
 - `chenile-interceptor`: generates a Chenile interceptor
 - `batch`: generates a batch process from a batch definition JSON file
+- `chenile-process-management`: generates a typed, multi-level process mini-monolith with definitions, workers and optional cron triggers ([guide](bp-process-management/README.md))
 - `it`: generates an integration test project
 - `minimonolith`: generates a mini monolith
 - `mybatisQuery`: generates a MyBatis query module

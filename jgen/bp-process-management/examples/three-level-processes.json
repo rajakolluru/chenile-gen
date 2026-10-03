@@ -1,0 +1,8 @@
+{
+  "processes": [
+    {"processType":"Import", "fields":{"batchId":"string"}, "children":["Partition"], "config":{"partitionSize":"100"}},
+    {"processType":"Partition", "fields":{"partitionId":"long"}, "children":["Record","Audit"]},
+    {"processType":"Record", "fields":{"recordId":"string","overwrite":"boolean"}},
+    {"processType":"Audit", "fields":{"recordId":"string"}}
+  ]
+}

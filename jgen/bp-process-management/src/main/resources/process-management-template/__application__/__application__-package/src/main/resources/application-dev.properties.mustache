@@ -1,0 +1,6 @@
+spring.datasource.url=jdbc:h2:file:./.{{application}}/data;MODE=PostgreSQL;DB_CLOSE_ON_EXIT=FALSE
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.hibernate.ddl-auto=update
+spring.sql.init.mode=always
+spring.sql.init.schema-locations=classpath:chenile-process-outbox-schema.sql,classpath:chenile-process-work-schema.sql

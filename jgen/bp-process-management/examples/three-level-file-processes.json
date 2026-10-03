@@ -1,0 +1,37 @@
+{
+  "processes": [
+    {
+      "processType": "BatchUpload",
+      "fields": {
+        "filename": "string"
+      },
+      "children": [
+        "FileUpload"
+      ],
+      "implementation": "fileSplit",
+      "config": {
+        "chunkBytes": "8"
+      }
+    },
+    {
+      "processType": "FileUpload",
+      "fields": {
+        "filename": "string"
+      },
+      "children": [
+        "ChunkUpload"
+      ],
+      "implementation": "fileSplit",
+      "config": {
+        "chunkBytes": "4"
+      }
+    },
+    {
+      "processType": "ChunkUpload",
+      "fields": {
+        "filename": "string"
+      },
+      "implementation": "fileRead"
+    }
+  ]
+}

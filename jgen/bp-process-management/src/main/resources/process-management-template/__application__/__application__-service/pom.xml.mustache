@@ -1,0 +1,9 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent><groupId>{{packageName}}</groupId><artifactId>{{application}}-parent</artifactId><version>{{applicationVersion}}</version><relativePath>../pom.xml</relativePath></parent>
+    <artifactId>{{application}}-service</artifactId>
+    <dependencies>
+        <dependency><groupId>{{packageName}}</groupId><artifactId>{{application}}-api</artifactId><version>{{applicationVersion}}</version></dependency>
+        <dependency><groupId>org.chenile.orchestrator.process</groupId><artifactId>process-admin-server</artifactId><version>{{chenileVersion}}</version></dependency>
+    </dependencies>
+</project>

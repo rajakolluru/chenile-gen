@@ -70,11 +70,10 @@ public class InitBatchBlueprint implements InitHook {
         public ProcessDefExt(ProcessDef processDef){
             this.processType = processDef.processType;
             this.parentProcessType = processDef.parentProcessType;
-            this.aggregatorConfig = processDef.aggregatorConfig;
-            this.splitterConfig = processDef.splitterConfig;
-            this.executorConfig = processDef.executorConfig;
+            this.predecessorProcessType = processDef.predecessorProcessType;
+            this.predecessorArgs = processDef.predecessorArgs;
+            this.config = processDef.config;
             this.leaf = processDef.leaf;
-            this.successors = processDef.successors;
         }
 
         @Override
@@ -82,14 +81,11 @@ public class InitBatchBlueprint implements InitHook {
             return "ProcessDefExt{" +
                     "root=" + root +
                     ", childProcessType='" + childProcessType + '\'' +
-                    ", successors=" + successors +
                     ", parentProcessType='" + parentProcessType + '\'' +
                     ", processType='" + processType + '\'' +
                     ", args='" + args + '\'' +
                     ", leaf=" + leaf +
-                    ", splitterConfig=" + splitterConfig +
-                    ", executorConfig=" + executorConfig +
-                    ", aggregatorConfig=" + aggregatorConfig +
+                    ", config=" + config +
                     '}';
         }
 

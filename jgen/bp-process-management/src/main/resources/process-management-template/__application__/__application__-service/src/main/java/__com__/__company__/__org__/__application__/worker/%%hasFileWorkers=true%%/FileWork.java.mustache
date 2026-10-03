@@ -1,0 +1,56 @@
+package {{packageName}}.worker;
+
+import {{packageName}}.model.ProcessResult;
+import java.io.InputStream;
+import java.nio.file.*;
+import java.security.MessageDigest;
+import java.util.*;
+
+/** Example byte-oriented file processing, not a remote upload implementation. */
+public class FileWork {
+    private final Path root;
+    public FileWork(String root) {
+        try { this.root = Files.createDirectories(Path.of(root)).toRealPath(); }
+        catch (Exception e) { throw new IllegalArgumentException("Cannot create file work root", e); }
+    }
+    private Path input(String filename) throws Exception {
+        if (filename == null || Path.of(filename).isAbsolute()) throw new IllegalArgumentException("filename must be relative to the work root");
+        Path path = root.resolve(filename).normalize().toRealPath();
+        if (!path.startsWith(root) || !Files.isRegularFile(path)) throw new IllegalArgumentException("File is outside work root or not regular");
+        return path;
+    }
+    public List<String> split(String filename, String processId, int chunkBytes) {
+        if (chunkBytes < 1 || chunkBytes > 16777216) throw new IllegalArgumentException("chunkBytes must be 1..16777216");
+        if (processId == null || !processId.matches("[A-Za-z0-9_-]+")) throw new IllegalArgumentException("Unsafe process id");
+        try {
+            Path source = input(filename);
+            Path directory = root.resolve("chunks").resolve(processId);
+            Files.createDirectories(directory);
+            if (!directory.toRealPath().startsWith(root)) throw new IllegalArgumentException("Chunk directory escaped work root");
+            var result = new ArrayList<String>();
+            try (InputStream stream = Files.newInputStream(source)) {
+                int index = 0;
+                for (byte[] bytes = stream.readNBytes(chunkBytes); bytes.length > 0; bytes = stream.readNBytes(chunkBytes)) {
+                    Path chunk = directory.resolve(String.format(Locale.ROOT, "%08d.chunk", index++));
+                    // Replays reuse identical chunks, never overwrite source/user files or changed input.
+                    if (Files.exists(chunk, LinkOption.NOFOLLOW_LINKS)) {
+                        if (Files.isSymbolicLink(chunk) || !Arrays.equals(bytes, Files.readAllBytes(chunk)))
+                            throw new IllegalStateException("Existing chunk differs: " + chunk.getFileName());
+                    } else Files.write(chunk, bytes, StandardOpenOption.CREATE_NEW);
+                    result.add(root.relativize(chunk).toString());
+                }
+            }
+            return result;
+        } catch (Exception e) { throw new IllegalStateException("File split failed", e); }
+    }
+    public ProcessResult process(String filename) {
+        try (InputStream stream = Files.newInputStream(input(filename))) {
+            var digest = MessageDigest.getInstance("SHA-256");
+            var result = new ProcessResult();
+            byte[] buffer = new byte[8192];
+            for (int read; (read = stream.read(buffer)) != -1; ) { digest.update(buffer, 0, read); result.bytesProcessed += read; }
+            result.sha256 = HexFormat.of().formatHex(digest.digest());
+            return result;
+        } catch (Exception e) { throw new IllegalStateException("Chunk processing failed", e); }
+    }
+}

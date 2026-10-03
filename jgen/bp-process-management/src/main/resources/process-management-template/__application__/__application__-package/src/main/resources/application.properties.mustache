@@ -1,0 +1,11 @@
+# Keep the host-specific application file in the executable jar, ahead of dependency resources.
+spring.config.import=classpath:process-application.properties
+spring.application.name={{application}}
+chenile.properties={{application}}-chenile.properties
+chenile.process.configurator={{definitionSource}}
+chenile.process.worker.jdbc.run-worker=false
+process.application.workers.enabled=${PROCESS_WORKERS_ENABLED:true}
+process.application.work-root=${PROCESS_WORK_ROOT:./work}
+{{#registerInServiceRegistry}}
+chenile.remote.service.registry={{serviceRegistryUrl}}
+{{/registerInServiceRegistry}}

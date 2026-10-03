@@ -1,0 +1,12 @@
+{{#processes}}
+--START--{{name}}Service.java
+package {{packageName}}.api;
+
+import {{packageName}}.model.{{inputType}};
+import org.chenile.orchestrator.process.model.Process;
+
+public interface {{name}}Service {
+    Process start({{inputType}} input);
+}
+--END--
+{{/processes}}

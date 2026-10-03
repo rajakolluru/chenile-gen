@@ -1,0 +1,20 @@
+package {{packageName}}.service;
+
+import org.chenile.orchestrator.process.jdbc.JdbcProcessWorkerRunner;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Scheduled;
+
+/** A bounded background poller lets HTTP, seeding and Quartz finish starting first. */
+public class ProcessWorkerPoller {
+    private final JdbcProcessWorkerRunner runner;
+    private volatile boolean ready;
+    @Value("${process.application.workers.enabled:true}") private boolean enabled;
+    public ProcessWorkerPoller(JdbcProcessWorkerRunner runner) { this.runner = runner; }
+    @EventListener(ApplicationReadyEvent.class) public void ready() { ready = true; }
+    @Scheduled(fixedDelayString="${process.application.workers.poll-millis:1000}")
+    public void poll() {
+        if (ready && enabled) for (int n = 0; n < 100 && runner.processOne(); n++) { /* bounded drain */ }
+    }
+}

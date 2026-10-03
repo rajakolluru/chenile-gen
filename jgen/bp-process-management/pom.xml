@@ -1,0 +1,12 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent><groupId>org.chenile</groupId><artifactId>jgen</artifactId><version>${revision}</version><relativePath>../pom.xml</relativePath></parent>
+    <artifactId>bp-process-management</artifactId>
+    <name>Chenile process management mini-monolith blueprint</name>
+    <dependencies>
+        <dependency><groupId>org.chenile</groupId><artifactId>jgen-base</artifactId></dependency>
+        <dependency><groupId>org.quartz-scheduler</groupId><artifactId>quartz</artifactId></dependency>
+        <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
+    </dependencies>
+</project>

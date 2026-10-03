@@ -1,0 +1,55 @@
+{
+  "name": "chenile-process-management",
+  "description": "Typed multi-level process workers, definitions and cron triggers in a runnable mini-monolith",
+  "sinceVersion": "2.1.31",
+  "initHook": "org.chenile.jgen.blueprint.process.InitProcessManagementBlueprint",
+  "templateFolder": "process-management-template",
+  "inputFields": [
+    {
+      "name": "application",
+      "type": "STRING",
+      "description": "Mini-monolith name (lowercase Java identifier)"
+    },
+    {
+      "name": "applicationVersion",
+      "type": "STRING",
+      "description": "Application version",
+      "defaultValue": "${defaultVersion}"
+    },
+    {
+      "name": "destFolder",
+      "type": "STRING",
+      "description": "Destination folder",
+      "defaultValue": "${defaultDestFolder}"
+    },
+    {
+      "name": "processSpec",
+      "type": "FILE",
+      "description": "JSON specification of processes, typed inputs, children and optional cron triggers"
+    },
+    {
+      "name": "definitionSource",
+      "type": "STRING",
+      "description": "Definition source: json or database",
+      "defaultValue": "json",
+      "validValues": [
+        "json",
+        "database"
+      ]
+    },
+    {
+      "name": "registerInServiceRegistry",
+      "type": "BOOLEAN",
+      "description": "Publish the generated Chenile process services to a remote registry",
+      "defaultValue": "n"
+    },
+    {
+      "name": "serviceRegistryUrl",
+      "type": "STRING",
+      "description": "Remote registry base URL",
+      "visibleWhen": {
+        "registerInServiceRegistry": true
+      }
+    }
+  ]
+}

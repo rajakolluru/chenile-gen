@@ -1,0 +1,38 @@
+{{#processes}}
+--START--{{name}}ServiceImpl.java
+package {{packageName}}.service;
+
+import {{packageName}}.api.{{name}}Service;
+import {{packageName}}.model.{{inputType}};
+import org.chenile.orchestrator.process.model.Process;
+
+public class {{name}}ServiceImpl implements {{name}}Service {
+    private final ProcessWorkers workers;
+    public {{name}}ServiceImpl(ProcessWorkers workers) { this.workers = workers; }
+    @Override public Process start({{inputType}} input) {
+        if (input == null) throw new IllegalArgumentException("{{inputType}} is required");
+        return workers.doFirstTrigger("{{name}}", input);
+    }
+}
+--END--
+{{/processes}}
+--START--ProcessWorkers.java
+package {{packageName}}.service;
+
+import org.chenile.core.context.ContextContainer;
+import org.chenile.orchestrator.process.model.WorkerDto;
+import org.chenile.orchestrator.process.utils.base.BatchServiceBase;
+
+/** One BatchService routes every level using the framework processType + workerType convention. */
+public class ProcessWorkers extends BatchServiceBase<Object> {
+    @Override protected String getTenant() { return ContextContainer.CONTEXT_CONTAINER.getTenant(); }
+    @Override public boolean startWorker(WorkerDto dto) {
+        var context = ContextContainer.CONTEXT_CONTAINER;
+        var snapshot = context.snapshot();
+        try {
+            context.setTenant(dto.process.tenant);
+            return super.startWorker(dto);
+        } finally { context.restore(snapshot); }
+    }
+}
+--END--

@@ -1,0 +1,109 @@
+# {{application}} process mini-monolith
+
+Generated with `chenile-process-management`. One Maven reactor contains typed inputs/API,
+worker services, configuration resources and an executable Spring Boot package.
+It uses the Chenile process manager, JDBC work queue, durable outbox, Quartz and management API.
+
+## Build and run
+
+Requires Java 25 and the current process-management runtime artifacts (including
+`process-admin-server`) installed or published at version {{chenileVersion}}.
+These process-management enhancements must be built from the current framework workspace
+until they are published; the version number alone does not imply Maven Central contains them.
+
+```sh
+mvn install
+export PROCESS_MANAGEMENT_API_KEY="$(openssl rand -hex 32)"
+# Enter this key in the React process UI; do not store it in frontend environment files.
+java -jar {{application}}-package/target/{{application}}-exec.jar --spring.profiles.active=dev
+```
+
+Local API: `http://127.0.0.1:8080`. Every HTTP route requires `X-Process-Management-Key`
+and `x-chenile-tenant-id` (e.g. `default`). The shared key grants administrator access
+across all tenants. There is no default key; missing/short secrets fail startup.
+The `dev` profile uses persistent H2 under `.{{application}}/`. Never use `dev` in production.
+
+## Generated services and workers
+
+{{#processes}}
+- `POST /{{serviceId}}` accepts `{{inputType}}` and starts `{{name}}`.
+{{#leaf}}
+  `{{name}}Executor` implements the leaf work. The framework reports success or failure.
+{{/leaf}}
+{{#composite}}
+  `{{name}}Splitter` creates typed child payloads; `{{name}}Aggregator` aggregates results/errors
+  once all direct children are terminal. Children can themselves be composite processes.
+{{/composite}}
+{{/processes}}
+
+Custom splitters/executors deliberately throw until their `doStart` methods are implemented.
+They never silently succeed. Use `makeSubProcessPayload(childInput, "ChildType")` to emit
+any number of each declared child type. Use the framework base classes for lifecycle reporting.
+The generated common `ProcessResult` summarizes bytes, child counts and errors; replace or
+extend it and the relevant worker generic output types for richer domain outputs.
+All worker bean names follow the exact `ProcessType` + `Splitter/Executor/Aggregator` convention.
+
+One `ProcessWorkers` BatchService routes every hierarchy level and restores tenant context.
+A bounded background poller starts after application initialization. Disable it with
+`PROCESS_WORKERS_ENABLED=false` if workers run separately. The built-in JDBC CommandLineRunner
+poller remains disabled so it cannot block application readiness and Quartz startup.
+Outbox on/off uses the same commands. Business effects are not magically exactly-once;
+use `WorkerDto.dispatchId` for application-level deduplication and size leases appropriately.
+
+{{#hasFileWorkers}}
+### File example
+
+File workers accept **relative** filenames under `PROCESS_WORK_ROOT` (default `./work`).
+`fileSplit` divides bytes into stable per-process chunk files under `chunks/<processId>/`;
+`fileRead` reads a chunk and reports byte count and SHA-256. This is working local file
+processing, not an upload to an unspecified remote system. Customize the executor for uploads.
+`chunkBytes` comes from the process definition's shared `config` (default 1 MiB, max 16 MiB).
+An empty file emits no children and completes aggregation; a missing/invalid file reports failure.
+Keep source files immutable while a process runs. Identical replayed chunks are reused;
+changed chunks are rejected. Chunk retention/cleanup is the application's responsibility.
+The work directory must be controlled by the application; do not let untrusted local users
+mutate paths/symlinks while workers run. For separate workers, share the same work storage.
+{{/hasFileWorkers}}
+
+## Definitions and cron triggers
+
+`{{application}}-configurations/src/main/resources/{{application}}/defs.json` contains framework
+definitions for every level, including parent relationships and shared worker configuration.
+Selected definition source: `{{definitionSource}}`.
+
+- JSON mode loads the generated definitions at startup; dashboard definition edits are read-only.
+- Database mode inserts missing rows into `process_definition`, then clears the configurator cache.
+  Existing database definitions and administrator edits are never overwritten on restart.
+  You can switch modes with `--chenile.process.configurator=database` or `json`.
+
+`{{application}}/cron-triggers.json` contains `ProcessCreate` schedules and typed arguments.
+Startup creates only missing schedules via the framework CrontabService. Existing schedules
+are preserved. Seeds default to disabled; enable them intentionally after preparing inputs.
+Cron names are globally unique, so use distinct names across tenants. Cron definitions must
+use known process types, Quartz six/seven-field syntax, valid timezones and typed arguments.
+Use the management UI to inspect/enable schedules, monitor trigger history and trace all child processes.
+Keep one scheduler owner in a deployment. New schedules refer to definitions from this host;
+do not configure a separate admin server against unrelated definitions/storage.
+
+## Service registry
+
+`registerInServiceRegistry={{registerInServiceRegistry}}` on every generated Chenile controller.
+Services remain locally callable regardless of this choice.
+{{#registerInServiceRegistry}}
+The package includes the registry delegate and publishes metadata to `{{serviceRegistryUrl}}`.
+Supply a reachable registry and a proper externally reachable base URL for production.
+{{/registerInServiceRegistry}}
+{{^registerInServiceRegistry}}
+No registry delegate or remote registration is required. Internal workers invoke the local
+process workflow; they do not make HTTP or registry calls back to their own mini-monolith.
+{{/registerInServiceRegistry}}
+
+## Production
+
+Without `dev`, supply `PROCESS_DATABASE_URL` (PostgreSQL), `PROCESS_DATABASE_USERNAME`,
+`PROCESS_DATABASE_PASSWORD` and the administrator key from your secret manager. Provision
+the full process/trigger/JPA schema, outbox/receipt/work tables and management history migration
+before startup. The host validates schemas; it is not a production schema migration tool.
+The normal API host's PostgreSQL startup/security requirements also apply here.
+Expose loopback HTTP through a secured HTTPS gateway; change `PROCESS_ADMIN_PORT` and
+`PROCESS_ADMIN_BIND_ADDRESS` as appropriate. Do not commit secrets or real input files.

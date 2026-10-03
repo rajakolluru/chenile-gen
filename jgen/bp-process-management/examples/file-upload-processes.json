@@ -1,0 +1,29 @@
+{
+  "processes": [
+    {
+      "processType": "FileUpload",
+      "inputType": "FileUploadIn",
+      "fields": {"filename": "string"},
+      "children": ["ChunkUpload"],
+      "implementation": "fileSplit",
+      "config": {"chunkBytes": "1048576"}
+    },
+    {
+      "processType": "ChunkUpload",
+      "inputType": "ChunkUploadIn",
+      "fields": {"filename": "string"},
+      "implementation": "fileRead"
+    }
+  ],
+  "cronTriggers": [
+    {
+      "name": "daily-file-upload",
+      "processType": "FileUpload",
+      "cronExpression": "0 0 2 * * ?",
+      "timezone": "UTC",
+      "tenant": "default",
+      "enabled": false,
+      "args": {"filename": "incoming/upload.dat"}
+    }
+  ]
+}

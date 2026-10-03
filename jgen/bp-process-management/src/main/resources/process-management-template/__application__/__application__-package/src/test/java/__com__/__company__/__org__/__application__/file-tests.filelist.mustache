@@ -1,0 +1,112 @@
+{{#processes}}
+{{#fileExample}}
+--START--{{name}}ExecutionTest.java
+package {{packageName}};
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.chenile.orchestrator.process.configuration.dao.ProcessRepository;
+import org.chenile.orchestrator.process.configuration.dao.CompletionEventRepository;
+import org.chenile.orchestrator.process.model.Process;
+import org.chenile.orchestrator.process.outbox.OutboxDispatcher;
+import org.chenile.orchestrator.process.jdbc.JdbcProcessWorkerRunner;
+import org.chenile.trigger.cron.CrontabRepository;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import java.net.URI;
+import java.net.http.*;
+import java.nio.file.*;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+@ActiveProfiles("dev")
+@SpringBootTest(classes={{Application}}Application.class, webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, properties={
+    "spring.datasource.url=jdbc:h2:mem:{{name}}-execution;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
+    "spring.jpa.hibernate.ddl-auto=create-drop", "process.application.workers.enabled=false",
+    "chenile.process.outbox.poll-enabled=false", "chenile.service.registry.read-only=true",
+    "chenile.process.management.api-key=generated-test-administrator-key-not-a-secret"})
+class {{name}}ExecutionTest {
+    private static final Path ROOT=temporary();
+    private static Path temporary() { try { return Files.createTempDirectory("chenile-file-test-"); } catch (Exception e) { throw new RuntimeException(e); } }
+    @DynamicPropertySource static void paths(DynamicPropertyRegistry registry) { registry.add("process.application.work-root",ROOT::toString); }
+    @LocalServerPort int port;
+    @Autowired ProcessRepository processes;
+    @Autowired CompletionEventRepository completions;
+    @Autowired org.springframework.beans.factory.ObjectProvider<OutboxDispatcher> dispatchers;
+    private void dispatch() { var dispatcher=dispatchers.getIfAvailable(); if (dispatcher != null) dispatcher.drainAll(100); }
+    @Autowired JdbcProcessWorkerRunner workers;
+    @Autowired CrontabRepository crons;
+    @Autowired org.chenile.orchestrator.process.config.reader.ProcessConfigurator definitions;
+    private int fileSize() { return 2*Integer.parseInt(definitions.findByName("{{name}}").config.getOrDefault("chunkBytes","1048576"))+1; }
+    private final ObjectMapper json=new ObjectMapper();
+    private final HttpClient http=HttpClient.newHttpClient();
+    private HttpResponse<String> post(String route, String body) throws Exception {
+        return http.send(HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + route))
+            .header("X-Process-Management-Key","generated-test-administrator-key-not-a-secret")
+            .header("x-chenile-tenant-id","test")
+            .header("Content-Type","application/json").POST(HttpRequest.BodyPublishers.ofString(body)).build(),HttpResponse.BodyHandlers.ofString());
+    }
+    private Process start(String filename) throws Exception {
+        var response=post("/{{serviceId}}",json.writeValueAsString(Map.of("filename",filename)));
+        assertEquals(200,response.statusCode(),response.body());
+        return processes.findAll().stream().filter(p -> "{{name}}".equals(p.processType) && p.input.contains(filename)).findFirst().orElseThrow();
+    }
+    private Process finish(String id) {
+        for (int n=0;n<100;n++) {
+            dispatch();
+            boolean work=workers.processOne();
+            Process root=processes.findById(id).orElseThrow();
+            if (root.getCurrentState().getStateId().startsWith("PROCESSED")) { dispatch(); return root; }
+            if (!work) throw new AssertionError("Process stalled in " + root.getCurrentState());
+        }
+        throw new AssertionError("Process did not complete");
+    }
+    @Test void splitsAndProcessesMultipleChunksThroughTypedChenileEndpoint() throws Exception {
+        String filename="success-" + UUID.randomUUID() + ".dat";
+        byte[] data=new byte[fileSize()]; new Random(1).nextBytes(data); Files.write(ROOT.resolve(filename),data);
+        Process root=finish(start(filename).id);
+        assertEquals("PROCESSED",root.getCurrentState().getStateId());
+        assertTrue(root.numSubProcesses > 1);
+        assertEquals(root.numSubProcesses,root.numCompletedSubProcesses);
+        assertEquals(data.length,json.readTree(root.output).get("bytesProcessed").asLong());
+        assertFalse(completions.findByTenantAndProcessIdIn("test",List.of(root.id)).isEmpty());
+    }
+    @Test void failedChunkIsReportedAndAggregatedByParent() throws Exception {
+        String filename="failure-" + UUID.randomUUID() + ".dat";
+        Files.write(ROOT.resolve(filename),new byte[fileSize()]); Process root=start(filename);
+        dispatch(); assertTrue(workers.processOne()); // Split only, before executing children.
+        try (var chunks=Files.list(ROOT.resolve("chunks").resolve(root.id))) { Files.delete(chunks.findFirst().orElseThrow()); }
+        root=finish(root.id);
+        assertEquals("PROCESSED_WITH_ERRORS",root.getCurrentState().getStateId());
+        assertFalse(root.errors.isEmpty());
+        assertEquals(1,json.readTree(root.output).get("failedChildren").asInt());
+        assertFalse(json.readTree(root.output).get("errors").isEmpty());
+    }
+    @Test void missingInputReportsSplitFailureAndUnauthenticatedRequestsAreRejected() throws Exception {
+        Process root=finish(start("missing-" + UUID.randomUUID() + ".dat").id);
+        assertEquals("PROCESSED_WITH_ERRORS",root.getCurrentState().getStateId());
+        var response=http.send(HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+"/{{serviceId}}"))
+            .POST(HttpRequest.BodyPublishers.ofString("{}")).build(),HttpResponse.BodyHandlers.ofString());
+        assertEquals(401,response.statusCode());
+    }
+}
+--END--
+--START--Inline{{name}}ExecutionTest.java
+package {{packageName}};
+
+import org.springframework.boot.test.context.SpringBootTest;
+
+/** The same workers/commands must also execute with outbox delivery disabled. */
+@SpringBootTest(classes={{Application}}Application.class, webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, properties={
+    "spring.datasource.url=jdbc:h2:mem:{{name}}-inline;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
+    "spring.jpa.hibernate.ddl-auto=create-drop", "process.application.workers.enabled=false",
+    "chenile.process.outbox.enabled=false", "chenile.service.registry.read-only=true",
+    "chenile.process.management.api-key=generated-test-administrator-key-not-a-secret"})
+class Inline{{name}}ExecutionTest extends {{name}}ExecutionTest { }
+--END--
+{{/fileExample}}
+{{/processes}}

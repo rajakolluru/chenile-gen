@@ -1,0 +1,13 @@
+package {{packageName}};
+
+import org.chenile.orchestrator.process.admin.ProcessAdminApplication;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Import;
+
+// Reuse the tested process API host, JDBC delivery, outbox and trigger configuration.
+@SpringBootApplication(scanBasePackages={"{{packageName}}.configuration","{{packageName}}.bootstrap"{{#registerInServiceRegistry}}, "org.chenile.service.registry.configuration"{{/registerInServiceRegistry}}})
+@Import(ProcessAdminApplication.class)
+public class {{Application}}Application {
+    public static void main(String[] args) { SpringApplication.run({{Application}}Application.class, args); }
+}

@@ -1,0 +1,83 @@
+package {{packageName}};
+
+import org.chenile.core.model.ChenileConfiguration;
+import org.chenile.orchestrator.process.config.reader.ProcessConfigurator;
+import org.chenile.orchestrator.process.configuration.dao.ProcessDefinitionRepository;
+import org.chenile.trigger.cron.CrontabRepository;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import static org.junit.jupiter.api.Assertions.*;
+
+@ActiveProfiles("dev")
+@SpringBootTest(classes={{Application}}Application.class, webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, properties={
+    "spring.datasource.url=jdbc:h2:mem:generated-application;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
+    "spring.jpa.hibernate.ddl-auto=create-drop", "process.application.workers.enabled=false",
+    "chenile.process.outbox.poll-enabled=false", "chenile.service.registry.read-only=true",
+    "chenile.process.management.api-key=generated-test-administrator-key-not-a-secret"})
+class GeneratedProcessApplicationTest {
+    @Autowired ProcessConfigurator definitions;
+    @Autowired ChenileConfiguration chenile;
+    @Autowired ProcessDefinitionRepository repository;
+    @Autowired CrontabRepository crons;
+    @Test void allLevelsAreConfiguredAsLocalChenileServices() {
+{{#processes}}
+        assertNotNull(definitions.findByName("{{name}}"));
+        assertNotNull(chenile.getServices().get("{{serviceId}}"));
+        assertEquals({{registerInServiceRegistry}},chenile.getServices().get("{{serviceId}}").isRegisterInServiceRegistry());
+{{#composite}}
+        assertFalse(definitions.findByName("{{name}}").leaf);
+{{/composite}}
+{{#leaf}}
+        assertTrue(definitions.findByName("{{name}}").leaf);
+{{/leaf}}
+{{/processes}}
+{{#databaseDefinitions}}
+        assertEquals({{processCount}},repository.count());
+{{/databaseDefinitions}}
+    }
+    @Test void startupSeedingIsRepeatableAndDoesNotOverwriteEdits() throws Exception {
+        // Bootstrapping is intentionally exposed for an idempotence regression test.
+        int cronCount=(int)crons.count();
+        seeder.run(new org.springframework.boot.DefaultApplicationArguments());
+        assertEquals(cronCount,crons.count());
+{{#databaseDefinitions}}
+        var row=repository.findAll().get(0); String original=row.definition;
+        var json=new com.fasterxml.jackson.databind.ObjectMapper();
+        var node=(com.fasterxml.jackson.databind.node.ObjectNode)json.readTree(original);
+        ((com.fasterxml.jackson.databind.node.ObjectNode)node.get("config")).put("adminEdit","preserved");
+        row.definition=node.toString();
+        repository.saveAndFlush(row);
+        seeder.run(new org.springframework.boot.DefaultApplicationArguments());
+        assertEquals(row.definition,repository.findById(row.processType).orElseThrow().definition);
+{{/databaseDefinitions}}
+    }
+    @Autowired {{packageName}}.bootstrap.GeneratedProcessBootstrap seeder;
+{{#hasCrons}}
+    @Autowired org.chenile.trigger.cron.CrontabScheduler cronScheduler;
+    @Autowired org.chenile.orchestrator.process.configuration.dao.ProcessRepository processes;
+    @Test void cronCreatesCorrelatedProcessInConfiguredTenant() throws Exception {
+        var cron=crons.findAll().get(0); boolean enabled=cron.enabled;
+        var tenantContext=org.chenile.core.context.ContextContainer.CONTEXT_CONTAINER;
+        var snapshot=tenantContext.snapshot(); tenantContext.setTenant(cron.tenant);
+        cron.enabled=true; cron=crons.saveAndFlush(cron);
+        var context=org.mockito.Mockito.mock(org.quartz.JobExecutionContext.class);
+        String fire=java.util.UUID.randomUUID().toString();
+        org.mockito.Mockito.when(context.getFireInstanceId()).thenReturn(fire);
+        org.mockito.Mockito.when(context.getFireTime()).thenReturn(new java.util.Date());
+        org.mockito.Mockito.when(context.getScheduledFireTime()).thenReturn(new java.util.Date());
+        try {
+            cronScheduler.fire(cron.id,context);
+            String triggerId="crontab:"+cron.id+":"+fire;
+            var process=processes.findAll().stream().filter(p -> triggerId.equals(p.triggerId)).findFirst().orElseThrow();
+            assertEquals(cron.tenant,process.tenant);
+            var json=new com.fasterxml.jackson.databind.ObjectMapper();
+            assertEquals(json.readTree(cron.eventPayloadJson).get("processDefName").asText(),process.processType);
+        } finally {
+            try { var current=crons.findById(cron.id).orElseThrow(); current.enabled=enabled; crons.saveAndFlush(current); }
+            finally { tenantContext.restore(snapshot); }
+        }
+    }
+{{/hasCrons}}
+}

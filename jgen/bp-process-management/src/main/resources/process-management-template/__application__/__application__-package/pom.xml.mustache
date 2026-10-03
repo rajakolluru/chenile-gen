@@ -1,0 +1,19 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent><groupId>{{packageName}}</groupId><artifactId>{{application}}-parent</artifactId><version>{{applicationVersion}}</version><relativePath>../pom.xml</relativePath></parent>
+    <artifactId>{{application}}-package</artifactId>
+    <dependencies>
+        <dependency><groupId>{{packageName}}</groupId><artifactId>{{application}}-service</artifactId><version>{{applicationVersion}}</version></dependency>
+        <dependency><groupId>{{packageName}}</groupId><artifactId>{{application}}-configurations</artifactId><version>{{applicationVersion}}</version></dependency>
+{{#registerInServiceRegistry}}
+        <dependency><groupId>org.chenile</groupId><artifactId>service-registry-delegate</artifactId><version>{{chenileVersion}}</version></dependency>
+{{/registerInServiceRegistry}}
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
+    </dependencies>
+    <build><finalName>{{application}}</finalName><plugins>
+        <plugin><groupId>org.springframework.boot</groupId><artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration><mainClass>{{packageName}}.{{Application}}Application</mainClass><classifier>exec</classifier></configuration>
+            <executions><execution><id>repackage</id><goals><goal>repackage</goal></goals></execution></executions>
+        </plugin>
+    </plugins></build>
+</project>

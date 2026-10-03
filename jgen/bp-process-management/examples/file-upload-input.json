@@ -1,0 +1,9 @@
+{
+  "blueprint": "chenile-process-management",
+  "application": "uploads",
+  "applicationVersion": "0.0.1-SNAPSHOT",
+  "destFolder": "./output",
+  "processSpec": "bp-process-management/examples/file-upload-processes.json",
+  "definitionSource": "json",
+  "registerInServiceRegistry": "n"
+}
