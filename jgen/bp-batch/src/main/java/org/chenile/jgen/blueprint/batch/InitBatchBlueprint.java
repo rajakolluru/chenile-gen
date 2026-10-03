@@ -46,7 +46,7 @@ public class InitBatchBlueprint implements InitHook {
         try (InputStream inputStream = new FileInputStream(batchJson)){
             configurator.read(inputStream);
         }catch(Exception e){
-            throw new ConfigurationException(1900,"File name " + batchJson + " cannot be processed. "+
+            throw new ConfigurationException("1900","File name " + batchJson + " cannot be processed. "+
                     " Error = " + e.getMessage());
         }
         Collection<ProcessDef> pdefs = configurator.processes.processMap.values();
