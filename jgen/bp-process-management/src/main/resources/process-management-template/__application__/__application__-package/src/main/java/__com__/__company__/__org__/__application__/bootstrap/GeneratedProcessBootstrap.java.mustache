@@ -32,32 +32,34 @@ public class GeneratedProcessBootstrap implements ApplicationRunner {
     }
     @Override public void run(ApplicationArguments args) throws Exception {
         try (var stream = getClass().getResourceAsStream("/{{application}}/defs.json")) {
+            var source = configurator instanceof DatabaseProcessConfigurator ? new ProcessConfigurator() : configurator;
+            source.read(stream);
             if (configurator instanceof DatabaseProcessConfigurator database) {
-                var node = json.readTree(stream).get("processMap");
                 // Flush all levels in one transaction before invalidating the definition cache.
-                transactions.executeWithoutResult(tx -> node.fields().forEachRemaining(e -> {
-                    if (!definitions.existsById(e.getKey())) definitions.save(new ProcessDefinition(e.getKey(),e.getValue().toString()));
+                transactions.executeWithoutResult(tx -> source.processes.processMap.forEach((name, definition) -> {
+                    if (!definitions.existsById(name)) definitions.save(new ProcessDefinition(name, serialize(definition)));
                 }));
                 database.clearCache();
-            } else configurator.read(stream);
+            }
         }
         try (var stream = getClass().getResourceAsStream("/{{application}}/cron-triggers.json")) {
-            for (var seed : json.readTree(stream)) {
-                String name=seed.get("name").asText(), tenant=seed.get("tenant").asText();
+            var schedules=new JsonCrontabRepository(); schedules.read(stream);
+            for (var cron : schedules.findAll()) {
+                String name=cron.name, tenant=cron.tenant;
                 var existing=crons.findAll().stream().filter(c -> c.name.equals(name)).findFirst();
                 if (existing.isPresent()) {
                     if (!tenant.equals(existing.get().tenant)) throw new IllegalStateException("Cron name belongs to another tenant: " + name);
                     continue;
                 }
-                var cron=new Crontab(); cron.name=name; cron.tenant=tenant; cron.eventName="ProcessCreate";
-                cron.cronExpression=seed.get("cronExpression").asText(); cron.timezone=seed.get("timezone").asText();
-                cron.enabled=seed.get("enabled").asBoolean(); cron.eventPayloadJson=seed.get("payload").toString();
-                cron.headersJson=json.writeValueAsString(java.util.Map.of("x-chenile-tenant-id",tenant));
                 var context=org.chenile.core.context.ContextContainer.CONTEXT_CONTAINER;
                 var snapshot=context.snapshot();
                 try { context.setTenant(tenant); cronService.save(cron); }
                 finally { context.restore(snapshot); }
             }
         }
+    }
+    private String serialize(ProcessDef definition) {
+        try { return json.writeValueAsString(definition); }
+        catch (com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalStateException("Cannot serialize " + definition.processType, e); }
     }
 }

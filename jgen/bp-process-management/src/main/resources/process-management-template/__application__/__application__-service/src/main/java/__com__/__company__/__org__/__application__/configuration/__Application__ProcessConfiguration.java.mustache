@@ -18,17 +18,14 @@ public class {{Application}}ProcessConfiguration {
     @Bean ProcessManagerClient processManagerClient() { return new ProcessManagerClientImpl(); }
     @Bean ProcessWorkers processWorkers() { return new ProcessWorkers(); }
     @Bean ProcessWorkerPoller processWorkerPoller(JdbcProcessWorkerRunner runner) { return new ProcessWorkerPoller(runner); }
-{{#hasFileWorkers}}
-    @Bean FileWork fileWork(@org.springframework.beans.factory.annotation.Value("${process.application.work-root:./work}") String root) { return new FileWork(root); }
-{{/hasFileWorkers}}
 {{#processes}}
     @Bean {{name}}ServiceImpl _{{serviceId}}Service_(ProcessWorkers workers) { return new {{name}}ServiceImpl(workers); }
 {{#leaf}}
-    @Bean {{name}}Executor {{name}}Executor({{#fileRead}}FileWork files{{/fileRead}}) { return new {{name}}Executor({{#fileRead}}files{{/fileRead}}); }
+    @Bean(name="{{processType}}Executor") {{name}}Executor {{name}}Executor() { return new {{name}}Executor(); }
 {{/leaf}}
 {{#composite}}
-    @Bean {{name}}Splitter {{name}}Splitter({{#fileSplit}}FileWork files{{/fileSplit}}) { return new {{name}}Splitter({{#fileSplit}}files{{/fileSplit}}); }
-    @Bean {{name}}Aggregator {{name}}Aggregator() { return new {{name}}Aggregator(); }
+    @Bean(name="{{processType}}Splitter") {{name}}Splitter {{name}}Splitter() { return new {{name}}Splitter(); }
+    @Bean(name="{{processType}}Aggregator") {{name}}Aggregator {{name}}Aggregator() { return new {{name}}Aggregator(); }
 {{/composite}}
 {{/processes}}
 }

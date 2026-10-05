@@ -4,6 +4,7 @@
   "applicationVersion": "0.0.1-SNAPSHOT",
   "destFolder": "./output",
   "processSpec": "bp-process-management/examples/file-upload-processes.json",
+  "cronSpec": "bp-process-management/examples/file-upload-crons.json",
   "definitionSource": "json",
   "registerInServiceRegistry": "n"
 }

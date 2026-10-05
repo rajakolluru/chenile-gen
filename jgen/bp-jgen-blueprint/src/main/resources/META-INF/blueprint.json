@@ -1,4 +1,5 @@
 {
+  "projectDirectoryPrefix": "bp-",
   "initHook" : "org.chenile.jgen.blueprint.jgenbp.InitJGenBlueprint",
   "name" : "jgen-blueprint",
   "description" : "Generates a New JGen Blueprint",

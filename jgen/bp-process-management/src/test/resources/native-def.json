@@ -1,0 +1,13 @@
+{
+  "processMap": {
+    "feed": {
+      "config": {"splitter_key": "splitter_value", "aggregator_key": "aggregator_value"}
+    },
+    "file": {"parentProcessType": "feed"},
+    "chunk": {
+      "leaf": true,
+      "parentProcessType": "file",
+      "config": {"executor_key": "executor_value"}
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "processMap": {
+    "batch": {"inputFields": {"batchId": "string"}},
+    "item": {"leaf": true, "parentProcessType": "batch", "inputFields": {"itemId": "string"}}
+  }
+}

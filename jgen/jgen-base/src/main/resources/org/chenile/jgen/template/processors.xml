@@ -8,6 +8,8 @@
             <config-defaulter/>
             <!-- rejects blueprints that require a newer Chenile runtime than the selected config -->
             <version-validator/>
+            <!-- validates common inputs before blueprint hooks and any generated file writes -->
+            <generic-input-validator/>
             <!-- Allows the Blueprint author to manipulate the input map before we start the process -->
             <post-input-executor/>
             <!-- copies the blueprint folder to the destination folder. Blueprint folder is in the blueprint jar. -->

@@ -1,4 +1,5 @@
 {
+  "projectDirectoryPrefix": "bdd-it-",
   "initHook" : "org.chenile.jgen.blueprint.it.InitItBlueprint",
   "name" : "it",
   "description" : "Generates a New Integration Test case",

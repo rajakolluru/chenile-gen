@@ -26,7 +26,7 @@ The `dev` profile uses persistent H2 under `.{{application}}/`. Never use `dev` 
 ## Generated services and workers
 
 {{#processes}}
-- `POST /{{serviceId}}` accepts `{{inputType}}` and starts `{{name}}`.
+- `POST /{{serviceId}}` accepts `{{inputType}}` and starts `{{processType}}`.
 {{#leaf}}
   `{{name}}Executor` implements the leaf work. The framework reports success or failure.
 {{/leaf}}
@@ -39,7 +39,7 @@ The `dev` profile uses persistent H2 under `.{{application}}/`. Never use `dev` 
 Custom splitters/executors deliberately throw until their `doStart` methods are implemented.
 They never silently succeed. Use `makeSubProcessPayload(childInput, "ChildType")` to emit
 any number of each declared child type. Use the framework base classes for lifecycle reporting.
-The generated common `ProcessResult` summarizes bytes, child counts and errors; replace or
+The generated common `ProcessResult` collects child outputs, counts and errors; replace or
 extend it and the relevant worker generic output types for richer domain outputs.
 All worker bean names follow the exact `ProcessType` + `Splitter/Executor/Aggregator` convention.
 
@@ -49,21 +49,6 @@ A bounded background poller starts after application initialization. Disable it 
 poller remains disabled so it cannot block application readiness and Quartz startup.
 Outbox on/off uses the same commands. Business effects are not magically exactly-once;
 use `WorkerDto.dispatchId` for application-level deduplication and size leases appropriately.
-
-{{#hasFileWorkers}}
-### File example
-
-File workers accept **relative** filenames under `PROCESS_WORK_ROOT` (default `./work`).
-`fileSplit` divides bytes into stable per-process chunk files under `chunks/<processId>/`;
-`fileRead` reads a chunk and reports byte count and SHA-256. This is working local file
-processing, not an upload to an unspecified remote system. Customize the executor for uploads.
-`chunkBytes` comes from the process definition's shared `config` (default 1 MiB, max 16 MiB).
-An empty file emits no children and completes aggregation; a missing/invalid file reports failure.
-Keep source files immutable while a process runs. Identical replayed chunks are reused;
-changed chunks are rejected. Chunk retention/cleanup is the application's responsibility.
-The work directory must be controlled by the application; do not let untrusted local users
-mutate paths/symlinks while workers run. For separate workers, share the same work storage.
-{{/hasFileWorkers}}
 
 ## Definitions and cron triggers
 
@@ -78,7 +63,8 @@ Selected definition source: `{{definitionSource}}`.
 
 `{{application}}/cron-triggers.json` contains `ProcessCreate` schedules and typed arguments.
 Startup creates only missing schedules via the framework CrontabService. Existing schedules
-are preserved. Seeds default to disabled; enable them intentionally after preparing inputs.
+are preserved. The supplied example disables its schedules; choose enabled flags intentionally
+after preparing inputs (the native Crontab default is enabled).
 Cron names are globally unique, so use distinct names across tenants. Cron definitions must
 use known process types, Quartz six/seven-field syntax, valid timezones and typed arguments.
 Use the management UI to inspect/enable schedules, monitor trigger history and trace all child processes.

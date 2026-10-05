@@ -1,0 +1,14 @@
+[
+  {
+    "name": "daily-file-upload",
+    "eventName": "ProcessCreate",
+    "cronExpression": "0 0 2 * * ?",
+    "timezone": "UTC",
+    "tenant": "default",
+    "enabled": false,
+    "payload": {
+      "processDefName": "FileUpload",
+      "args": {"filename": "incoming/upload.dat"}
+    }
+  }
+]

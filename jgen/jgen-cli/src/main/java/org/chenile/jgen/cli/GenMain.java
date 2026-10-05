@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import org.chenile.jgen.blueprints.BlueprintConfig;
 import org.chenile.jgen.blueprints.BlueprintExecutor;
 import org.chenile.jgen.blueprints.BlueprintInputService;
+import org.chenile.jgen.blueprints.BlueprintSampleEmitter;
 import org.chenile.jgen.blueprints.Registry;
 import org.chenile.jgen.blueprints.model.FieldType;
 import org.chenile.jgen.blueprints.model.InputField;
@@ -37,7 +38,8 @@ public class GenMain implements Runnable {
     ObjectWriter prettyWriter = objectMapper.writerWithDefaultPrettyPrinter();
     @CommandLine.Option(names = {"-c", "--config"}, description = "Name of config file.")
     private File configFile;
-    @CommandLine.Option(names = {"-e", "--emit-config"}, description = "Emits a config file for customization")
+    @CommandLine.Option(names = {"-e", "--emit-config"}, arity = "0..1", fallbackValue = "",
+            description = "Emits config; with -g, emits companion input-file samples (use -o or provide a path)")
     private File configFileToEmit;
     @CommandLine.Option(names = {"-f", "--input-file"}, description = "Uses the input file instead of prompting")
     private File inputFile;
@@ -53,18 +55,27 @@ public class GenMain implements Runnable {
     }
     @Override
     public void run() {
-        try (Scanner scanner = new Scanner(System.in)) {
-            if (configFileToEmit != null) {
-                emitConfigFile();
-                return;
-            }
+        try {
             if (generateBluePrint != null){
+                if (configFileToEmit != null && !configFileToEmit.getPath().isBlank()) {
+                    if (outputFile != null && !outputFile.toPath().toAbsolutePath().normalize()
+                            .equals(configFileToEmit.toPath().toAbsolutePath().normalize()))
+                        throw new IllegalArgumentException("Use one output path for -e and -o");
+                    outputFile = configFileToEmit;
+                }
                 generateBluePrintFile();
                 return;
             }
-            if(inputFile == null)
-                checkConfigFiles(scanner);
-            blueprint(scanner);
+            if (configFileToEmit != null) {
+                if (configFileToEmit.getPath().isBlank())
+                    throw new IllegalArgumentException("-e requires a config filename, or use -g and -o for blueprint samples");
+                emitConfigFile();
+                return;
+            }
+            try (Scanner scanner = new Scanner(System.in)) {
+                if(inputFile == null) checkConfigFiles(scanner);
+                blueprint(scanner);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -80,14 +91,17 @@ public class GenMain implements Runnable {
         }
         Optional<BlueprintConfig> bpc = list.stream().filter(bp -> bp.name.equals(generateBluePrint)).findFirst();
         if (bpc.isEmpty()){
-            System.err.println("Specified blue print " + generateBluePrint + " does not exist!");
-            return;
+            throw new IllegalArgumentException("Specified blueprint " + generateBluePrint + " does not exist");
         }
         BlueprintConfig blueprintConfig = bpc.get();
         Map<String,Object> expectedMap = new HashMap<>();
         expectedMap.put("blueprint",generateBluePrint);
         for(InputField inf: blueprintConfig.inputFields){
             expectedMap.put(inf.name, inf.type == FieldType.RECORD_ARRAY ? List.of() : resolveDefaultValue(inf, configMap));
+        }
+        if (configFileToEmit != null) {
+            if (outputFile == null) throw new IllegalArgumentException("Companion samples require -o <input.json>");
+            BlueprintSampleEmitter.emit(blueprintConfig, outputFile.toPath(), expectedMap);
         }
         String s = prettyWriter.writeValueAsString(expectedMap);
         if (outputFile == null) {
@@ -98,7 +112,7 @@ public class GenMain implements Runnable {
             writer.write(s);
             System.out.println("The file " + outputFile + " generated successfully with the inputs expected from blueprint " + generateBluePrint);
         } catch (IOException e) {
-            System.err.println("An error occurred while writing to the file: " + e.getMessage());
+            throw new IOException("Cannot write blueprint input file: " + outputFile, e);
         }
     }
 

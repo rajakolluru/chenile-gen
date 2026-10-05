@@ -1,8 +1,37 @@
 {
-  "processes": [
-    {"processType":"Import", "fields":{"batchId":"string"}, "children":["Partition"], "config":{"partitionSize":"100"}},
-    {"processType":"Partition", "fields":{"partitionId":"long"}, "children":["Record","Audit"]},
-    {"processType":"Record", "fields":{"recordId":"string","overwrite":"boolean"}},
-    {"processType":"Audit", "fields":{"recordId":"string"}}
-  ]
+  "processMap": {
+    "Import": {
+      "leaf": false,
+      "config": {
+        "partitionSize": "100"
+      }
+    },
+    "Partition": {
+      "parentProcessType": "Import",
+      "leaf": false
+    },
+    "Record": {
+      "parentProcessType": "Partition",
+      "leaf": true
+    },
+    "Audit": {
+      "parentProcessType": "Partition",
+      "leaf": true
+    }
+  },
+  "inputFields": {
+    "Import": {
+      "batchId": "string"
+    },
+    "Partition": {
+      "partitionId": "long"
+    },
+    "Record": {
+      "recordId": "string",
+      "overwrite": "boolean"
+    },
+    "Audit": {
+      "recordId": "string"
+    }
+  }
 }

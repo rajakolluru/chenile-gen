@@ -1,4 +1,5 @@
 {
+  "registryClientFlag": "registerInServiceRegistry",
   "name": "chenile-process-management",
   "description": "Typed multi-level process workers, definitions and cron triggers in a runnable mini-monolith",
   "sinceVersion": "2.1.31",
@@ -25,7 +26,13 @@
     {
       "name": "processSpec",
       "type": "FILE",
-      "description": "JSON specification of processes, typed inputs, children and optional cron triggers"
+      "description": "Native processMap definitions with optional inputFields"
+    },
+    {
+      "name": "cronSpec",
+      "type": "FILE",
+      "description": "Optional JSON array of cron schedules (separate from process definitions)",
+      "required": false
     },
     {
       "name": "definitionSource",

@@ -1,0 +1,10 @@
+<states>
+    <flow id="DEFAULT" default="true">
+        <manual-state id="CREATED" initialState="true">
+            <on eventId="approve" newStateId="APPROVED"/>
+            <on eventId="cancel" newStateId="CANCELLED"/>
+        </manual-state>
+        <manual-state id="APPROVED"/>
+        <manual-state id="CANCELLED"/>
+    </flow>
+</states>

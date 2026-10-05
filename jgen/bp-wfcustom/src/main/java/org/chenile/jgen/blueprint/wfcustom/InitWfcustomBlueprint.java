@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.chenile.jgen.blueprints.BlueprintConfig;
 import org.chenile.jgen.blueprints.InitHook;
+import org.chenile.jgen.blueprints.SampleInputFile;
 import org.chenile.jgen.util.CapUtils;
 import org.chenile.jgen.util.JavaNameUtils;
 import org.chenile.workflow.cli.CLIHelper;
@@ -18,6 +19,7 @@ public class InitWfcustomBlueprint implements InitHook {
     CLIHelper cliHelper = new CLIHelper();
     @Override
     public void init(BlueprintConfig blueprintConfig) {
+        blueprintConfig.sampleInputFiles.put("xmlFile", SampleInputFile.resource(".xml", getClass(), "/wfcustom-samples/states.xml"));
         blueprintConfig.postInputCaptureHook = (Map<String,Object> map) -> {
             String service = (String)map.get("service");
             map.put("Service", CapUtils.capitalizeFirst(service));

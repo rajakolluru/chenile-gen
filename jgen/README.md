@@ -75,7 +75,7 @@ Internally, the CLI does very little generation work itself. Its responsibility 
 ## CLI Options
 
 - `-c, --config`: load a config JSON instead of the bundled default config
-- `-e, --emit-config`: copy the default config template into `config/`
+- `-e, --emit-config`: copy global config into `config/`; with `-g`, emit companion sample input files
 - `-f, --input-file`: read blueprint inputs from a JSON file
 - `-g, --generate-blueprint-file`: generate a sample input JSON for a specific blueprint
 - `-o, --output-file`: write the generated sample input JSON to a file
@@ -188,6 +188,32 @@ jgen-cli/bin/jgen.sh -f api-input.json
 ```
 
 This is the safest way to learn a blueprint because the generated JSON shows exactly which fields the blueprint expects.
+
+### Companion samples for file inputs
+
+Add `-e` to emit blueprint-owned sample files alongside the main input JSON:
+
+```bash
+jgen-cli/bin/jgen.sh -g chenile-process-management -o process-input.json -e
+jgen-cli/bin/jgen.sh -g wfcustom -o workflow-input.json -e
+# Equivalent shorthand:
+jgen-cli/bin/jgen.sh -g wfcustom -e workflow-input.json
+```
+
+The first command emits `process-input-processSpec.json` and
+`process-input-cronSpec.json`; the second emits `workflow-input-xmlFile.xml`.
+The main input JSON contains absolute paths to these companions. Fill in required
+project/service names and customize the samples, then run `jgen -f <input.json>`.
+Emission never runs project-generation hooks and refuses to overwrite existing
+main or companion files. Without `-e`, `-g` retains its existing placeholder behavior.
+Standalone `-e <config-file>` still emits global configuration.
+
+Blueprint authors register `SampleInputFile` emitters in
+`BlueprintConfig.sampleInputFiles`, keyed by their FILE input name. The emitter
+owns the content; the framework only assigns
+`<output-stem>-<input-field><extension>`, invokes the emitter and fills the input
+reference. Packaged JSON/XML resources can use `SampleInputFile.resource(...)`;
+custom emitters can write their own sample data without CLI changes.
 
 ## Configuration
 

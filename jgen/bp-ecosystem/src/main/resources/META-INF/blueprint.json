@@ -1,4 +1,5 @@
 {
+  "registryClientFlag": "includeServiceRegistry",
   "initHook": "org.chenile.jgen.blueprint.ecosystem.InitEcosystemBlueprint",
   "name": "chenile-ecosystem",
   "description": "Generates a Chenile service ecosystem from the existing service and mini-monolith blueprints",

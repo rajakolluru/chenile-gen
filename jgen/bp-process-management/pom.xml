@@ -6,7 +6,8 @@
     <name>Chenile process management mini-monolith blueprint</name>
     <dependencies>
         <dependency><groupId>org.chenile</groupId><artifactId>jgen-base</artifactId></dependency>
-        <dependency><groupId>org.quartz-scheduler</groupId><artifactId>quartz</artifactId></dependency>
+        <dependency><groupId>org.chenile.orchestrator.process</groupId><artifactId>process-api</artifactId></dependency>
+        <dependency><groupId>org.chenile.orchestrator.process</groupId><artifactId>chenile-trigger</artifactId></dependency>
         <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
     </dependencies>
 </project>

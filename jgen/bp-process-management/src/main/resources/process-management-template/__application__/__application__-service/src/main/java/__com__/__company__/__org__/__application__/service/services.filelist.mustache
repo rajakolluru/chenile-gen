@@ -11,7 +11,7 @@ public class {{name}}ServiceImpl implements {{name}}Service {
     public {{name}}ServiceImpl(ProcessWorkers workers) { this.workers = workers; }
     @Override public Process start({{inputType}} input) {
         if (input == null) throw new IllegalArgumentException("{{inputType}} is required");
-        return workers.doFirstTrigger("{{name}}", input);
+        return workers.doFirstTrigger("{{processType}}", input);
     }
 }
 --END--

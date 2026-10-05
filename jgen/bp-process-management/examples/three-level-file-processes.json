@@ -1,37 +1,32 @@
 {
-  "processes": [
-    {
-      "processType": "BatchUpload",
-      "fields": {
-        "filename": "string"
-      },
-      "children": [
-        "FileUpload"
-      ],
-      "implementation": "fileSplit",
+  "processMap": {
+    "BatchUpload": {
+      "leaf": false,
       "config": {
         "chunkBytes": "8"
       }
     },
-    {
-      "processType": "FileUpload",
-      "fields": {
-        "filename": "string"
-      },
-      "children": [
-        "ChunkUpload"
-      ],
-      "implementation": "fileSplit",
+    "FileUpload": {
+      "parentProcessType": "BatchUpload",
+      "leaf": false,
       "config": {
         "chunkBytes": "4"
       }
     },
-    {
-      "processType": "ChunkUpload",
-      "fields": {
-        "filename": "string"
-      },
-      "implementation": "fileRead"
+    "ChunkUpload": {
+      "parentProcessType": "FileUpload",
+      "leaf": true
     }
-  ]
+  },
+  "inputFields": {
+    "BatchUpload": {
+      "filename": "string"
+    },
+    "FileUpload": {
+      "filename": "string"
+    },
+    "ChunkUpload": {
+      "filename": "string"
+    }
+  }
 }

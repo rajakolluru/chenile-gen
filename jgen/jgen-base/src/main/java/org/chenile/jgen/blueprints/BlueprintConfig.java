@@ -17,6 +17,15 @@ public class BlueprintConfig {
     public Consumer<Map<String,Object>> postInputCaptureHook;
     public String templateFolder;
     public List<InputField> inputFields;
+    /** Defaults to the first input field, which conventionally names the generated project. */
+    public String projectNameField;
+    /** Prefix used by the template's top-level directory, e.g. "bp-" or "bdd-it-". */
+    public String projectDirectoryPrefix = "";
+    /** Optional boolean input enabling a registry client that requires serviceRegistryUrl. */
+    public String registryClientFlag;
+    /** Optional emitters for FILE inputs, registered by the blueprint's init hook. */
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public Map<String,SampleInputFile> sampleInputFiles = new java.util.LinkedHashMap<>();
     /**
      * Final processing post the code generation
      */

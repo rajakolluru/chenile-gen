@@ -1,4 +1,5 @@
 {
+  "registryClientFlag": "enableServiceRegistryDelegate",
   "initHook" : "org.chenile.jgen.blueprint.minimonolith.InitMinimonolithBlueprint",
   "name" : "minimonolith",
   "description" : "Generates a New Mini Monolith",
