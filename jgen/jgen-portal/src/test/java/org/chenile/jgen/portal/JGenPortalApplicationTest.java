@@ -16,6 +16,6 @@ class JGenPortalApplicationTest {
     @Test
     void startsWithoutADatabaseAndReportsTheReleaseVersion() {
         assertFalse(context.containsBean("dataSource"));
-        assertEquals("2.1.31", controller.generator("chenile-process-management").get("version"));
+        assertEquals("2.1.32", controller.generator("chenile-process-management").get("version"));
     }
 }
