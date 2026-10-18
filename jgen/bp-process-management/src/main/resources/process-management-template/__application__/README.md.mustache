@@ -93,3 +93,8 @@ before startup. The host validates schemas; it is not a production schema migrat
 The normal API host's PostgreSQL startup/security requirements also apply here.
 Expose loopback HTTP through a secured HTTPS gateway; change `PROCESS_ADMIN_PORT` and
 `PROCESS_ADMIN_BIND_ADDRESS` as appropriate. Do not commit secrets or real input files.
+
+Cron firing now durably submits a DISPATCH_TRIGGER outbox command. Its acknowledgement/outbox ID is
+also the trigger ID stored on a resulting process; the cron fire identity is only a submission retry key.
+The shared artifact is chenile-outbox. POST /trigger returns HTTP 202 with only triggerId in its payload;
+GET /trigger/{id} queries status in the caller tenant. The dispatcher must run before a process exists.

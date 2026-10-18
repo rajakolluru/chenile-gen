@@ -61,6 +61,8 @@ class GeneratedProcessApplicationTest {
 {{#hasCrons}}
     @Autowired org.chenile.trigger.cron.CrontabScheduler cronScheduler;
     @Autowired org.chenile.orchestrator.process.configuration.dao.ProcessRepository processes;
+    @Autowired org.chenile.orchestrator.process.outbox.ProcessOutboxRepository outbox;
+    @Autowired org.chenile.orchestrator.process.outbox.OutboxDispatcher dispatcher;
     @Test void cronCreatesCorrelatedProcessInConfiguredTenant() throws Exception {
         var cron=crons.findAll().get(0); boolean enabled=cron.enabled;
         var tenantContext=org.chenile.core.context.ContextContainer.CONTEXT_CONTAINER;
@@ -73,7 +75,13 @@ class GeneratedProcessApplicationTest {
         org.mockito.Mockito.when(context.getScheduledFireTime()).thenReturn(new java.util.Date());
         try {
             cronScheduler.fire(cron.id,context);
-            String triggerId="crontab:"+cron.id+":"+fire;
+            var contextJson=new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(
+                    java.util.Map.of("x-chenile-quartz-fire-instance-id",fire));
+            String fragment=contextJson.substring(1,contextJson.length()-1);
+            var accepted=outbox.findCommands("DISPATCH_TRIGGER",cron.tenant,null,null,fragment,0,10);
+            assertEquals(1,accepted.totalElements());
+            String triggerId=accepted.content().get(0).id;
+            dispatcher.drainAll(30);
             var process=processes.findAll().stream().filter(p -> triggerId.equals(p.triggerId)).findFirst().orElseThrow();
             assertEquals(cron.tenant,process.tenant);
             var json=new com.fasterxml.jackson.databind.ObjectMapper();
