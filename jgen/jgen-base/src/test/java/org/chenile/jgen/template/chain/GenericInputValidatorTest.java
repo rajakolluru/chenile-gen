@@ -3,6 +3,7 @@ package org.chenile.jgen.template.chain;
 import org.chenile.jgen.blueprints.BlueprintConfig;
 import org.chenile.jgen.blueprints.BlueprintExecutor;
 import org.chenile.jgen.blueprints.model.InputField;
+import org.chenile.jgen.blueprints.model.FieldType;
 import org.chenile.jgen.config.ConfigProvider;
 import org.chenile.jgen.template.model.TemplateContext;
 import org.chenile.jgen.util.ProcessorFactory;
@@ -45,6 +46,15 @@ class GenericInputValidatorTest {
         assertTrue(failure.getMessage().contains("identifier"));
         assertFalse(called.get());
         assertFalse(Files.exists(temporary.resolve("output")));
+        var dependencies = new InputField(); dependencies.name = "runtimeDependencies";
+        dependencies.type = FieldType.POM_Dependencies;
+        blueprint.inputFields = List.of(blueprint.inputFields.get(0), dependencies);
+        var malformed = input(); malformed.put("runtimeDependencies", "not-an-array");
+        failure = assertThrows(IllegalArgumentException.class, () -> new BlueprintExecutor().execute(
+                blueprint, new ConfigProvider().obtainDefaultConfig(), malformed));
+        assertTrue(failure.getMessage().contains("runtimeDependencies"));
+        assertFalse(called.get());
+        assertFalse(Files.exists(temporary.resolve("output")));
     }
 
     @Test void validatesBlueprintsWithoutHooks() {
@@ -83,13 +93,23 @@ class GenericInputValidatorTest {
         Path templates = Files.createDirectories(temporary.resolve("templates/__project__"));
         Files.writeString(templates.resolve("result.txt.mustache"), "{{company}}/{{message}}");
         blueprint.templateFolder = templates.getParent().toString();
+        var parent = new InputField(); parent.name = "super_pom"; parent.type = FieldType.SuperPOM;
+        var dependencies = new InputField(); dependencies.name = "runtimeDependencies";
+        dependencies.type = FieldType.POM_Dependencies;
+        blueprint.inputFields = List.of(blueprint.inputFields.get(0), parent, dependencies);
         blueprint.postInputCaptureHook = map -> {
             assertEquals("mycompany", map.get("company"));
+            assertEquals("shared-parent", map.get("parentArtifactId"));
+            assertEquals("${revision}", map.get("parentVersion"));
+            assertEquals("", map.get("parentRelativePath"));
+            assertEquals("library", ((Map<?, ?>) ((List<?>) map.get("runtimeDependencies")).get(0)).get("artifactId"));
             assertFalse(Files.exists(temporary.resolve("output")));
             map.put("message", "hook-ran");
         };
         var context = new TemplateContext(); context.blueprintConfig = blueprint;
         context.config = new ConfigProvider().obtainDefaultConfig(); context.map = input(); context.isJar = false;
+        context.map.put("super_pom", Map.of("groupId", "example", "artifactId", "shared-parent", "version", "${revision}", "relativePath", ""));
+        context.map.put("runtimeDependencies", List.of(Map.of("groupId", "example", "artifactId", "library", "version", "1.0.0")));
         var config = new XmlOrchConfigurator<TemplateContext>();
         config.setBeanFactoryAdapter(new ProcessorFactory("org.chenile.jgen.template.chain."));
         config.setFilename("org/chenile/jgen/template/processors.xml");

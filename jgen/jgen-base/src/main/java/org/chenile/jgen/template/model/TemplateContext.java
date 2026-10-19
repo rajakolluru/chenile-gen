@@ -17,6 +17,8 @@ public class TemplateContext {
    public Map<String, Object> map;
    private String output;
    public boolean isJar = true;
+   /** Invocation ancestry is local to this generation, so independent runs do not share state. */
+   public java.util.List<String> blueprintPath = java.util.List.of();
    public String getOutput(){
       if (output == null) {
          output = (String) map.get("destFolder");

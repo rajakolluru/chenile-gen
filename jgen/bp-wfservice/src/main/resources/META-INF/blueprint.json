@@ -1,67 +1,77 @@
 {
-  "initHook" : "org.chenile.jgen.blueprint.wfservice.InitWfserviceBlueprint",
-  "name" : "wfservice",
-  "description" : "Generates a typical  Workflow service ",
+  "initHook": "org.chenile.jgen.blueprint.wfservice.InitWfserviceBlueprint",
+  "name": "wfservice",
+  "description": "Generates a typical  Workflow service ",
   "templateFolder": "wfservice-template",
-  "inputFields" :[
+  "inputFields": [
     {
-      "name" : "service",
-      "type" : "STRING",
-      "description": "Workflow Service Name"
+      "name": "service",
+      "type": "STRING",
+      "description": "Workflow Service Name",
+      "validation": "PROJECT_NAME"
     },
     {
-    "name" : "serviceVersion",
-    "type" : "STRING",
-    "description": "Version of service",
-    "defaultValue" : "${defaultVersion}"
+      "name": "serviceVersion",
+      "type": "STRING",
+      "description": "Version of service",
+      "defaultValue": "${defaultVersion}",
+      "validation": "VERSION"
     },
     {
-      "name" : "destFolder",
-      "type" : "STRING",
+      "name": "destFolder",
+      "type": "STRING",
       "description": "Destination Folder",
-      "defaultValue" : "${defaultDestFolder}"
-    }
-
-  ,{
-      "name" : "activity",
-      "type" : "BOOLEAN",
+      "defaultValue": "${defaultDestFolder}"
+    },
+    {
+      "name": "activity",
+      "type": "BOOLEAN",
       "description": "Enable Activity Management",
-      "defaultValue" : "n"
+      "defaultValue": "n"
     },
-
     {
-      "name" : "enablement",
-      "type" : "BOOLEAN",
+      "name": "enablement",
+      "type": "BOOLEAN",
       "description": "Enablement",
-      "defaultValue" : "n"
-    }
-  ,
-
-    {
-      "name" : "jpa",
-      "type" : "BOOLEAN",
-      "description": "JPA",
-      "defaultValue" : "y"
-    }
-    ,
-    {
-        "name" : "cloudSwitchEnabled",
-        "type" : "BOOLEAN",
-        "description": "Enable Cloud Switch",
-        "defaultValue" : "n"
-    }
-    ,
-    {
-        "name" : "security",
-        "type" : "BOOLEAN",
-        "description": "Enable Security",
-        "defaultValue" : "n"
+      "defaultValue": "n"
     },
     {
-        "name" : "enableMCP",
-        "type" : "BOOLEAN",
-        "description": "Enable MCP support",
-        "defaultValue" : "n"
+      "name": "jpa",
+      "type": "BOOLEAN",
+      "description": "JPA",
+      "defaultValue": "y"
+    },
+    {
+      "name": "cloudSwitchEnabled",
+      "type": "BOOLEAN",
+      "description": "Enable Cloud Switch",
+      "defaultValue": "n"
+    },
+    {
+      "name": "security",
+      "type": "BOOLEAN",
+      "description": "Enable Security",
+      "defaultValue": "n"
+    },
+    {
+      "name": "enableMCP",
+      "type": "BOOLEAN",
+      "description": "Enable MCP support",
+      "defaultValue": "n"
+    },
+    {
+      "name": "super_pom",
+      "type": "SuperPOM",
+      "description": "Optional parent POM for the generated project",
+      "required": false,
+      "helpText": "Object with groupId, artifactId, version and relativePath. Omit to keep the blueprint parent."
+    },
+    {
+      "name": "dependencies",
+      "type": "POM_Dependencies",
+      "description": "Additional Maven dependencies",
+      "required": false,
+      "helpText": "Added to __service__/__service__-service/pom.xml. Versions may be omitted when supplied by dependency management."
     }
   ]
 }

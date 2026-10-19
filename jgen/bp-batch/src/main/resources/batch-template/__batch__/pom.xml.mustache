@@ -9,17 +9,27 @@
 		<module>{{batch}}deploy-configurations</module>
 		<module>{{batch}}deploy-package</module>
 	</modules>
+    {{#parentArtifactId}}
+    <parent>
+        <groupId>{{parentGroupId}}</groupId>
+        <artifactId>{{parentArtifactId}}</artifactId>
+        <version>{{parentVersion}}</version>
+        <relativePath>{{parentRelativePath}}</relativePath>
+    </parent>
+    {{/parentArtifactId}}
+    {{^parentArtifactId}}
     <parent>
         <groupId>{{chenilePackage}}</groupId>
         <version>{{chenileVersion}}</version>
         <artifactId>chenile-parent</artifactId>
     </parent>
+    {{/parentArtifactId}}
 
 	<properties>
 		<{{batch}}.version>${revision}</{{batch}}.version>
 		<revision>0.0.1-SNAPSHOT</revision>
 	</properties>
-	
+
 	<groupId>{{com}}.{{company}}.{{org}}.{{batch}}</groupId>
 	<version>${revision}</version>
 	<artifactId>{{batch}}-parent</artifactId>

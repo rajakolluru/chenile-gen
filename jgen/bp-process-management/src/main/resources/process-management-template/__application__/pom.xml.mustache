@@ -1,11 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent><groupId>{{chenilePackage}}</groupId><artifactId>chenile-parent</artifactId><version>{{chenileVersion}}</version><relativePath/></parent>
-    <groupId>{{packageName}}</groupId><artifactId>{{application}}-parent</artifactId><version>{{applicationVersion}}</version><packaging>pom</packaging>
-    <properties><revision>{{applicationVersion}}</revision></properties>
-    <modules>
-        <module>{{application}}-api</module><module>{{application}}-service</module>
-        <module>{{application}}-configurations</module><module>{{application}}-package</module>
-    </modules>
-</project>
+<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
+{{#parentArtifactId}}<parent><groupId>{{parentGroupId}}</groupId><artifactId>{{parentArtifactId}}</artifactId><version>{{parentVersion}}</version><relativePath>{{parentRelativePath}}</relativePath></parent>{{/parentArtifactId}}
+{{^parentArtifactId}}<parent><groupId>{{chenilePackage}}</groupId><artifactId>chenile-parent</artifactId><version>{{chenileVersion}}</version></parent>{{/parentArtifactId}}
+<groupId>{{packageName}}</groupId><artifactId>{{application}}-parent</artifactId><version>{{applicationVersion}}</version><packaging>pom</packaging>
+<properties><revision>{{applicationVersion}}</revision></properties>
+<modules><module>{{application}}-api</module><module>{{application}}-server-config</module><module>{{application}}-server-service</module>
+{{#processes}}<module>{{workerModule}}</module>{{/processes}}
+<module>{{application}}-worker-listener</module><module>{{serverMonolith}}</module><module>{{workerMonolith}}</module>
+{{#separateRegistry}}<module>{{registryMonolith}}</module>{{/separateRegistry}}
+</modules></project>

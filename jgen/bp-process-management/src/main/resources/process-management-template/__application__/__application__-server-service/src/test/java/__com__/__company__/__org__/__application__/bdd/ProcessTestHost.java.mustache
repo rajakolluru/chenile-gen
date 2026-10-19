@@ -1,0 +1,8 @@
+package {{packageName}}.bdd;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.persistence.autoconfigure.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+@SpringBootApplication(scanBasePackages={"org.chenile.configuration", "org.chenile.orchestrator.process.configuration", "{{packageName}}.configuration", "{{packageName}}.bootstrap"})
+@EntityScan({"org.chenile.orchestrator.process.model", "org.chenile.orchestrator.process.configuration.model", "org.chenile.trigger.cron"})
+@EnableJpaRepositories({"org.chenile.orchestrator.process.configuration.dao", "org.chenile.trigger.cron"})
+public class ProcessTestHost {}

@@ -21,6 +21,7 @@ public class FileNameReplacer extends FileProcessor {
         StringSubstitutor substitutor = new StringSubstitutor(map,"__","__");
         String folder = file.getParent();
         String filename = file.getName();
+        if (org.chenile.jgen.blueprints.BlueprintMarker.isMarker(filename)) return;
         String newName = substitutor.replace(filename);
         if (!newName.equals(filename)) {
             String destination = folder + File.separator + newName;

@@ -1,87 +1,100 @@
 {
-  "initHook" : "org.chenile.jgen.blueprint.wfcustom.InitWfcustomBlueprint",
-  "name" : "wfcustom",
-  "description" : "Generates a New Custom Workflow",
+  "initHook": "org.chenile.jgen.blueprint.wfcustom.InitWfcustomBlueprint",
+  "name": "wfcustom",
+  "description": "Generates a New Custom Workflow",
   "templateFolder": "wfcustom-template",
-  "inputFields" :[
+  "inputFields": [
     {
-      "name" : "service",
-      "type" : "STRING",
-      "description": "Workflow Entity"
+      "name": "service",
+      "type": "STRING",
+      "description": "Workflow Entity",
+      "validation": "PROJECT_NAME"
     },
     {
-    "name" : "serviceVersion",
-    "type" : "STRING",
-    "description": "Version of Entity",
-    "defaultValue" : "${defaultVersion}"
+      "name": "serviceVersion",
+      "type": "STRING",
+      "description": "Version of Entity",
+      "defaultValue": "${defaultVersion}",
+      "validation": "VERSION"
     },
     {
-      "name" : "destFolder",
-      "type" : "STRING",
+      "name": "destFolder",
+      "type": "STRING",
       "description": "Destination Folder",
-      "defaultValue" : "${defaultDestFolder}"
-    }
-    ,{
-        "name" : "jpa",
-        "type" : "BOOLEAN",
-        "description": "Enable JPA",
-        "defaultValue" : "y"
-    }
-    ,
+      "defaultValue": "${defaultDestFolder}"
+    },
     {
-        "name" : "cloudSwitchEnabled",
-        "type" : "BOOLEAN",
-        "description": "Enable Cloud Switch",
-        "defaultValue" : "n"
-    }
-    ,
+      "name": "jpa",
+      "type": "BOOLEAN",
+      "description": "Enable JPA",
+      "defaultValue": "y"
+    },
     {
-      "name" : "xmlFile",
-      "type" : "FILE",
+      "name": "cloudSwitchEnabled",
+      "type": "BOOLEAN",
+      "description": "Enable Cloud Switch",
+      "defaultValue": "n"
+    },
+    {
+      "name": "xmlFile",
+      "type": "FILE",
       "description": "XML File name"
     },
     {
-        "name" : "security",
-        "type" : "BOOLEAN",
-        "description": "Enable Security",
-        "defaultValue" : "n"
-    }
-  ,{
-      "name" : "activity",
-      "type" : "BOOLEAN",
+      "name": "security",
+      "type": "BOOLEAN",
+      "description": "Enable Security",
+      "defaultValue": "n"
+    },
+    {
+      "name": "activity",
+      "type": "BOOLEAN",
       "description": "Enable Activity Management",
-      "defaultValue" : "n"
+      "defaultValue": "n"
     },
-
     {
-      "name" : "enablement",
-      "type" : "BOOLEAN",
+      "name": "enablement",
+      "type": "BOOLEAN",
       "description": "Enablement",
-      "defaultValue" : "y"
+      "defaultValue": "y"
     },
     {
-      "name" : "genCustomizedPayload",
-      "type" : "BOOLEAN",
+      "name": "genCustomizedPayload",
+      "type": "BOOLEAN",
       "description": "Generate Customized Payload",
-      "defaultValue" : "y"
+      "defaultValue": "y"
     },
     {
-      "name" : "genDefaultPostSaveHook",
-      "type" : "BOOLEAN",
+      "name": "genDefaultPostSaveHook",
+      "type": "BOOLEAN",
       "description": "Generate Default Post Save Hook",
-      "defaultValue" : "y"
+      "defaultValue": "y"
     },
     {
-      "name" : "genDefaultAutoState",
-      "type" : "BOOLEAN",
+      "name": "genDefaultAutoState",
+      "type": "BOOLEAN",
       "description": "Generate Default Auto State",
-      "defaultValue" : "y"
+      "defaultValue": "y"
     },
     {
-      "name" : "enableMCP",
-      "type" : "BOOLEAN",
+      "name": "enableMCP",
+      "type": "BOOLEAN",
       "description": "Enable MCP support",
-      "defaultValue" : "n"
+      "defaultValue": "n"
+    },
+    {
+      "name": "super_pom",
+      "type": "SuperPOM",
+      "description": "Optional parent POM for the generated project",
+      "required": false,
+      "helpText": "Object with groupId, artifactId, version and relativePath. Omit to keep the blueprint parent."
+    },
+    {
+      "name": "dependencies",
+      "type": "POM_Dependencies",
+      "description": "Additional Maven dependencies",
+      "required": false,
+      "helpText": "Added to __service__/__service__-service/pom.xml. Versions may be omitted when supplied by dependency management."
     }
   ]
 }

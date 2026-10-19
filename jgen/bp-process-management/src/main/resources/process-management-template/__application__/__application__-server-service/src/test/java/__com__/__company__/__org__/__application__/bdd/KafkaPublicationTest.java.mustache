@@ -1,0 +1,14 @@
+package {{packageName}}.bdd;
+import {{packageName}}.configuration.ProcessKafkaPublisher;
+import org.junit.jupiter.api.Test;
+import org.springframework.kafka.core.KafkaTemplate;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+public class KafkaPublicationTest {
+ @Test void failedBrokerAcknowledgementFailsPublication() {
+  KafkaTemplate<String,String> kafka = mock(KafkaTemplate.class);
+  when(kafka.send(any(org.apache.kafka.clients.producer.ProducerRecord.class))).thenReturn(java.util.concurrent.CompletableFuture.failedFuture(new IllegalStateException("broker unavailable")));
+  var publisher = new ProcessKafkaPublisher().chenilePub(kafka);
+  assertThrows(IllegalStateException.class, () -> publisher.asyncPublish("work", "{}", java.util.Map.of("x-chenile-tenant-id", "tenant0")));
+ }
+}

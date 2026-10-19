@@ -1,33 +1,49 @@
 {
-  "initHook" : "org.chenile.jgen.blueprint.headlessservice.InitHeadlessServiceBlueprint",
-  "name" : "chenile-headless-service",
-  "description" : "Generates a non-HTTP Chenile service",
-  "sinceVersion" : "2.1.31",
+  "initHook": "org.chenile.jgen.blueprint.headlessservice.InitHeadlessServiceBlueprint",
+  "name": "chenile-headless-service",
+  "description": "Generates a non-HTTP Chenile service",
+  "sinceVersion": "2.1.31",
   "templateFolder": "headless-service-template",
-  "inputFields" :[
+  "inputFields": [
     {
-      "name" : "service",
-      "type" : "STRING",
+      "name": "service",
+      "type": "STRING",
       "description": "Name of Service",
-      "defaultValue": "${defaultServiceName}"
+      "defaultValue": "${defaultServiceName}",
+      "validation": "JAVA_IDENTIFIER"
     },
     {
-      "name" : "serviceVersion",
-      "type" : "STRING",
+      "name": "serviceVersion",
+      "type": "STRING",
       "description": "Service Version",
-      "defaultValue": "${defaultVersion}"
+      "defaultValue": "${defaultVersion}",
+      "validation": "VERSION"
     },
     {
-      "name" : "destFolder",
-      "type" : "STRING",
+      "name": "destFolder",
+      "type": "STRING",
       "description": "Destination Folder",
-      "defaultValue" : "${defaultDestFolder}"
+      "defaultValue": "${defaultDestFolder}"
     },
     {
-      "name" : "registerInServiceRegistry",
-      "type" : "BOOLEAN",
+      "name": "registerInServiceRegistry",
+      "type": "BOOLEAN",
       "description": "Publish this service to the Chenile Service Registry",
-      "defaultValue" : "y"
+      "defaultValue": "y"
+    },
+    {
+      "name": "super_pom",
+      "type": "SuperPOM",
+      "description": "Optional parent POM for the generated project",
+      "required": false,
+      "helpText": "Object with groupId, artifactId, version and relativePath. Omit to keep the blueprint parent."
+    },
+    {
+      "name": "dependencies",
+      "type": "POM_Dependencies",
+      "description": "Additional Maven dependencies",
+      "required": false,
+      "helpText": "Added to __service__/__service__-service/pom.xml. Versions may be omitted when supplied by dependency management."
     }
   ]
 }

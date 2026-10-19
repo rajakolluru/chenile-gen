@@ -1,155 +1,121 @@
 # Chenile process management blueprint
 
-`chenile-process-management` generates a domain-neutral mini-monolith from the
-runtime's native process definitions. It supports multiple roots, arbitrary
-hierarchy depth, multiple child types, predecessor chaining, and optional cron
-triggers. It uses a `ProcessDefinitionConfigurator` subclass of the runtime JSON
-`ProcessConfigurator` for process documents and `JsonCrontabRepository` for a
-separate schedule file. The blueprint only adapts those validated objects to templates.
+`chenile-process-management` is an aggregated blueprint that generates a process
+server and a worker mini-monolith from native `processMap` definitions. It can
+reuse a service registry, host one in the server (recommended), or create a third
+mini-monolith containing the registry. It preserves typed inputs, arbitrary
+hierarchies, predecessor chaining, and separate optional cron schedules.
 
 ## Generate
 
-Install the current process-management runtime locally until its dependent
-artifacts are published. From `chenile-gen/jgen`:
+From `chenile-gen/jgen`:
 
 ```sh
-mvn install -pl jgen-cli -am
-jgen-cli/bin/jgen.sh -g chenile-process-management -o process-input.json
-# Add -e to also emit process/cron samples and fill their file references:
+mvn install
 jgen-cli/bin/jgen.sh -g chenile-process-management -o process-input.json -e
-# Alternatively use the supplied complete example:
+# Edit process-input.json and its companion process/cron specifications.
+jgen-cli/bin/jgen.sh -f process-input.json
+# Or use the checked-in example:
 jgen-cli/bin/jgen.sh -f bp-process-management/examples/file-upload-input.json
 cd output/uploads
 mvn install
-export PROCESS_MANAGEMENT_API_KEY="$(openssl rand -hex 32)"
-java -jar uploads-package/target/uploads-exec.jar --spring.profiles.active=dev
 ```
 
-Every generated splitter and executor is an application hook that throws an
-explicit error until implemented. FileUpload/ChunkUpload are example definitions,
-not built-in implementations. Implement file splitting and uploading in the
-generated application; the blueprint does not interpret filenames, chunk sizes,
-checksums, storage paths, or any other domain configuration.
+The generated README lists the exact executable JARs, deployment URLs, topic names,
+startup order and environment settings. Kafka is the currently supported queue
+transport. Generated splitter/executor hooks throw until implemented; they are
+application code, not example file-upload implementations.
 
-## Input
+## Inputs
 
-CLI fields remain `application`, `applicationVersion`, `destFolder`,
-`processSpec`, optional `cronSpec`, `definitionSource` (`json` or `database`), and
-`registerInServiceRegistry` (`y`/`n`). Registry publication requires an HTTP(S)
-`serviceRegistryUrl`. The global JGen config supplies package segments and
-`chenileVersion` (minimum 2.1.31 with the enhanced local runtime). Generation
-refuses to overwrite an existing application directory.
+Existing inputs remain: `application`, `applicationVersion`, `destFolder`,
+`processSpec`, optional `cronSpec`, `definitionSource` (`json` or `database`),
+`super_pom` and additional server-service `dependencies`.
 
-The process specification is a typed extension of the framework's `Processes`
-document:
+| Input | Default / visibility |
+| --- | --- |
+| `registryMode` | `create`; alternatively `existing` |
+| `existingRegistryUrl` | Required only for `existing` |
+| `registryPlacement` | `server` (recommended); alternatively `separate`; asked only for `create` |
+| `serverDeploymentUrl` | `http://localhost:8000` |
+| `workerDeploymentUrl` | `http://localhost:8001` |
+| `registryDeploymentUrl` | `http://localhost:8002`; asked only for a separate registry |
+| `transport` | `kafka` |
+| `workTopic` | `<application>-work`; fills absent `config.queue` values |
 
-```json
-{
-  "processMap": {
-    "Import": {"leaf":false, "config":{"partitionSize":"100"}},
-    "Partition": {"parentProcessType":"Import", "leaf":false},
-    "Record": {"parentProcessType":"Partition", "leaf":true},
-    "Audit": {"parentProcessType":"Partition", "leaf":true}
-  },
-  "inputFields": {
-    "Import": {"batchId":"string"},
-    "Partition": {"partitionId":"long"},
-    "Record": {"recordId":"string", "overwrite":"boolean"},
-    "Audit": {"recordId":"string"}
-  }
-}
+All generated hosts have distinct deployment URLs. A colocated registry uses the
+server URL. Existing per-definition queue names are retained, and the worker
+subscribes to every resulting topic. Global JGen configuration supplies package
+segments and the Chenile version (minimum 2.1.32).
+
+`visibleWhen` controls interactive CLI prompts, portal visibility and server-side
+input validation. Non-interactive files can omit inactive fields. Legacy flat
+parent coordinates remain supported. Programmatic preparation still recognizes
+legacy `registerInServiceRegistry` plus `serviceRegistryUrl`; new input files use
+the explicit registry choices above.
+
+## Generated modules
+
+- `<application>-api`: shared typed payloads and process-start service contracts.
+- `<application>-server-config`: native definitions and cron seeds, server only.
+- `<application>-server-service`: typed Chenile HTTP services, process bootstrap,
+  runtime services and acknowledged Kafka publication; no business workers.
+- `<application>-<processType>-workers`: one plain JAR per definition. Leaf types
+  get an executor; non-leaf types get a splitter and aggregator in the same JAR.
+- `<application>-worker-listener`: a headless Chenile listener, Kafka subscription,
+  tenant validation/restoration, process delegate and retry handling.
+- `<application>Server` and `<application>Worker`: composed `minimonolith` projects.
+- `<application>Registry`: composed only for a separate generated registry.
+
+The worker has no process datasource, process service, JDBC starter or outbox
+worker. The server uses exactly one queue-based starter. Process callbacks use
+the registry-backed delegate; the server advertises its deployment URL.
+
+The aggregate parses the process specification once and computes a deployment
+plan. Its template includes:
+
+```text
+%{{chenile-process-workers forEach=processes as=process}}/
+%{{minimonolith role=server}}/
+%{{minimonolith role=worker}}/
+%%separateRegistry=true%%/
+  %{{minimonolith role=registry}}/
 ```
 
-- `processMap` keys are process-type Java identifiers, including lowercase types
-  such as `feed`, `file`, and `chunk` in the runtime test `def.json`. Their keys
-  are preserved; Java classes use capitalized names (`FeedSplitter`, `FeedIn`).
-  Values are ordinary `ProcessDef` objects: `parentProcessType`, `leaf`,
-  `args`, opaque shared `config`, `predecessorProcessType`, and
-  `predecessorArgs` (`INPUT`, `OUTPUT`, or `BOTH`).
-- Declare hierarchy with `parentProcessType`; children are derived from those
-  definitions, never maintained in a second child list. `leaf` must agree with
-  the hierarchy. Every referenced parent/predecessor must exist.
-- `args` optionally names the generated DTO (for example `ImportIn`) or its
-  fully qualified class name. The simple name determines the generated DTO;
-  generation writes its new fully qualified model-package name to runtime definitions.
-  Omitted values default to `<CapitalizedProcessType>In`.
-- `inputFields` maps process types to DTO field-name/type maps, or can be placed
-  directly inside each process definition. Do not declare both for the same type. An omitted entry
-  generates an empty DTO. Supported types are string, integer/int, long, boolean,
-  and double, or the corresponding boxed Java names.
+The reusable `chenile-process-workers` blueprint consumes the prepared definition
+through scalar fields (`processType`, `name`, `inputType`, `leaf`, `children`),
+plus `workerModule`, `application`, `packageName`, version, parent and dependency
+inputs. Its payload model is supplied by the application's API JAR.
 
-### Separate cron file
+## Process and cron specifications
 
-Set `cronSpec` to a file containing a JSON array of native crontabs:
+The process file retains the runtime's native `processMap` structure, with optional
+`inputFields` metadata either at document level or inside a definition. Names and
+model types are validated before any generated files are written. Domain config
+remains opaque, apart from validating/filling the queue topic required for dispatch.
 
-```json
-[
-  {
-    "name": "daily-import",
-    "tenant": "default",
-    "enabled": false,
-    "cronExpression": "0 0 2 * * ?",
-    "timezone": "UTC",
-    "eventName": "ProcessCreate",
-    "payload": {"processDefName":"Import", "args":{"batchId":"daily"}}
-  }
-]
-```
+Cron schedules remain a separate JSON array read by `JsonCrontabRepository`.
+Only the server packages and seeds these resources. Bootstrap creates missing
+records without overwriting saved administrator changes on restart.
 
-`JsonCrontabRepository` accepts structured `payload`/`headers`, or the native
-`eventPayloadJson`/`headersJson` strings (not both forms together).
-Timezone defaults to UTC and enabled defaults to true, like `Crontab`; the example
-explicitly disables its schedule. Missing IDs are generated deterministically.
-No cron file is required. Blueprint ingress currently supports `ProcessCreate`;
-its payload arguments must match the selected process's fields and types.
-
-The configurator owns process-name/model validation, hierarchy and predecessor
-references/cycles, leaf consistency, field types and process/cron payload checks.
-The JSON repository owns schedule and duplicate-name/ID checks. Both JSON readers
-reject duplicate JSON keys, ignore unknown properties and retain their previous
-configuration if validation fails. The standard runtime reader can load definitions
-containing generation metadata without failing. Generic application, package,
-version, registry and destination validation remains in JGen's processing chain.
-
-### Migrating earlier blueprint inputs
-
-Replace the old `processes` array with native `processMap` entries. Move
-`fields` into top-level `inputFields`, use `args` instead of `inputType`,
-and express child relationships with each child's `parentProcessType`. Set
-`leaf` explicitly. Remove `implementation`: the generator has no
-`fileSplit`, `fileRead`, or other domain-specific modes. The supplied examples
-use the new contract, including the three-level file-named scaffold. Move old
-`cronTriggers` entries into `cronSpec`, using native `eventName` and `payload`
-instead of schedule-level `processType` and `args`.
-
-## Generated application
-
-The Maven reactor contains API, service, configurations, and executable-package
-modules. Each process gets a typed local Chenile service and HTTP ingress.
-Registry registration is optional and does not affect local service availability.
-
-Leaf executors return domain outputs. Composite splitters emit typed
-`SubProcessPayload` objects through the framework helper. Generic aggregators
-collect child outputs and report child counts/errors without interpreting output
-fields. Customize these application hooks for domain behavior.
-
-Startup loads emitted native `defs.json` through `ProcessConfigurator` in
-both JSON and database modes. Database mode inserts only missing rows and clears
-the definition cache; restart preserves administrator edits. Cron seeds are read
-through `JsonCrontabRepository` and saved through the existing `CrontabService`,
-preserving existing schedules and tenant context.
-
-The package reuses the protected process-administration host, JDBC queue,
-background worker polling, and optional outbox. All HTTP routes require the
-administrator key and tenant header. Production requires a provisioned PostgreSQL
-schema and secret configuration; persistent local H2 is development-only.
-See the generated README for deployment and worker lifecycle instructions.
+Input names, deployment URLs and the default Kafka topic declare shared
+`validation` rules in `blueprint.json`; JGen enforces them before blueprint hooks.
+Process hierarchy, cron contracts and deployment relationships remain blueprint
+checks. See [declarative input validation](../docs/input-validation.md).
 
 ## Verification
 
-Blueprint tests cover native configurator parsing, hierarchy/predecessor
-validation, opaque configuration, generic workers, typed cron arguments, and
-actual template processing for registry on/off and JSON/database definitions.
-Generated startup tests cover local services, repeatable seeding, administrator
-edit preservation, and cron/process correlation. Business execution tests belong
-to the application, not to an example-specific generator branch.
+Generator tests cover registry choices, hierarchy validation and per-definition
+worker expansion. Generated projects include a Cucumber REST test with an explicit
+tenant header and committed-process publication to Kafka, a publication-failure
+test, and Kafka delivery to the headless worker with tenant restoration and no
+datasource. The server and worker tests extend `KafkaBaseTest`, following
+`bp-batch`: Docker must be running, and Testcontainers starts and stops Kafka
+automatically. No separately started Kafka server is needed for `mvn install`.
+The complete split/execute/aggregate and remote callback cycle still depends on
+your application-specific worker implementations.
+
+The server initializes the runtime's idempotent outbox/receipt SQL schema;
+Hibernate manages the process, definition and crontab entities in the local
+default configuration. For an externally managed schema, disable automatic SQL
+initialization after provisioning those tables and select schema validation.

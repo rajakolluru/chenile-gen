@@ -1,38 +1,53 @@
 {
   "projectDirectoryPrefix": "bp-",
-  "initHook" : "org.chenile.jgen.blueprint.jgenbp.InitJGenBlueprint",
-  "name" : "jgen-blueprint",
-  "description" : "Generates a New JGen Blueprint",
+  "initHook": "org.chenile.jgen.blueprint.jgenbp.InitJGenBlueprint",
+  "name": "jgen-blueprint",
+  "description": "Generates a New JGen Blueprint",
   "templateFolder": "blueprint-template",
-  "inputFields" :[
+  "inputFields": [
     {
-      "name" : "blueprintName",
-      "type" : "STRING",
-      "description": "Name of Blueprint"
+      "name": "blueprintName",
+      "type": "STRING",
+      "description": "Name of Blueprint",
+      "validation": "JAVA_IDENTIFIER"
     },
     {
-      "name" : "destFolder",
-      "type" : "STRING",
+      "name": "destFolder",
+      "type": "STRING",
       "description": "Destination Folder",
-      "defaultValue" : "${defaultDestFolder}"
+      "defaultValue": "${defaultDestFolder}"
     },
     {
-      "name" : "security",
-      "type" : "BOOLEAN",
+      "name": "security",
+      "type": "BOOLEAN",
       "description": "Enable Security",
-      "defaultValue" : "n"
+      "defaultValue": "n"
     },
     {
-      "name" : "jpa",
-      "type" : "BOOLEAN",
+      "name": "jpa",
+      "type": "BOOLEAN",
       "description": "Enable JPA",
-      "defaultValue" : "y"
+      "defaultValue": "y"
     },
     {
-      "name" : "cloudSwitchEnabled",
-      "type" : "BOOLEAN",
+      "name": "cloudSwitchEnabled",
+      "type": "BOOLEAN",
       "description": "Enable Cloud Switch",
-      "defaultValue" : "n"
+      "defaultValue": "n"
+    },
+    {
+      "name": "super_pom",
+      "type": "SuperPOM",
+      "description": "Optional parent POM for the generated project",
+      "required": false,
+      "helpText": "Object with groupId, artifactId, version and relativePath. Omit to keep the blueprint parent."
+    },
+    {
+      "name": "dependencies",
+      "type": "POM_Dependencies",
+      "description": "Additional Maven dependencies",
+      "required": false,
+      "helpText": "Added to bp-__blueprintName__/pom.xml. Versions may be omitted when supplied by dependency management."
     }
   ]
 }

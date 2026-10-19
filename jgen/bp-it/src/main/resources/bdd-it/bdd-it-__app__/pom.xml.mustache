@@ -1,10 +1,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    {{#parentArtifactId}}
+    <parent>
+        <groupId>{{parentGroupId}}</groupId>
+        <artifactId>{{parentArtifactId}}</artifactId>
+        <version>{{parentVersion}}</version>
+        <relativePath>{{parentRelativePath}}</relativePath>
+    </parent>
+    {{/parentArtifactId}}
+    {{^parentArtifactId}}
     <parent>
         <groupId>org.chenile.bdd</groupId>
         <version>{{chenileBddVersion}}</version>
         <artifactId>chenile-bdd-parent</artifactId>
     </parent>
+    {{/parentArtifactId}}
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>chenile-bdd-it</artifactId>
@@ -27,5 +37,13 @@
             <scope>test</scope>
         </dependency>
 
+
+        {{#dependencies}}
+        <dependency>
+            <groupId>{{groupId}}</groupId>
+            <artifactId>{{artifactId}}</artifactId>
+            {{#version}}<version>{{version}}</version>{{/version}}
+        </dependency>
+        {{/dependencies}}
     </dependencies>
 </project>

@@ -149,46 +149,53 @@ class ProcessManagementBlueprintTest {
         Files.createDirectories(Path.of(input.get("destFolder").toString()).resolve("example"));
         context.map=input;
         assertTrue(assertThrows(IllegalArgumentException.class,()->new GenericInputValidator().execute(context)).getMessage().contains("already exists"));
-        var registry=input(example("file-upload-processes.json")); registry.put("registerInServiceRegistry",true);
+        var registry=input(example("file-upload-processes.json")); registry.put("registryMode","existing");
         context.map=registry;
-        assertTrue(assertThrows(IllegalArgumentException.class,()->new GenericInputValidator().execute(context)).getMessage().contains("serviceRegistryUrl"));
+        assertTrue(assertThrows(IllegalArgumentException.class,()->new GenericInputValidator().execute(context)).getMessage().contains("existingRegistryUrl"));
     }
-    @Test void rendersAllModulesWorkersInputsAndRegistrationOptionsThroughRealPipeline() throws Exception {
-        String models="/process-management-template/__application__/__application__-api/src/main/java/__com__/__company__/__org__/__application__/model/";
-        assertNotNull(getClass().getResource(models + "ProcessResult.java.mustache"));
-        try (var filelist=getClass().getResourceAsStream(models + "inputs.filelist.mustache")) {
-            assertFalse(new String(filelist.readAllBytes(), StandardCharsets.UTF_8).contains("ProcessResult"));
-        }
-        for (boolean registry : List.of(false,true)) {
-            var input=input(example("file-upload-processes.json")); withCrons(input,example("file-upload-crons.json")); input.put("registerInServiceRegistry",registry);
-            input.put("serviceRegistryUrl","http://localhost:8082"); input.put("definitionSource",registry ? "database" : "json");
+    @Test void rendersRegistryChoicesAndOneWorkerJarPerDefinitionThroughTheRealPipeline() throws Exception {
+        for (String mode : List.of("colocated", "separate", "existing")) {
+            var input=input(example("file-upload-processes.json")); withCrons(input,example("file-upload-crons.json"));
+            input.put("registryMode", mode.equals("existing") ? "existing" : "create");
+            input.put("registryPlacement", mode.equals("separate") ? "separate" : "server");
+            input.put("existingRegistryUrl", "http://registry.example:9000");
+            input.put("definitionSource", mode.equals("existing") ? "database" : "json");
             var blueprint=json.readValue(getClass().getResourceAsStream("/META-INF/blueprint.json"),BlueprintConfig.class);
             new InitProcessManagementBlueprint().init(blueprint);
             blueprint.templateFolder=Path.of(getClass().getResource("/process-management-template").toURI()).toString();
             var context=new TemplateContext(); context.blueprintConfig=blueprint;
-            context.config=new ConfigProvider().obtainDefaultConfig(); context.map=input; context.isJar=false;
+            context.config=new ConfigProvider().obtainDefaultConfig(); context.config.company="example"; context.config.org="process"; context.map=input; context.isJar=false;
             var config=new XmlOrchConfigurator<TemplateContext>(); config.setBeanFactoryAdapter(new ProcessorFactory("org.chenile.jgen.template.chain."));
             config.setFilename("org/chenile/jgen/template/processors.xml");
             var executor=new OrchExecutorImpl<TemplateContext>(); executor.setOrchConfigurator(config); executor.execute(context);
             Path root=Path.of(input.get("destFolder").toString()).resolve("example");
-            String controller=Files.readString(root.resolve("example-service/src/main/java/com/example/process/example/configuration/controller/FileUploadController.java"));
-            assertTrue(controller.contains("registerInServiceRegistry=" + registry));
             assertTrue(Files.exists(root.resolve("example-api/src/main/java/com/example/process/example/model/ChunkUploadIn.java")));
-            String result=Files.readString(root.resolve("example-api/src/main/java/com/example/process/example/model/ProcessResult.java"));
-            assertTrue(result.contains("public class ProcessResult"));
-            assertTrue(result.contains("public List<Object> outputs"));
-            assertFalse(result.contains("--START--"));
-            assertTrue(Files.exists(root.resolve("example-service/src/main/java/com/example/process/example/worker/FileUploadAggregator.java")));
-            assertFalse(Files.exists(root.resolve("example-service/src/main/java/com/example/process/example/worker/FileWork.java")));
-            String splitter=Files.readString(root.resolve("example-service/src/main/java/com/example/process/example/worker/FileUploadSplitter.java"));
-            assertTrue(splitter.contains("UnsupportedOperationException"));
-            assertFalse(splitter.contains("chunkBytes"));
-            assertFalse(splitter.contains("filename"));
-            String bootstrap=Files.readString(root.resolve("example-package/src/main/java/com/example/process/example/bootstrap/GeneratedProcessBootstrap.java"));
-            assertFalse(bootstrap.contains("readTree"));
-            String pom=Files.readString(root.resolve("example-package/pom.xml"));
-            assertEquals(registry,pom.contains("service-registry-delegate"));
-            try (var paths=Files.walk(root)) { assertFalse(paths.anyMatch(p -> p.toString().endsWith(".mustache") || p.toString().contains("__application__"))); }
+            assertTrue(Files.exists(root.resolve("example-FileUpload-workers/src/main/java/com/example/process/example/worker/FileUploadAggregator.java")));
+            assertTrue(Files.exists(root.resolve("example-FileUpload-workers/src/main/java/com/example/process/example/worker/FileUploadSplitter.java")));
+            assertTrue(Files.exists(root.resolve("example-ChunkUpload-workers/src/main/java/com/example/process/example/worker/ChunkUploadExecutor.java")));
+            assertFalse(Files.exists(root.resolve("example-server-service/src/main/java/com/example/process/example/worker")));
+            String service=Files.readString(root.resolve("example-server-service/src/main/java/com/example/process/example/service/FileUploadServiceImpl.java"));
+            assertTrue(service.contains("manager.create(dto)")); assertFalse(service.contains("ProcessWorkers"));
+            String serverTest=Files.readString(root.resolve("example-server-service/src/test/java/com/example/process/example/bdd/CukesRestTest.java"));
+            assertTrue(serverTest.contains("extends org.chenile.mqtt.test.KafkaBaseTest"));
+            String workerTest=Files.readString(root.resolve("example-worker-listener/src/test/java/com/example/process/example/worker/WorkerListenerTest.java"));
+            assertTrue(workerTest.contains("extends org.chenile.mqtt.test.KafkaBaseTest"));
+            assertTrue(workerTest.contains("kafka.send(publication)"));
+            assertFalse(workerTest.contains("listener.auto-startup=false"));
+            String steps=Files.readString(root.resolve("example-server-service/src/test/java/com/example/process/example/bdd/CukesSteps.java"));
+            assertTrue(steps.contains("the committed process is published to Kafka"));
+            assertFalse(steps.contains("localhost:9092"));
+            String workerPom=Files.readString(root.resolve("exampleWorker/exampleWorker-package/pom.xml"));
+            assertTrue(workerPom.contains("example-FileUpload-workers")); assertTrue(workerPom.contains("example-ChunkUpload-workers"));
+            assertFalse(workerPom.contains("process-service"));
+            String serverPom=Files.readString(root.resolve("exampleServer/exampleServer-package/pom.xml"));
+            assertEquals(mode.equals("colocated"), serverPom.contains("service-registry-service"));
+            assertEquals(mode.equals("separate"), Files.exists(root.resolve("exampleRegistry")));
+            String properties=Files.readString(root.resolve("exampleWorker/exampleWorker-configurations/src/main/resources/application.properties"));
+            assertTrue(properties.contains("DataSourceAutoConfiguration")); assertTrue(properties.contains("server.port=${SERVER_PORT:8001}"));
+            String registry=Files.readString(root.resolve("exampleWorker/exampleWorker-configurations/src/main/resources/application.yml"));
+            assertTrue(registry.contains(mode.equals("existing") ? "http://registry.example:9000" : mode.equals("separate") ? "http://localhost:8002" : "http://localhost:8000"));
+            try (var paths=Files.walk(root)) { assertFalse(paths.anyMatch(p -> p.toString().endsWith(".mustache") || p.toString().contains("%{{") || p.toString().contains(".jgen-child-"))); }
         }
     }
 }

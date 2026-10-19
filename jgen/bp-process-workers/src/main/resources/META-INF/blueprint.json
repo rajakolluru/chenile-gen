@@ -1,0 +1,96 @@
+{
+  "name": "chenile-process-workers",
+  "description": "One process definition worker JAR: executor or splitter and aggregator",
+  "sinceVersion": "2.1.32",
+  "initHook": "org.chenile.jgen.blueprint.workers.InitProcessWorkersBlueprint",
+  "templateFolder": "process-workers-template",
+  "inputFields": [
+    {
+      "name": "workerModule",
+      "type": "STRING",
+      "description": "workerModule",
+      "validation": "PROJECT_NAME"
+    },
+    {
+      "name": "application",
+      "type": "STRING",
+      "description": "application",
+      "validation": "JAVA_IDENTIFIER"
+    },
+    {
+      "name": "applicationVersion",
+      "type": "STRING",
+      "description": "applicationVersion",
+      "defaultValue": "${defaultVersion}",
+      "validation": "VERSION"
+    },
+    {
+      "name": "packageName",
+      "type": "STRING",
+      "description": "packageName",
+      "validation": "JAVA_PACKAGE"
+    },
+    {
+      "name": "processType",
+      "type": "STRING",
+      "description": "processType",
+      "validation": "JAVA_IDENTIFIER"
+    },
+    {
+      "name": "name",
+      "type": "STRING",
+      "description": "name",
+      "validation": "JAVA_IDENTIFIER"
+    },
+    {
+      "name": "inputType",
+      "type": "STRING",
+      "description": "inputType",
+      "validation": "JAVA_IDENTIFIER"
+    },
+    {
+      "name": "leaf",
+      "type": "BOOLEAN",
+      "description": "leaf",
+      "defaultValue": "y"
+    },
+    {
+      "name": "children",
+      "type": "RECORD_ARRAY",
+      "description": "children",
+      "required": false,
+      "childFields": [
+        {
+          "name": "name",
+          "type": "STRING",
+          "description": "name",
+          "validation": "JAVA_IDENTIFIER"
+        },
+        {
+          "name": "inputType",
+          "type": "STRING",
+          "description": "inputType",
+          "validation": "JAVA_IDENTIFIER"
+        }
+      ]
+    },
+    {
+      "name": "destFolder",
+      "type": "STRING",
+      "description": "destFolder",
+      "defaultValue": "${defaultDestFolder}"
+    },
+    {
+      "name": "super_pom",
+      "type": "SuperPOM",
+      "description": "super_pom",
+      "required": false
+    },
+    {
+      "name": "dependencies",
+      "type": "POM_Dependencies",
+      "description": "dependencies",
+      "required": false
+    }
+  ]
+}

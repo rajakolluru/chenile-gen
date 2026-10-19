@@ -21,5 +21,13 @@
 			<groupId>{{chenilePackage}}</groupId>
 			<artifactId>chenile-core</artifactId>
 		</dependency>
-	</dependencies>
+
+        {{#dependencies}}
+        <dependency>
+            <groupId>{{groupId}}</groupId>
+            <artifactId>{{artifactId}}</artifactId>
+            {{#version}}<version>{{version}}</version>{{/version}}
+        </dependency>
+        {{/dependencies}}
+    </dependencies>
 </project>

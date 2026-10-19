@@ -7,6 +7,8 @@ import org.chenile.owiz.config.impl.XmlOrchConfigurator;
 import org.chenile.owiz.impl.OrchExecutorImpl;
 
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 public class BlueprintExecutor {
     OrchExecutorImpl<TemplateContext> orchExecutor ;
@@ -24,6 +26,22 @@ public class BlueprintExecutor {
         templateContext.blueprintConfig = blueprintConfig;
         templateContext.config = config;
         templateContext.map = inputMap;
+        templateContext.blueprintPath = blueprintConfig.name == null ? List.of() : List.of(blueprintConfig.name);
         orchExecutor.execute(templateContext);
+    }
+    /** Invokes a child with the same configuration and a separate input map and ancestry. */
+    public void executeChild(BlueprintConfig blueprint, Map<String, Object> inputMap, TemplateContext parent) throws Exception {
+        List<String> ancestry = parent.blueprintPath.isEmpty()
+                ? List.of(parent.blueprintConfig.name) : parent.blueprintPath;
+        if (ancestry.contains(blueprint.name))
+            throw new IllegalArgumentException("Recursive blueprint inclusion: " + String.join(" -> ", ancestry) + " -> " + blueprint.name);
+        TemplateContext child = new TemplateContext();
+        child.blueprintConfig = blueprint;
+        child.config = parent.config;
+        child.map = inputMap;
+        child.isJar = !java.nio.file.Files.isDirectory(java.nio.file.Path.of(blueprint.templateFolder));
+        var path = new ArrayList<>(ancestry); path.add(blueprint.name);
+        child.blueprintPath = List.copyOf(path);
+        orchExecutor.execute(child);
     }
 }

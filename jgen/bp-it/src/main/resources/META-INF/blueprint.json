@@ -1,38 +1,54 @@
 {
   "projectDirectoryPrefix": "bdd-it-",
-  "initHook" : "org.chenile.jgen.blueprint.it.InitItBlueprint",
-  "name" : "it",
-  "description" : "Generates a New Integration Test case",
+  "initHook": "org.chenile.jgen.blueprint.it.InitItBlueprint",
+  "name": "it",
+  "description": "Generates a New Integration Test case",
   "templateFolder": "bdd-it",
-  "inputFields" :[
+  "inputFields": [
     {
-      "name" : "app",
-      "type" : "STRING",
-      "description": "Name of app"
+      "name": "app",
+      "type": "STRING",
+      "description": "Name of app",
+      "validation": "JAVA_IDENTIFIER"
     },
     {
-    "name" : "appVersion",
-    "type" : "STRING",
-    "description": "Version of App",
-    "defaultValue" : "${defaultVersion}"
+      "name": "appVersion",
+      "type": "STRING",
+      "description": "Version of App",
+      "defaultValue": "${defaultVersion}",
+      "validation": "VERSION"
     },
     {
-      "name" : "entity",
-      "type" : "STRING",
-      "description": "Name of Entity"
+      "name": "entity",
+      "type": "STRING",
+      "description": "Name of Entity",
+      "validation": "PROJECT_NAME"
     },
     {
-      "name" : "destFolder",
-      "type" : "STRING",
+      "name": "destFolder",
+      "type": "STRING",
       "description": "Destination Folder",
-      "defaultValue" : "${defaultDestFolder}"
-    }
-    ,
+      "defaultValue": "${defaultDestFolder}"
+    },
     {
-        "name" : "security",
-        "type" : "BOOLEAN",
-        "description": "Enable Security",
-        "defaultValue" : "n"
+      "name": "security",
+      "type": "BOOLEAN",
+      "description": "Enable Security",
+      "defaultValue": "n"
+    },
+    {
+      "name": "super_pom",
+      "type": "SuperPOM",
+      "description": "Optional parent POM for the generated project",
+      "required": false,
+      "helpText": "Object with groupId, artifactId, version and relativePath. Omit to keep the blueprint parent."
+    },
+    {
+      "name": "dependencies",
+      "type": "POM_Dependencies",
+      "description": "Additional Maven dependencies",
+      "required": false,
+      "helpText": "Added to bdd-it-__app__/pom.xml. Versions may be omitted when supplied by dependency management."
     }
   ]
 }

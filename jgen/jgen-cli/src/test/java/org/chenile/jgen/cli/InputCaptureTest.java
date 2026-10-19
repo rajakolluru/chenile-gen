@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class InputCaptureTest {
@@ -108,6 +109,20 @@ class InputCaptureTest {
                         "dependencyGroup", "org.chenile",
                         "dependencyVersion", "2.1.20"
                 )))));
+    }
+
+    @Test void capturesStructuredPomInputsFromFilesAndInteractiveAnswers() {
+        InputField parent = new InputField(); parent.name = "super_pom"; parent.type = FieldType.SuperPOM;
+        Map<String, Object> value = (Map<String, Object>) InputCapture.captureField(parent, Map.of(),
+                new java.util.Scanner("y\nexample\nparent\n1.0.0\n\n"), null);
+        assertEquals("parent", value.get("artifactId")); assertEquals("", value.get("relativePath"));
+        assertEquals(value, InputCapture.captureField(parent, Map.of(), null, Map.of("super_pom", value)));
+        assertNull(InputCapture.captureField(parent, Map.of(), new java.util.Scanner(""), null));
+        InputField dependencies = new InputField(); dependencies.name = "dependencies"; dependencies.type = FieldType.POM_Dependencies;
+        var rows = (List<Map<String, Object>>) InputCapture.captureField(dependencies, Map.of(),
+                new java.util.Scanner("y\nexample\nlibrary\n1.0.0\nn\n"), null);
+        assertEquals("library", rows.get(0).get("artifactId"));
+        assertEquals(List.of(), InputCapture.captureField(dependencies, Map.of(), new java.util.Scanner(""), null));
     }
 
     private InputField dependencyField() {

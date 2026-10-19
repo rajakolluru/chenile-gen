@@ -20,3 +20,10 @@ You need maven installed to compile the Java code from source.
 ## How do you execute this script
 $ make clean all # will compile the code from source and make it available
 $ source setpath.sh # will set your system PATH variable to point to stm-cli and jgen.sh 
+
+JGen supports optional shared Maven parents and additional dependencies across all
+built-in blueprints. See [composable blueprints](jgen/docs/composable-blueprints.md)
+for the input contract, dependency destinations, and compatibility rules.
+
+[Aggregated blueprints](jgen/docs/aggregated-blueprints.md) can invoke composable
+blueprints from template folders and compute their inputs through a callback.

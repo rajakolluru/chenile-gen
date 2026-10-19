@@ -69,6 +69,7 @@ class CompanionSampleEmissionTest {
         Path output = temporary.resolve("input.json");
         assertEquals(0, execute("-g","chenile-process-management","-o",output.toString()));
         assertNull(read(output).get("processSpec"));
+        assertEquals("${application}-work", read(output).get("workTopic"));
         assertFalse(Files.exists(temporary.resolve("input-processSpec.json")));
     }
 

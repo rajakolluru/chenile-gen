@@ -144,6 +144,34 @@ function renderForm() {
     wrapper.appendChild(error);
     form.appendChild(wrapper);
   }
+  form.addEventListener('change', updateFieldVisibility);
+  updateFieldVisibility();
+}
+
+function visibleFields() {
+  const values = {};
+  const visible = new Set();
+  const form = el('generatorForm');
+  for (const field of state.schema.fields) {
+    const active = Object.entries(field.visibleWhen || {}).every(([key, expected]) =>
+      values[key] != null && String(values[key]) === String(expected));
+    if (!active) continue;
+    visible.add(field.name);
+    const input = form.elements[field.name];
+    if (input) values[field.name] = field.type === 'BOOLEAN'
+      ? input.value === 'y' || input.value === 'true' : input.value;
+  }
+  return visible;
+}
+
+function updateFieldVisibility() {
+  const visible = visibleFields();
+  for (const field of state.schema.fields) {
+    const wrapper = el('generatorForm').querySelector(`[data-field="${field.name}"]`);
+    if (wrapper) wrapper.hidden = !visible.has(field.name);
+    const input = el('generatorForm').elements[field.name];
+    if (input) input.disabled = !visible.has(field.name);
+  }
 }
 
 function inputFor(field) {
@@ -176,11 +204,15 @@ function inputFor(field) {
     input.multiple = field.multiple === true;
     return input;
   }
-  if (field.type === 'RECORD_ARRAY') {
+  if (field.type === 'SuperPOM' || field.type === 'POM_Dependencies' || field.type === 'RECORD_ARRAY') {
     const textarea = document.createElement('textarea');
     textarea.name = field.name;
-    textarea.placeholder = 'JSON array';
-    textarea.value = '[]';
+    textarea.placeholder = field.type === 'SuperPOM'
+      ? '{"groupId":"com.example","artifactId":"parent","version":"1.0.0","relativePath":"../pom.xml"}'
+      : field.type === 'POM_Dependencies'
+        ? '[{"groupId":"com.example","artifactId":"service","version":"1.0.0"}]'
+        : 'JSON array';
+    textarea.value = field.type === 'SuperPOM' ? '' : '[]';
     return textarea;
   }
   const input = document.createElement('input');
@@ -192,7 +224,9 @@ function inputFor(field) {
 
 async function collectAnswers() {
   const answers = {};
+  const visible = visibleFields();
   for (const field of state.schema.fields) {
+    if (!visible.has(field.name)) continue;
     const input = el('generatorForm').elements[field.name];
     if (!input) continue;
     if (field.type === 'FILE') {
@@ -210,7 +244,9 @@ async function collectAnswers() {
       answers[field.name] = field.multiple ? paths : paths[0];
     } else if (field.type === 'MULTI_SELECT') {
       answers[field.name] = Array.from(input.selectedOptions).map(option => option.value);
-    } else if (field.type === 'RECORD_ARRAY') {
+    } else if (field.type === 'SuperPOM') {
+      answers[field.name] = input.value.trim() ? JSON.parse(input.value) : null;
+    } else if (field.type === 'POM_Dependencies' || field.type === 'RECORD_ARRAY') {
       answers[field.name] = JSON.parse(input.value || '[]');
     } else {
       answers[field.name] = input.value;

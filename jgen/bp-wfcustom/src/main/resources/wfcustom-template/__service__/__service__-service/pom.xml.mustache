@@ -8,7 +8,7 @@
 		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	
+
 	<artifactId>{{service}}-service</artifactId>
 	<packaging>jar</packaging>
 
@@ -19,7 +19,7 @@
 			<groupId>{{com}}.{{company}}.{{org}}.{{servicePackage}}</groupId>
 			<artifactId>{{service}}-api</artifactId>
 		</dependency>
-	
+
 			<dependency>
 				<groupId>{{chenilePackage}}</groupId>
 	            <artifactId>workflow-service</artifactId>
@@ -85,7 +85,15 @@
             <scope>test</scope>
         </dependency>
         {{/enablement}}
-	</dependencies>
+
+        {{#dependencies}}
+        <dependency>
+            <groupId>{{groupId}}</groupId>
+            <artifactId>{{artifactId}}</artifactId>
+            {{#version}}<version>{{version}}</version>{{/version}}
+        </dependency>
+        {{/dependencies}}
+    </dependencies>
 
     <build>
         <plugins>

@@ -4,6 +4,7 @@ import org.apache.commons.text.StringSubstitutor;
 import org.chenile.jgen.blueprints.model.FieldType;
 import org.chenile.jgen.blueprints.model.InputField;
 import org.chenile.jgen.util.FieldUtils;
+import org.chenile.jgen.blueprints.PomInputs;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +44,14 @@ public abstract class InputCapture {
 
     public static Object captureField(InputField field, Map<String,Object> configMap, Scanner scanner,
                                       Map<String,Object> inputMap) {
+        if (PomInputs.supports(field)) {
+            if (inputMap != null) return PomInputs.normalize(field, PomInputs.suppliedValue(field, inputMap), configMap);
+            if (field.type == FieldType.SuperPOM) return captureParent(field, configMap, scanner);
+            InputField records = new InputField(); records.name = field.name; records.description = field.description;
+            records.childFields = PomInputs.childFields(field);
+            if (!scanner.hasNextLine()) return PomInputs.normalize(field, List.of(), configMap);
+            return PomInputs.normalize(field, captureRecordArrayField(records, configMap, scanner, null), configMap);
+        }
         if (field.type == FieldType.RECORD_ARRAY) {
             return captureRecordArrayField(field, configMap, scanner, inputMap);
         }
@@ -52,6 +61,7 @@ public abstract class InputCapture {
             return captureScalarFromInputMap(configMap,field,inputMap,defValue);
         }
         String prompt = field.description;
+        if (field.validation != null) prompt += " [" + field.validation + "]";
         if (field.type == FieldType.BOOLEAN) prompt += "(y/n)";
         prompt += "?";
         if (defValue != null)
@@ -66,12 +76,26 @@ public abstract class InputCapture {
         return input;
     }
 
+    private static Object captureParent(InputField field, Map<String, Object> variables, Scanner scanner) {
+        System.out.print("Set " + field.name + " parent POM? (y/n) ");
+        if (!scanner.hasNextLine() || !"y".equalsIgnoreCase(scanner.nextLine()))
+            return PomInputs.normalize(field, null, variables);
+        Map<String, Object> parent = new java.util.LinkedHashMap<>();
+        for (InputField child : PomInputs.childFields(field)) {
+            if ("relativePath".equals(child.name)) {
+                System.out.print("relativePath (blank disables local parent lookup)? ");
+                parent.put(child.name, scanner.hasNextLine() ? scanner.nextLine() : "");
+            } else parent.put(child.name, captureField(child, variables, scanner, null));
+        }
+        return PomInputs.normalize(field, parent, variables);
+    }
+
     private static Object captureScalarFromInputMap(Map<String,Object> configMap,InputField field,
                                                     Map<String, Object> inputMap, String defValue) {
         Object raw = inputMap.get(field.name);
         String value = raw != null ? substitute(configMap, raw.toString()) : defValue;
         if (!FieldUtils.isValid(field,value)){
-            String message = "Field " + field.name + " has an invalid value " + value + "specified.";
+            String message = "Field " + field.name + " has an invalid value " + value + "specified." + (field.validation == null ? "" : " Expected " + field.validation);
             throw new RuntimeException(message);
         }
         return value;

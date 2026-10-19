@@ -97,7 +97,7 @@ public class GenMain implements Runnable {
         Map<String,Object> expectedMap = new HashMap<>();
         expectedMap.put("blueprint",generateBluePrint);
         for(InputField inf: blueprintConfig.inputFields){
-            expectedMap.put(inf.name, inf.type == FieldType.RECORD_ARRAY ? List.of() : resolveDefaultValue(inf, configMap));
+            expectedMap.put(inf.name, (inf.type == FieldType.RECORD_ARRAY || inf.type == FieldType.POM_Dependencies) ? List.of() : resolveDefaultValue(inf, configMap));
         }
         if (configFileToEmit != null) {
             if (outputFile == null) throw new IllegalArgumentException("Companion samples require -o <input.json>");
@@ -235,7 +235,9 @@ public class GenMain implements Runnable {
         if (configMap == null || configMap.isEmpty()) {
             return field.defaultValue;
         }
-        return InputCapture.captureField(field, configMap, null, Map.of()).toString();
+        // Sample inputs may still reference fields the user has not supplied.
+        // Validate only when those inputs are captured for actual generation.
+        return new org.apache.commons.text.StringSubstitutor(configMap).replace(field.defaultValue);
     }
 
     static Object normalizeFieldValue(InputField field, Object value) {

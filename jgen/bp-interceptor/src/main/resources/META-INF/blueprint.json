@@ -1,25 +1,41 @@
 {
-  "initHook" : "org.chenile.jgen.blueprint.interceptor.InitInterceptorBlueprint",
-  "name" : "chenile-interceptor",
-  "description" : "Generates a Chenile Interceptor",
+  "initHook": "org.chenile.jgen.blueprint.interceptor.InitInterceptorBlueprint",
+  "name": "chenile-interceptor",
+  "description": "Generates a Chenile Interceptor",
   "templateFolder": "interceptor-template",
-  "inputFields" :[
+  "inputFields": [
     {
-      "name" : "interceptorName",
-      "type" : "STRING",
-      "description": "Name of interceptor"
+      "name": "interceptorName",
+      "type": "STRING",
+      "description": "Name of interceptor",
+      "validation": "JAVA_IDENTIFIER"
     },
     {
-      "name" : "interceptorVersion",
-      "type" : "STRING",
+      "name": "interceptorVersion",
+      "type": "STRING",
       "description": "Interceptor Version",
-      "defaultValue": "${defaultVersion}"
+      "defaultValue": "${defaultVersion}",
+      "validation": "VERSION"
     },
     {
-      "name" : "destFolder",
-      "type" : "STRING",
+      "name": "destFolder",
+      "type": "STRING",
       "description": "Destination Folder",
-      "defaultValue" : "${defaultDestFolder}"
+      "defaultValue": "${defaultDestFolder}"
+    },
+    {
+      "name": "super_pom",
+      "type": "SuperPOM",
+      "description": "Optional parent POM for the generated project",
+      "required": false,
+      "helpText": "Object with groupId, artifactId, version and relativePath. Omit to keep the blueprint parent."
+    },
+    {
+      "name": "dependencies",
+      "type": "POM_Dependencies",
+      "description": "Additional Maven dependencies",
+      "required": false,
+      "helpText": "Added to __interceptorName__/pom.xml. Versions may be omitted when supplied by dependency management."
     }
   ]
 }

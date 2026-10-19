@@ -1,32 +1,47 @@
 {
-  "initHook" : "org.chenile.jgen.blueprint.mybatisQuery.InitMybatisQueryBlueprint",
-  "name" : "mybatisQuery",
-  "description" : "Generates a New MybatisQuery",
+  "initHook": "org.chenile.jgen.blueprint.mybatisQuery.InitMybatisQueryBlueprint",
+  "name": "mybatisQuery",
+  "description": "Generates a New MybatisQuery",
   "templateFolder": "mybatis-query-template",
-  "inputFields" :[
+  "inputFields": [
     {
-      "name" : "namespace",
-      "type" : "STRING",
-      "description": "Name space of query"
+      "name": "namespace",
+      "type": "STRING",
+      "description": "Name space of query",
+      "validation": "JAVA_IDENTIFIER"
     },
     {
-    "name" : "namespaceVersion",
-    "type" : "STRING",
-    "description": "Version of query",
-    "defaultValue" : "${defaultVersion}"
+      "name": "namespaceVersion",
+      "type": "STRING",
+      "description": "Version of query",
+      "defaultValue": "${defaultVersion}",
+      "validation": "VERSION"
     },
     {
-      "name" : "destFolder",
-      "type" : "STRING",
+      "name": "destFolder",
+      "type": "STRING",
       "description": "Destination Folder",
-      "defaultValue" : "${defaultDestFolder}"
-    }
-    ,
+      "defaultValue": "${defaultDestFolder}"
+    },
     {
-        "name" : "security",
-        "type" : "BOOLEAN",
-        "description": "Enable Security",
-        "defaultValue" : "n"
+      "name": "security",
+      "type": "BOOLEAN",
+      "description": "Enable Security",
+      "defaultValue": "n"
+    },
+    {
+      "name": "super_pom",
+      "type": "SuperPOM",
+      "description": "Optional parent POM for the generated project",
+      "required": false,
+      "helpText": "Object with groupId, artifactId, version and relativePath. Omit to keep the blueprint parent."
+    },
+    {
+      "name": "dependencies",
+      "type": "POM_Dependencies",
+      "description": "Additional Maven dependencies",
+      "required": false,
+      "helpText": "Added to __namespace__/pom.xml. Versions may be omitted when supplied by dependency management."
     }
   ]
 }

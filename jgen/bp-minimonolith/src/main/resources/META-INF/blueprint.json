@@ -1,121 +1,185 @@
 {
   "registryClientFlag": "enableServiceRegistryDelegate",
-  "initHook" : "org.chenile.jgen.blueprint.minimonolith.InitMinimonolithBlueprint",
-  "name" : "minimonolith",
-  "description" : "Generates a New Mini Monolith",
+  "initHook": "org.chenile.jgen.blueprint.minimonolith.InitMinimonolithBlueprint",
+  "name": "minimonolith",
+  "description": "Generates a New Mini Monolith",
   "templateFolder": "monolith-template",
-  "inputFields" :[
+  "inputFields": [
     {
-      "name" : "monolith",
-      "type" : "STRING",
-      "description": "Name of mini monolith"
+      "name": "monolith",
+      "type": "STRING",
+      "description": "Name of mini monolith",
+      "validation": "JAVA_IDENTIFIER"
     },
     {
-    "name" : "monolithVersion",
-    "type" : "STRING",
-    "description": "Version of mini monolith",
-    "defaultValue" : "${defaultVersion}"
+      "name": "monolithVersion",
+      "type": "STRING",
+      "description": "Version of mini monolith",
+      "defaultValue": "${defaultVersion}",
+      "validation": "VERSION"
     },
     {
-      "name" : "destFolder",
-      "type" : "STRING",
+      "name": "destFolder",
+      "type": "STRING",
       "description": "Destination Folder",
-      "defaultValue" : "${defaultDestFolder}"
-    }
-    ,{
-        "name" : "jpa",
-        "type" : "BOOLEAN",
-        "description": "Enable JPA",
-        "defaultValue" : "y"
-    }
-  ,
+      "defaultValue": "${defaultDestFolder}"
+    },
     {
-      "name" : "cloudSwitchEnabled",
-      "type" : "BOOLEAN",
+      "name": "jpa",
+      "type": "BOOLEAN",
+      "description": "Enable JPA",
+      "defaultValue": "y"
+    },
+    {
+      "name": "cloudSwitchEnabled",
+      "type": "BOOLEAN",
       "description": "Enable Cloud Switch",
-      "defaultValue" : "n"
+      "defaultValue": "n"
     },
     {
-      "name" : "security",
-      "type" : "BOOLEAN",
+      "name": "security",
+      "type": "BOOLEAN",
       "description": "Enable Security",
-      "defaultValue" : "n"
+      "defaultValue": "n"
     },
     {
-      "name" : "enableMCP",
-      "type" : "BOOLEAN",
+      "name": "enableMCP",
+      "type": "BOOLEAN",
       "description": "Enable MCP support",
-      "defaultValue" : "n"
+      "defaultValue": "n"
     },
     {
-      "name" : "enableServiceRegistry",
-      "type" : "BOOLEAN",
+      "name": "enableServiceRegistry",
+      "type": "BOOLEAN",
       "description": "Host the Chenile service registry in this monolith",
-      "defaultValue" : "n"
+      "defaultValue": "n"
     },
     {
-      "name" : "enableServiceRegistryDelegate",
-      "type" : "BOOLEAN",
+      "name": "enableServiceRegistryDelegate",
+      "type": "BOOLEAN",
       "description": "Use the Chenile service registry delegate in this monolith",
-      "defaultValue" : "n"
+      "defaultValue": "n"
     },
     {
-      "name" : "enableCconfig",
-      "type" : "BOOLEAN",
+      "name": "enableCconfig",
+      "type": "BOOLEAN",
       "description": "Include the Chenile cconfig service",
-      "defaultValue" : "n"
+      "defaultValue": "n"
     },
     {
-      "name" : "serviceRegistryUrl",
-      "type" : "STRING",
+      "name": "serviceRegistryUrl",
+      "type": "STRING",
       "description": "Remote Chenile service registry URL when delegate mode is enabled",
-      "visibleWhen" : { "enableServiceRegistryDelegate" : "true" }
+      "visibleWhen": {
+        "enableServiceRegistryDelegate": "true"
+      },
+      "validation": "HTTP_URL"
     },
     {
-      "name" : "dependencies",
-      "type" : "RECORD_ARRAY",
+      "name": "dependencies",
+      "type": "POM_Dependencies",
       "description": "Maven dependencies",
-      "childFields" :[
+      "required": false,
+      "helpText": "Added to __monolith__/__monolith__-package/pom.xml. Versions may be omitted when supplied by dependency management."
+    },
+    {
+      "name": "enableQueryController",
+      "type": "BOOLEAN",
+      "description": "Include the Chenile query controller in this monolith",
+      "defaultValue": "n"
+    },
+    {
+      "name": "enableH2Console",
+      "type": "BOOLEAN",
+      "description": "Enable the Spring Boot H2 console for JPA-based monoliths",
+      "defaultValue": "n"
+    },
+    {
+      "name": "mcpServerName",
+      "type": "STRING",
+      "description": "MCP server name when MCP is enabled",
+      "defaultValue": "${monolith}"
+    },
+    {
+      "name": "mcpInstructions",
+      "type": "STRING",
+      "description": "MCP server instructions when MCP is enabled",
+      "defaultValue": "This server exposes MCP tools from the ${monolith} mini monolith"
+    },
+    {
+      "name": "super_pom",
+      "type": "SuperPOM",
+      "description": "Optional parent POM for the generated project",
+      "required": false,
+      "helpText": "Object with groupId, artifactId, version and relativePath. Omit to keep the blueprint parent."
+    },
+    {
+      "name": "deploymentUrl",
+      "type": "STRING",
+      "description": "deploymentUrl",
+      "required": false,
+      "validation": "HTTP_URL"
+    },
+    {
+      "name": "runtimeProperties",
+      "type": "RECORD_ARRAY",
+      "description": "runtimeProperties",
+      "required": false,
+      "childFields": [
         {
-          "name" : "dependencyName",
-          "type" : "STRING",
-          "description": "Dependency artifactId"
+          "name": "key",
+          "type": "STRING",
+          "description": "key"
         },
         {
-          "name" : "dependencyGroup",
-          "type" : "STRING",
-          "description": "Dependency groupId"
-        },
-        {
-          "name" : "dependencyVersion",
-          "type" : "STRING",
-          "description": "Dependency version"
+          "name": "value",
+          "type": "STRING",
+          "description": "value",
+          "required": false
         }
       ]
     },
     {
-      "name" : "enableQueryController",
-      "type" : "BOOLEAN",
-      "description": "Include the Chenile query controller in this monolith",
-      "defaultValue" : "n"
+      "name": "scanPackages",
+      "type": "RECORD_ARRAY",
+      "description": "scanPackages",
+      "required": false,
+      "childFields": [
+        {
+          "name": "packageName",
+          "type": "STRING",
+          "description": "packageName",
+          "validation": "JAVA_PACKAGE"
+        }
+      ]
     },
     {
-      "name" : "enableH2Console",
-      "type" : "BOOLEAN",
-      "description": "Enable the Spring Boot H2 console for JPA-based monoliths",
-      "defaultValue" : "n"
+      "name": "entityPackages",
+      "type": "RECORD_ARRAY",
+      "description": "entityPackages",
+      "required": false,
+      "childFields": [
+        {
+          "name": "packageName",
+          "type": "STRING",
+          "description": "packageName",
+          "validation": "JAVA_PACKAGE"
+        }
+      ]
     },
     {
-      "name" : "mcpServerName",
-      "type" : "STRING",
-      "description": "MCP server name when MCP is enabled",
-      "defaultValue" : "${monolith}"
-    },
-    {
-      "name" : "mcpInstructions",
-      "type" : "STRING",
-      "description": "MCP server instructions when MCP is enabled",
-      "defaultValue" : "This server exposes MCP tools from the ${monolith} mini monolith"
+      "name": "repositoryPackages",
+      "type": "RECORD_ARRAY",
+      "description": "repositoryPackages",
+      "required": false,
+      "childFields": [
+        {
+          "name": "packageName",
+          "type": "STRING",
+          "description": "packageName",
+          "validation": "JAVA_PACKAGE"
+        }
+      ]
     }
   ]
 }

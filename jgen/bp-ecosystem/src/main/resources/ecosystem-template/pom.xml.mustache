@@ -4,11 +4,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    {{#parentArtifactId}}
+    <parent>
+        <groupId>{{parentGroupId}}</groupId>
+        <artifactId>{{parentArtifactId}}</artifactId>
+        <version>{{parentVersion}}</version>
+        <relativePath>{{parentRelativePath}}</relativePath>
+    </parent>
+    {{/parentArtifactId}}
+    {{^parentArtifactId}}
     <parent>
         <groupId>{{chenilePackage}}</groupId>
         <artifactId>chenile-parent</artifactId>
         <version>{{chenileVersion}}</version>
     </parent>
+    {{/parentArtifactId}}
 
     <groupId>{{com}}.{{company}}.{{org}}.{{ecosystem}}</groupId>
     <artifactId>{{ecosystem}}-parent</artifactId>
@@ -29,4 +39,13 @@
 {{/includeHeadlessService}}{{#includeQueryService}}        <module>{{queryNamespace}}</module>
         <module>{{queryMonolith}}</module>
 {{/includeQueryService}}    </modules>
+    <dependencies>
+        {{#dependencies}}
+        <dependency>
+            <groupId>{{groupId}}</groupId>
+            <artifactId>{{artifactId}}</artifactId>
+            {{#version}}<version>{{version}}</version>{{/version}}
+        </dependency>
+        {{/dependencies}}
+    </dependencies>
 </project>

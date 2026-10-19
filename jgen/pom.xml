@@ -23,6 +23,7 @@
 		<module>bp-mybatisQuery</module>
 		<module>bp-it</module>
 		<module>bp-batch</module>
+		<module>bp-process-workers</module>
 		<module>bp-process-management</module>
 		<module>jgen-cli</module>
 		<module>jgen-portal</module>
@@ -35,6 +36,7 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+            <dependency><groupId>org.chenile</groupId><artifactId>bp-process-workers</artifactId><version>${jgen.version}</version></dependency>
 			<dependency>
 				<groupId>org.chenile</groupId>
 				<artifactId>bp-process-management</artifactId>

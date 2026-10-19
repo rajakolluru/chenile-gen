@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 {{#jpa}}
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 {{/jpa}}
@@ -13,13 +13,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 {{#enableServiceRegistry}}
 		"{{chenilePackage}}.service.registry.configuration",
 {{/enableServiceRegistry}}
+{{#enableServiceRegistryDelegate}}
+        "{{chenilePackage}}.service.registry.configuration",
+{{/enableServiceRegistryDelegate}}
 		{{#enableCconfig}}
 		"org.chenile.cconfig.configuration",
 		{{/enableCconfig}}
-		"{{chenilePackage}}.configuration" })
+		"{{chenilePackage}}.configuration"{{#scanPackages}}, "{{packageName}}"{{/scanPackages}} })
 {{#jpa}}
-@EntityScan({ "{{com}}.{{company}}.{{org}}.**.model"{{#enableCconfig}}, "org.chenile.cconfig.model"{{/enableCconfig}} })
-@EnableJpaRepositories(basePackages = { "{{com}}.{{company}}.{{org}}.**.configuration.dao"{{#enableCconfig}}, "org.chenile.cconfig.configuration.dao"{{/enableCconfig}} })
+@EntityScan({ "{{com}}.{{company}}.{{org}}.**.model"{{#enableCconfig}}, "org.chenile.cconfig.model"{{/enableCconfig}}{{#entityPackages}}, "{{packageName}}"{{/entityPackages}} })
+@EnableJpaRepositories(basePackages = { "{{com}}.{{company}}.{{org}}.**.configuration.dao"{{#enableCconfig}}, "org.chenile.cconfig.configuration.dao"{{/enableCconfig}}{{#repositoryPackages}}, "{{packageName}}"{{/repositoryPackages}} })
 @EnableTransactionManagement
 {{/jpa}}
 public class {{Monolith}}Application extends SpringBootServletInitializer {

@@ -29,13 +29,38 @@ The repository currently packages these built-in blueprints:
 - `wfcustom`: generates a custom workflow service from a workflow XML file
 - `chenile-interceptor`: generates a Chenile interceptor
 - `batch`: generates a batch process from a batch definition JSON file
-- `chenile-process-management`: generates a typed, multi-level process mini-monolith with definitions, workers and optional cron triggers ([guide](bp-process-management/README.md))
+- `chenile-process-workers`: generates one definition's executor or splitter/aggregator JAR
+- `chenile-process-management`: generates a process server and worker mini-monoliths, per-definition worker JARs and an optional registry host ([guide](bp-process-management/README.md))
 - `it`: generates an integration test project
 - `minimonolith`: generates a mini monolith
 - `mybatisQuery`: generates a MyBatis query module
 - `jgen-blueprint`: generates a new JGen blueprint module
 
 These names are the values used with `-g` and in input JSON files under the `blueprint` field.
+
+## Declarative Input Validation
+
+Input fields can declare a `validation` rule such as `JAVA_IDENTIFIER`,
+`JAVA_PACKAGE`, or `HTTP_URL`. JGen applies it across CLI, portal, and composed
+blueprint inputs before generation. See [input validation](docs/input-validation.md)
+for the supported rules and nested-field examples.
+
+## Composable Blueprints
+
+All built-in blueprints accept an optional `super_pom` (`SuperPOM`) and additional
+`dependencies` (`POM_Dependencies`). Each blueprint selects the destination POM;
+custom blueprints may declare multiple independently named dependency fields.
+Existing inputs and default parents remain supported. See the
+[composition contract and examples](docs/composable-blueprints.md).
+
+## Aggregated Blueprints
+
+A template folder such as `%{{minimonolith role=worker}}` invokes another
+registered blueprint. The enclosing blueprint registers `childBlueprintInputs`
+to compute that child's inputs from its current map, the blueprint name, and
+string attributes. Repeated and nested invocations are supported. See
+[aggregated blueprints](docs/aggregated-blueprints.md) for syntax, lifecycle,
+callback examples, and output placement.
 
 ## Build
 
@@ -389,7 +414,8 @@ The pipeline performs these steps:
 7. expand `.filelist` outputs into multiple files
 8. replace placeholders in file and folder names such as `__service__`
 9. process conditional folders such as `%%jpa=true%%`
-10. run blueprint post-processing hooks
+10. expand included blueprint markers through their own generation pipelines
+11. run blueprint post-processing hooks
 
 The execution path in code is:
 

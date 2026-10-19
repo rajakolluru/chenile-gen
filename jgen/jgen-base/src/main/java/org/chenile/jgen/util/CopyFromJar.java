@@ -10,6 +10,10 @@ import java.util.Collections;
 public class CopyFromJar {
     public void copyFromJar(String source, final Path target) throws URISyntaxException, IOException {
         URI resource = getClass().getClassLoader().getResource(source).toURI();
+        if (resource.getScheme().equals("file")) {
+            copyTree(Paths.get(resource), target);
+            return;
+        }
         FileSystem fileSystem;
         boolean closeFileSystem = false;
         try {
@@ -21,26 +25,21 @@ public class CopyFromJar {
         }
 
         try {
-            final Path jarPath = fileSystem.getPath(source);
-
-            Files.walkFileTree(jarPath, new SimpleFileVisitor<>() {
-
-                @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    Path currentTarget = target.resolve(jarPath.relativize(dir).toString());
-                    Files.createDirectories(currentTarget);
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    Files.copy(file, target.resolve(jarPath.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
-                    return FileVisitResult.CONTINUE;
-                }
-
-            });
+            copyTree(fileSystem.getPath(source), target);
         } finally {
             if (closeFileSystem) fileSystem.close();
         }
+    }
+    private void copyTree(Path source, Path target) throws IOException {
+        Files.walkFileTree(source, new SimpleFileVisitor<>() {
+            @Override public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attributes) throws IOException {
+                Files.createDirectories(target.resolve(source.relativize(dir).toString()));
+                return FileVisitResult.CONTINUE;
+            }
+            @Override public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
+                Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }

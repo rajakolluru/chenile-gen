@@ -13,11 +13,16 @@ import java.util.Map;
 public class FieldUtils {
     public static boolean isRequired(InputField field) {
         if (field.required != null) return field.required;
+        if (org.chenile.jgen.blueprints.PomInputs.supports(field)) return false;
         return field.defaultValue == null || field.defaultValue.isBlank();
     }
 
     public static boolean isValid(InputField field, String input) {
         if (input == null || input.isEmpty()) return !isRequired(field);
+        if (field.type == FieldType.MULTI_SELECT) {
+            for (String item : input.split(",", -1))
+                if (!InputValidation.isValid(field.validation, item.trim())) return false;
+        } else if (!InputValidation.isValid(field.validation, input)) return false;
         if (field.type == FieldType.BOOLEAN){
             input = input.toLowerCase(Locale.ROOT);
             return "y".equals(input) || "n".equals(input) || "true".equals(input) || "false".equals(input);

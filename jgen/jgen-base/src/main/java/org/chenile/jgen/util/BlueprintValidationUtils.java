@@ -45,7 +45,8 @@ public final class BlueprintValidationUtils {
         require(project.matches("[A-Za-z][A-Za-z0-9_-]*"), "Invalid project name: " + projectField);
         for (var entry : input.entrySet()) {
             if (entry.getKey().endsWith("Version")) {
-                require(entry.getValue() instanceof String version && version.matches("[A-Za-z0-9_.-]+"),
+                String pattern = entry.getKey().equals("parentVersion") ? "[A-Za-z0-9_.$}{-]+" : "[A-Za-z0-9_.-]+";
+                require(entry.getValue() instanceof String version && version.matches(pattern),
                         "Invalid " + entry.getKey());
             }
         }

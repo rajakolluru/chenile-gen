@@ -25,10 +25,13 @@ public class BlueprintInputService {
         Map<String, Object> source = submitted == null ? Map.of() : submitted;
         for (InputField field : blueprintConfig.inputFields) {
             if (!isVisible(field, result)) continue;
-            Object value = normalizeFieldValue(field, resolveSubmittedValue(field, result, source));
+            Object value = PomInputs.supports(field)
+                    ? PomInputs.normalize(field, PomInputs.suppliedValue(field, source), result)
+                    : normalizeFieldValue(field, resolveSubmittedValue(field, result, source));
             validateValue(field, value);
             if (value != null) result.put(field.name, value);
         }
+        PomInputs.normalizeBlueprintInputs(blueprintConfig, result);
         return result;
     }
 
@@ -42,6 +45,7 @@ public class BlueprintInputService {
     }
 
     public Object normalizeFieldValue(InputField field, Object value) {
+        if (PomInputs.supports(field)) return PomInputs.normalize(field, value, Map.of());
         if (value == null) return null;
         if (field.type == FieldType.BOOLEAN) {
             if (value instanceof Boolean bool) return bool;
@@ -83,13 +87,14 @@ public class BlueprintInputService {
         map.put("helpText", field.helpText);
         map.put("type", field.type);
         map.put("required", FieldUtils.isRequired(field));
-        map.put("defaultValue", substitute(defaults, field.defaultValue));
+        map.put("defaultValue", field.type == FieldType.POM_Dependencies ? List.of() : substitute(defaults, field.defaultValue));
         map.put("validValues", field.validValues);
-        map.put("childFields", field.childFields == null ? List.of() : describeChildFields(field.childFields, defaults));
+        map.put("childFields", describeChildFields(PomInputs.childFields(field), defaults));
         map.put("accept", field.accept);
         map.put("maxSizeBytes", field.maxSizeBytes);
         map.put("multiple", Boolean.TRUE.equals(field.multiple));
         map.put("visibleWhen", field.visibleWhen);
+        map.put("validation", field.validation);
         return map;
     }
 
@@ -102,6 +107,8 @@ public class BlueprintInputService {
     }
 
     private void validateValue(InputField field, Object value) {
+        org.chenile.jgen.util.InputValidation.validateField(field, value, field.name);
+        if (PomInputs.supports(field)) { PomInputs.normalize(field, value, Map.of()); return; }
         if (field.type == FieldType.RECORD_ARRAY) {
             if (value == null) return;
             if (!(value instanceof List<?> records)) {

@@ -1,21 +1,22 @@
 {
-  "registryClientFlag": "registerInServiceRegistry",
   "name": "chenile-process-management",
-  "description": "Typed multi-level process workers, definitions and cron triggers in a runnable mini-monolith",
-  "sinceVersion": "2.1.31",
+  "description": "Process server and headless worker mini-monoliths with optional dedicated service registry",
+  "sinceVersion": "2.1.32",
   "initHook": "org.chenile.jgen.blueprint.process.InitProcessManagementBlueprint",
   "templateFolder": "process-management-template",
   "inputFields": [
     {
       "name": "application",
       "type": "STRING",
-      "description": "Mini-monolith name (lowercase Java identifier)"
+      "description": "Process deployment application name (lowercase Java identifier)",
+      "validation": "JAVA_IDENTIFIER"
     },
     {
       "name": "applicationVersion",
       "type": "STRING",
       "description": "Application version",
-      "defaultValue": "${defaultVersion}"
+      "defaultValue": "${defaultVersion}",
+      "validation": "VERSION"
     },
     {
       "name": "destFolder",
@@ -36,7 +37,7 @@
     },
     {
       "name": "definitionSource",
-      "type": "STRING",
+      "type": "DROPDOWN",
       "description": "Definition source: json or database",
       "defaultValue": "json",
       "validValues": [
@@ -45,18 +46,91 @@
       ]
     },
     {
-      "name": "registerInServiceRegistry",
-      "type": "BOOLEAN",
-      "description": "Publish the generated Chenile process services to a remote registry",
-      "defaultValue": "n"
+      "name": "registryMode",
+      "type": "DROPDOWN",
+      "description": "Create a service registry or use an existing registry",
+      "validValues": [
+        "create",
+        "existing"
+      ],
+      "defaultValue": "create"
     },
     {
-      "name": "serviceRegistryUrl",
+      "name": "existingRegistryUrl",
       "type": "STRING",
-      "description": "Remote registry base URL",
+      "description": "Existing Chenile service registry base URL",
       "visibleWhen": {
-        "registerInServiceRegistry": true
-      }
+        "registryMode": "existing"
+      },
+      "validation": "HTTP_URL"
+    },
+    {
+      "name": "registryPlacement",
+      "type": "DROPDOWN",
+      "description": "Registry placement (server is recommended)",
+      "validValues": [
+        "server",
+        "separate"
+      ],
+      "visibleWhen": {
+        "registryMode": "create"
+      },
+      "defaultValue": "server"
+    },
+    {
+      "name": "serverDeploymentUrl",
+      "type": "STRING",
+      "description": "Process server deployment URL",
+      "defaultValue": "http://localhost:8000",
+      "validation": "HTTP_URL"
+    },
+    {
+      "name": "workerDeploymentUrl",
+      "type": "STRING",
+      "description": "Worker deployment URL (host identity/health; work arrives over Kafka)",
+      "defaultValue": "http://localhost:8001",
+      "validation": "HTTP_URL"
+    },
+    {
+      "name": "registryDeploymentUrl",
+      "type": "STRING",
+      "description": "Dedicated registry deployment URL",
+      "visibleWhen": {
+        "registryMode": "create",
+        "registryPlacement": "separate"
+      },
+      "defaultValue": "http://localhost:8002",
+      "validation": "HTTP_URL"
+    },
+    {
+      "name": "transport",
+      "type": "DROPDOWN",
+      "description": "Queue transport (Kafka)",
+      "validValues": [
+        "kafka"
+      ],
+      "defaultValue": "kafka"
+    },
+    {
+      "name": "workTopic",
+      "type": "STRING",
+      "description": "Default Kafka topic when a process definition has no config.queue",
+      "defaultValue": "${application}-work",
+      "validation": "KAFKA_TOPIC"
+    },
+    {
+      "name": "super_pom",
+      "type": "SuperPOM",
+      "description": "Optional parent POM for the generated project",
+      "required": false,
+      "helpText": "Object with groupId, artifactId, version and relativePath. Omit to keep the blueprint parent."
+    },
+    {
+      "name": "dependencies",
+      "type": "POM_Dependencies",
+      "description": "Additional Maven dependencies",
+      "required": false,
+      "helpText": "Additional dependencies for the generated server-service JAR."
     }
   ]
 }

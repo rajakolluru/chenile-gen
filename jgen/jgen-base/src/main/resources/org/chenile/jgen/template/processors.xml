@@ -24,6 +24,8 @@
             <file-name-replacer/>
             <!-- Processes conditional files. If a key in the map has a given value then the folder is copied. -->
             <conditional-processor/>
+            <!-- Expands surviving child markers after parent rendering and conditional selection. -->
+            <blueprint-expander/>
             <!-- Allows the blueprint author to change the destination folder if required with custom logic -->
             <post-process-executor/>
         </processor-chain>

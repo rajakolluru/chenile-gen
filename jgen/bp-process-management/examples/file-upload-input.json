@@ -6,5 +6,10 @@
   "processSpec": "bp-process-management/examples/file-upload-processes.json",
   "cronSpec": "bp-process-management/examples/file-upload-crons.json",
   "definitionSource": "json",
-  "registerInServiceRegistry": "n"
+  "registryMode": "create",
+  "registryPlacement": "server",
+  "serverDeploymentUrl": "http://localhost:8000",
+  "workerDeploymentUrl": "http://localhost:8001",
+  "transport": "kafka",
+  "workTopic": "uploads-work"
 }

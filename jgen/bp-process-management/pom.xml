@@ -5,6 +5,8 @@
     <artifactId>bp-process-management</artifactId>
     <name>Chenile process management mini-monolith blueprint</name>
     <dependencies>
+        <dependency><groupId>org.chenile</groupId><artifactId>bp-process-workers</artifactId></dependency>
+        <dependency><groupId>org.chenile</groupId><artifactId>bp-minimonolith</artifactId></dependency>
         <dependency><groupId>org.chenile</groupId><artifactId>jgen-base</artifactId></dependency>
         <dependency><groupId>org.chenile.orchestrator.process</groupId><artifactId>process-api</artifactId></dependency>
         <dependency><groupId>org.chenile.orchestrator.process</groupId><artifactId>crontab-service</artifactId><version>${chenile.process.management}</version></dependency>

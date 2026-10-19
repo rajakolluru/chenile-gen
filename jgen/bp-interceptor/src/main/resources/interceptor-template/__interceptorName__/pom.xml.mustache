@@ -2,12 +2,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    {{#parentArtifactId}}
+    <parent>
+        <groupId>{{parentGroupId}}</groupId>
+        <artifactId>{{parentArtifactId}}</artifactId>
+        <version>{{parentVersion}}</version>
+        <relativePath>{{parentRelativePath}}</relativePath>
+    </parent>
+    {{/parentArtifactId}}
+    {{^parentArtifactId}}
     <parent>
         <artifactId>chenile-parent</artifactId>
         <groupId>{{chenilePackage}}</groupId>
         <version>{{chenileVersion}}</version>
 		<relativePath>../pom.xml</relativePath>
     </parent>
+    {{/parentArtifactId}}
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>{{com}}.{{company}}.{{org}}</groupId>
@@ -38,5 +48,13 @@
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        {{#dependencies}}
+        <dependency>
+            <groupId>{{groupId}}</groupId>
+            <artifactId>{{artifactId}}</artifactId>
+            {{#version}}<version>{{version}}</version>{{/version}}
+        </dependency>
+        {{/dependencies}}
     </dependencies>
 </project>

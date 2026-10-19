@@ -316,6 +316,10 @@ p { margin: 4px 0 0; color: var(--muted); }
   min-width: 0;
 }
 
+.field[hidden] {
+  display: none;
+}
+
 .field label {
   color: var(--blue);
   font-size: 12px;

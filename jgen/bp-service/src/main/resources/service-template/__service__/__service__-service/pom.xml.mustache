@@ -8,7 +8,7 @@
 		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	
+
 	<artifactId>{{service}}-service</artifactId>
 	<packaging>jar</packaging>
 
@@ -82,5 +82,13 @@
             <scope>test</scope>
         </dependency>
         {{/cloudEdgeSwitch}}
-	</dependencies>
+
+        {{#dependencies}}
+        <dependency>
+            <groupId>{{groupId}}</groupId>
+            <artifactId>{{artifactId}}</artifactId>
+            {{#version}}<version>{{version}}</version>{{/version}}
+        </dependency>
+        {{/dependencies}}
+    </dependencies>
 </project>

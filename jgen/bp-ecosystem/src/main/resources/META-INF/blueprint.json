@@ -10,13 +10,15 @@
       "name": "ecosystem",
       "type": "STRING",
       "description": "Name of the ecosystem",
-      "required": true
+      "required": true,
+      "validation": "PROJECT_NAME"
     },
     {
       "name": "ecosystemVersion",
       "type": "STRING",
       "description": "Version for generated projects",
-      "defaultValue": "${defaultVersion}"
+      "defaultValue": "${defaultVersion}",
+      "validation": "VERSION"
     },
     {
       "name": "destFolder",
@@ -28,13 +30,15 @@
       "name": "service",
       "type": "STRING",
       "description": "Name of the HTTP service",
-      "defaultValue": "${ecosystem}Service"
+      "defaultValue": "${ecosystem}Service",
+      "validation": "JAVA_IDENTIFIER"
     },
     {
       "name": "monolith",
       "type": "STRING",
       "description": "Name of the primary mini monolith",
-      "defaultValue": "${ecosystem}Monolith"
+      "defaultValue": "${ecosystem}Monolith",
+      "validation": "JAVA_IDENTIFIER"
     },
     {
       "name": "security",
@@ -61,7 +65,8 @@
       "defaultValue": "${ecosystem}Registry",
       "visibleWhen": {
         "includeServiceRegistry": "true"
-      }
+      },
+      "validation": "JAVA_IDENTIFIER"
     },
     {
       "name": "serviceRegistryUrl",
@@ -70,7 +75,8 @@
       "defaultValue": "http://localhost:8080",
       "visibleWhen": {
         "includeServiceRegistry": "true"
-      }
+      },
+      "validation": "HTTP_URL"
     },
     {
       "name": "includeCconfig",
@@ -91,7 +97,8 @@
       "defaultValue": "${ecosystem}Headless",
       "visibleWhen": {
         "includeHeadlessService": "true"
-      }
+      },
+      "validation": "JAVA_IDENTIFIER"
     },
     {
       "name": "headlessMonolith",
@@ -100,7 +107,8 @@
       "defaultValue": "${ecosystem}HeadlessMonolith",
       "visibleWhen": {
         "includeHeadlessService": "true"
-      }
+      },
+      "validation": "JAVA_IDENTIFIER"
     },
     {
       "name": "includeQueryService",
@@ -115,7 +123,8 @@
       "defaultValue": "${ecosystem}Query",
       "visibleWhen": {
         "includeQueryService": "true"
-      }
+      },
+      "validation": "JAVA_IDENTIFIER"
     },
     {
       "name": "queryMonolith",
@@ -124,7 +133,22 @@
       "defaultValue": "${ecosystem}QueryMonolith",
       "visibleWhen": {
         "includeQueryService": "true"
-      }
+      },
+      "validation": "JAVA_IDENTIFIER"
+    },
+    {
+      "name": "super_pom",
+      "type": "SuperPOM",
+      "description": "Optional parent POM for the generated project",
+      "required": false,
+      "helpText": "Object with groupId, artifactId, version and relativePath. Omit to keep the blueprint parent."
+    },
+    {
+      "name": "dependencies",
+      "type": "POM_Dependencies",
+      "description": "Additional Maven dependencies",
+      "required": false,
+      "helpText": "Added to pom.xml. Versions may be omitted when supplied by dependency management."
     }
   ]
 }

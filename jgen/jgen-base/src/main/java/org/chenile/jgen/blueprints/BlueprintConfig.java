@@ -15,6 +15,9 @@ public class BlueprintConfig {
     public String sinceVersion;
     public Class<InitHook> initHook;
     public Consumer<Map<String,Object>> postInputCaptureHook;
+    /** Registered by the init hook when this blueprint includes child blueprint markers. */
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public ChildBlueprintInputs childBlueprintInputs;
     public String templateFolder;
     public List<InputField> inputFields;
     /** Defaults to the first input field, which conventionally names the generated project. */

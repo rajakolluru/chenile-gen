@@ -103,15 +103,15 @@
         {{/security}}
 
 		<!-- Start including all the services that need to be packaged with this mini monolith -->
-		
+
 		{{#dependencies}}
-			<dependency>
-				<groupId>{{dependencyGroup}}</groupId>
-				<artifactId>{{dependencyName}}</artifactId>
-				{{#dependencyVersion}}<version>{{dependencyVersion}}</version>{{/dependencyVersion}}
-			</dependency>
-		{{/dependencies}}
-		
+        <dependency>
+            <groupId>{{groupId}}</groupId>
+            <artifactId>{{artifactId}}</artifactId>
+            {{#version}}<version>{{version}}</version>{{/version}}
+        </dependency>
+        {{/dependencies}}
+
 	</dependencies>
 
 

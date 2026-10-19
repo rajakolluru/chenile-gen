@@ -19,7 +19,7 @@
 		<version>{{chenileVersion}}</version>
 	</parent>
 	{{/parentArtifactId}}
-	
+
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>{{namespace}}-query-service</artifactId>
 	<version>${revision}</version>
@@ -30,7 +30,7 @@
 		<revision>{{namespaceVersion}}</revision>
 	</properties>
 
-	<dependencies>	
+	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -51,7 +51,7 @@
     		<artifactId>chenile-query-controller</artifactId>
     		<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.chenile</groupId>
 			<artifactId>cucumber-utils</artifactId>
@@ -62,5 +62,13 @@
 			<artifactId>junit-vintage-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+
+        {{#dependencies}}
+        <dependency>
+            <groupId>{{groupId}}</groupId>
+            <artifactId>{{artifactId}}</artifactId>
+            {{#version}}<version>{{version}}</version>{{/version}}
+        </dependency>
+        {{/dependencies}}
+    </dependencies>
 </project>

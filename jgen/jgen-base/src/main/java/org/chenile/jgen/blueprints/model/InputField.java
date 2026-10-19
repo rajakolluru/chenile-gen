@@ -12,6 +12,7 @@ public class InputField {
     public Boolean required;
     public List<String> validValues;
     public List<InputField> childFields;
+    public ValidationType validation;
     public String accept;
     public Long maxSizeBytes;
     public Boolean multiple;
