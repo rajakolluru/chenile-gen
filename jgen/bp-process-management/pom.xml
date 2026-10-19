@@ -7,7 +7,7 @@
     <dependencies>
         <dependency><groupId>org.chenile</groupId><artifactId>jgen-base</artifactId></dependency>
         <dependency><groupId>org.chenile.orchestrator.process</groupId><artifactId>process-api</artifactId></dependency>
-        <dependency><groupId>org.chenile.orchestrator.process</groupId><artifactId>crontab-trigger</artifactId><version>${chenile.process.management}</version></dependency>
+        <dependency><groupId>org.chenile.orchestrator.process</groupId><artifactId>crontab-service</artifactId><version>${chenile.process.management}</version></dependency>
         <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
     </dependencies>
 </project>
