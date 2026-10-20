@@ -107,6 +107,7 @@ public class ProcessDeploymentPlan {
     child.put("monolith", monolith);
     child.put("monolithVersion", version);
     child.put("jpa", !worker);
+    child.put("enableH2Console", role.equals("server"));
     child.put("security", false);
     child.put("deploymentUrl", deploymentUrl);
     child.put("enableServiceRegistry", registry);
@@ -149,6 +150,12 @@ public class ProcessDeploymentPlan {
       property(properties, "spring.jpa.hibernate.ddl-auto", "${PROCESS_SCHEMA_MODE:update}");
       property(properties, "spring.jpa.open-in-view", "false");
       property(properties, "spring.liquibase.enabled", "false");
+      if (role.equals("server")) {
+        property(
+            properties,
+            "spring.h2.console.enabled",
+            "${PROCESS_H2_CONSOLE_ENABLED:true}");
+      }
       if (role.equals("server")) {
         property(properties, "chenile.process.configurator", text(current, "definitionSource"));
         property(properties, "chenile.process.outbox.run-dispatcher", "true");

@@ -83,6 +83,12 @@ Hibernate manages the process, definition and crontab entities in the local
 default configuration. For an externally managed schema, disable automatic SQL
 initialization after provisioning those tables and select schema validation.
 
+With the default file-backed H2 database, the server exposes the H2 browser
+console at `{{serverDeploymentUrl}}/h2-console` (JDBC URL:
+`jdbc:h2:file:./.{{serverMonolith}}/data;MODE=PostgreSQL;DB_CLOSE_ON_EXIT=FALSE`,
+user `sa`, blank password). Set `PROCESS_H2_CONSOLE_ENABLED=false` when using an
+externally managed database or before exposing the server outside local development.
+
 ## Process manager UI
 
 After starting the server above, run the UI from the Chenile process-management
@@ -99,3 +105,7 @@ Open the Vite URL, enter tenant `default` and the same
 adds `/process-management/api`; `PROCESS_API_TARGET` should be the server origin,
 without that path. If `definitionSource` is `json`, definitions are read-only in
 the UI; use `database` when administrators need to create or edit definitions.
+If a trigger trace returns 404, confirm the proxy target is the same generated
+server that accepted the trigger and the UI tenant matches the trigger tenant.
+An accepted trigger appears in the trace while pending, before Kafka dispatch
+creates its process record.

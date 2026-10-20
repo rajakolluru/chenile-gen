@@ -216,6 +216,11 @@ class ProcessManagementBlueprintTest {
             assertFalse(workerPom.contains("process-service"));
             String serverPom=Files.readString(root.resolve("exampleServer/exampleServer-package/pom.xml"));
             assertEquals(mode.equals("colocated"), serverPom.contains("service-registry-service"));
+            assertTrue(serverPom.contains("spring-boot-h2console"));
+            String serverProperties=Files.readString(root.resolve("exampleServer/exampleServer-configurations/src/main/resources/application.properties"));
+            assertTrue(serverProperties.contains("spring.h2.console.enabled=${PROCESS_H2_CONSOLE_ENABLED:true}"));
+            String serverYaml=Files.readString(root.resolve("exampleServer/exampleServer-configurations/src/main/resources/application.yml"));
+            assertTrue(serverYaml.contains("enabled: ${PROCESS_H2_CONSOLE_ENABLED:true}"));
             assertEquals(mode.equals("separate"), Files.exists(root.resolve("exampleRegistry")));
             String properties=Files.readString(root.resolve("exampleWorker/exampleWorker-configurations/src/main/resources/application.properties"));
             assertTrue(properties.contains("DataSourceAutoConfiguration")); assertTrue(properties.contains("server.port=${SERVER_PORT:8001}"));

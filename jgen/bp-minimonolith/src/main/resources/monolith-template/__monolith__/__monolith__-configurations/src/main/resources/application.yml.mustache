@@ -39,7 +39,7 @@ spring:
 {{#enableH2Console}}
   h2:
     console:
-      enabled: true
+      enabled: ${PROCESS_H2_CONSOLE_ENABLED:true}
 {{/enableH2Console}}
   security:
     oauth2:
