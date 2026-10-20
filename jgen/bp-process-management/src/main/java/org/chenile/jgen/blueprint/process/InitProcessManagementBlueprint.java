@@ -46,27 +46,38 @@ public class InitProcessManagementBlueprint implements InitHook {
       }
       configurator.validateCrons(crons.findAll());
       List<Map<String, Object>> processes = new ArrayList<>();
-      for (var def : configurator.processes.processMap.values())
-        processes.add(
-            Map.of(
-                "name",
-                capitalizeFirst(def.processType),
-                "processType",
-                def.processType,
-                "inputType",
-                modelName(def.args),
-                "fields",
-                configurator.fields(def.processType),
-                "leaf",
-                def.leaf,
-                "composite",
-                !def.leaf,
-                "serviceId",
-                Character.toLowerCase(def.processType.charAt(0)) + def.processType.substring(1),
-                "children",
-                configurator.children(def).stream()
-                    .map(c -> Map.of("name", c.processType, "inputType", modelName(c.args)))
-                    .toList()));
+      for (var def : configurator.processes.processMap.values()) {
+        Map<String, Object> process = new LinkedHashMap<>();
+        process.put("name", capitalizeFirst(def.processType));
+        process.put("processType", def.processType);
+        process.put("inputType", modelName(def.args));
+        process.put("fields", configurator.fields(def.processType));
+        process.put("outputType", configurator.outputType(def.processType));
+        process.put("outputFields", configurator.outputFields(def.processType));
+        process.put("apiArtifact", input.get("application") + "-" + def.processType + "-api");
+        process.put("serviceArtifact", input.get("application") + "-" + def.processType + "-service");
+        process.put("leaf", def.leaf);
+        process.put("composite", !def.leaf);
+        process.put(
+            "serviceId",
+            Character.toLowerCase(def.processType.charAt(0)) + def.processType.substring(1));
+        process.put(
+            "children",
+            configurator.children(def).stream()
+                .map(
+                    c ->
+                        Map.of(
+                            "name", c.processType,
+                            "inputType", modelName(c.args),
+                            "childApiArtifact",
+                                input.get("application") + "-" + c.processType + "-api"))
+                .toList());
+        if (Boolean.TRUE.equals(process.get("composite"))) {
+          String processType = process.get("processType").toString();
+          process.put("childOutputType", configurator.childOutputType(processType));
+        }
+        processes.add(process);
+      }
       ProcessDeploymentPlan.prepare(input, processes, configurator.processes.processMap);
       input.put("packageName", configurator.packageName);
       input.put("Application", capitalizeFirst(input.get("application").toString()));

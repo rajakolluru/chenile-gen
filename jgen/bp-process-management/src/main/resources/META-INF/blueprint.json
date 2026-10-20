@@ -8,6 +8,7 @@
     {
       "name": "application",
       "type": "STRING",
+      "defaultValue": "p1",
       "description": "Process deployment application name (lowercase Java identifier)",
       "validation": "JAVA_IDENTIFIER"
     },
@@ -27,7 +28,7 @@
     {
       "name": "processSpec",
       "type": "FILE",
-      "description": "Native processMap definitions with optional inputFields"
+      "description": "Native processMap definitions with optional inputFields and outputFields"
     },
     {
       "name": "cronSpec",

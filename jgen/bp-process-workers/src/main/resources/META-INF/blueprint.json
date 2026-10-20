@@ -1,6 +1,6 @@
 {
   "name": "chenile-process-workers",
-  "description": "One process definition worker JAR: executor or splitter and aggregator",
+  "description": "API and service JARs for one process type: typed input/output API and executor or splitter/aggregator service",
   "sinceVersion": "2.1.32",
   "initHook": "org.chenile.jgen.blueprint.workers.InitProcessWorkersBlueprint",
   "templateFolder": "process-workers-template",
@@ -49,6 +49,50 @@
       "validation": "JAVA_IDENTIFIER"
     },
     {
+      "name": "fields",
+      "type": "RECORD_ARRAY",
+      "description": "Typed input fields",
+      "required": false,
+      "childFields": [
+        {"name": "name", "type": "STRING", "description": "field name", "validation": "JAVA_IDENTIFIER"},
+        {"name": "javaType", "type": "STRING", "description": "field Java type", "validation": "JAVA_TYPE"}
+      ]
+    },
+    {
+      "name": "outputType",
+      "type": "STRING",
+      "description": "outputType",
+      "required": true
+    },
+    {
+      "name": "childOutputType",
+      "type": "STRING",
+      "description": "childOutputType",
+      "required": false
+    },
+    {
+      "name": "outputFields",
+      "type": "RECORD_ARRAY",
+      "description": "outputFields",
+      "required": false,
+      "childFields": [
+        {"name": "name", "type": "STRING", "description": "field name", "validation": "JAVA_IDENTIFIER"},
+        {"name": "javaType", "type": "STRING", "description": "field Java type", "validation": "JAVA_TYPE"}
+      ]
+    },
+    {
+      "name": "apiArtifact",
+      "type": "STRING",
+      "description": "API artifactId",
+      "validation": "PROJECT_NAME"
+    },
+    {
+      "name": "serviceArtifact",
+      "type": "STRING",
+      "description": "service artifactId",
+      "validation": "PROJECT_NAME"
+    },
+    {
       "name": "leaf",
       "type": "BOOLEAN",
       "description": "leaf",
@@ -71,7 +115,8 @@
           "type": "STRING",
           "description": "inputType",
           "validation": "JAVA_IDENTIFIER"
-        }
+        },
+        {"name": "childApiArtifact", "type": "STRING", "description": "child API artifact", "validation": "PROJECT_NAME"}
       ]
     },
     {

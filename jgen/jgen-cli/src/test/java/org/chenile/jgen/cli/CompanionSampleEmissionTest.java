@@ -31,14 +31,15 @@ class CompanionSampleEmissionTest {
     @SuppressWarnings("unchecked")
     private Map<String,Object> read(Path path) throws Exception { return json.readValue(path.toFile(), Map.class); }
 
-    @Test void processCompanionsUseOutputStemAndValidateWithTheirRuntimeReaders() throws Exception {
-        Path output = temporary.resolve("nested/orders.input.json");
-        assertEquals(0, execute("-g","chenile-process-management","-o",output.toString(),"-e"));
+    @Test void processCompanionsAndInputAreWrittenTogetherIntoTheEmitFolder() throws Exception {
+        Path folder = temporary.resolve("nested/process-specs");
+        Path output = folder.resolve("input-file.json");
+        assertEquals(0, execute("-g","chenile-process-management","-e",folder.toString()));
         var inputs = read(output);
         Path definitions = Path.of(inputs.get("processSpec").toString());
         Path schedules = Path.of(inputs.get("cronSpec").toString());
-        assertEquals(output.resolveSibling("orders.input-processSpec.json"), definitions);
-        assertEquals(output.resolveSibling("orders.input-cronSpec.json"), schedules);
+        assertEquals(folder.resolve("input-file-processSpec.json"), definitions);
+        assertEquals(folder.resolve("input-file-cronSpec.json"), schedules);
         inputs.putAll(new ConfigProvider().getConfigAsMap(new ConfigProvider().obtainDefaultConfig()));
         inputs.put("application","example");
         var configurator = new ProcessDefinitionConfigurator(inputs);
@@ -48,14 +49,16 @@ class CompanionSampleEmissionTest {
         assertDoesNotThrow(() -> configurator.validateCrons(crons.findAll()));
         assertEquals(2, configurator.processes.processMap.size());
         assertFalse(crons.findAll().get(0).enabled);
+        assertTrue(configurator.outputFields("item").stream().anyMatch(field -> "processed".equals(field.get("name"))));
     }
 
-    @Test void customStmEmitterProvidesParseableWorkflowAndAcceptsEOutputPath() throws Exception {
-        Path output = temporary.resolve("workflow.json");
-        assertEquals(0, execute("-g","wfcustom","-e",output.toString()));
+    @Test void customStmEmitterProvidesParseableWorkflowInTheEmitFolder() throws Exception {
+        Path folder = temporary.resolve("workflow-specs");
+        Path output = folder.resolve("input-file.json");
+        assertEquals(0, execute("-g","wfcustom","-e",folder.toString()));
         var input = read(output);
         Path xml = Path.of(input.get("xmlFile").toString());
-        assertEquals(output.resolveSibling("workflow-xmlFile.xml"),xml);
+        assertEquals(folder.resolve("input-file-xmlFile.xml"),xml);
         var provider = new ConfigProvider();
         input.put("service","example");
         var blueprint = Registry.blueprints.get("wfcustom");
@@ -73,32 +76,37 @@ class CompanionSampleEmissionTest {
         assertFalse(Files.exists(temporary.resolve("input-processSpec.json")));
     }
 
-    @Test void eWithBlueprintWithoutFileInputsStillEmitsItsMainInput() throws Exception {
-        Path output = temporary.resolve("service.json");
-        assertEquals(0, execute("-g","chenile-service","-o",output.toString(),"-e"));
+    @Test void eFolderWithBlueprintWithoutFileInputsStillEmitsItsMainInput() throws Exception {
+        Path folder = temporary.resolve("service-input");
+        Path output = folder.resolve("input-file.json");
+        assertEquals(0, execute("-g","chenile-service","-e",folder.toString()));
         assertEquals("chenile-service",read(output).get("blueprint"));
-        try (var files = Files.list(temporary)) { assertEquals(1,files.count()); }
+        try (var files = Files.list(folder)) { assertEquals(1,files.count()); }
     }
 
     @Test void refusesExistingCompanionsBeforeEmittingAnythingElse() throws Exception {
-        Path output = temporary.resolve("input.json");
-        Path existing = Files.writeString(temporary.resolve("input-cronSpec.json"),"keep");
-        assertNotEquals(0, execute("-g","chenile-process-management","-o",output.toString(),"-e"));
+        Path folder = temporary.resolve("specs");
+        Files.createDirectories(folder);
+        Path output = folder.resolve("input-file.json");
+        Path existing = Files.writeString(folder.resolve("input-file-cronSpec.json"),"keep");
+        assertNotEquals(0, execute("-g","chenile-process-management","-e",folder.toString()));
         assertEquals("keep",Files.readString(existing));
         assertFalse(Files.exists(output));
-        assertFalse(Files.exists(temporary.resolve("input-processSpec.json")));
+        assertFalse(Files.exists(folder.resolve("input-file-processSpec.json")));
     }
 
     @Test void rejectsMissingOrConflictingOutputPaths() {
         assertNotEquals(0, execute("-g","chenile-process-management","-e"));
-        assertNotEquals(0, execute("-g","chenile-process-management","-e",temporary.resolve("one.json").toString(),
+        assertNotEquals(0, execute("-g","chenile-process-management","-e",temporary.resolve("one").toString(),
                 "-o",temporary.resolve("two.json").toString()));
     }
 
     @Test void refusesToOverwriteTheMainInputFile() throws Exception {
-        Path output = Files.writeString(temporary.resolve("input.json"),"keep");
-        assertNotEquals(0, execute("-g","wfcustom","-o",output.toString(),"-e"));
+        Path folder = temporary.resolve("workflow");
+        Files.createDirectories(folder);
+        Path output = Files.writeString(folder.resolve("input-file.json"),"keep");
+        assertNotEquals(0, execute("-g","wfcustom","-e",folder.toString()));
         assertEquals("keep",Files.readString(output));
-        assertFalse(Files.exists(temporary.resolve("input-xmlFile.xml")));
+        assertFalse(Files.exists(folder.resolve("input-file-xmlFile.xml")));
     }
 }

@@ -72,16 +72,26 @@ class ProcessManagementBlueprintTest {
         assertEquals("FileUpload",defs.get("ChunkUpload").parentProcessType);
         assertEquals("1048576",defs.get("FileUpload").config.get("chunkBytes"));
         assertEquals("com.example.process.example.model.FileUploadIn",defs.get("FileUpload").args);
+        @SuppressWarnings("unchecked") var generated=(List<Map<String,Object>>)input.get("processes");
+        var fileUpload=generated.stream().filter(p -> p.get("processType").equals("FileUpload")).findFirst().orElseThrow();
+        assertEquals("AggregatedResult<ChunkUploadOutput>", fileUpload.get("outputType"));
+        assertEquals("ChunkUploadOutput", fileUpload.get("childOutputType"));
         var cron=json.readValue(input.get("cronsJson").toString(),org.chenile.trigger.cron.Crontab[].class)[0];
         assertFalse(cron.enabled);
         assertEquals("FileUpload",json.readValue(cron.eventPayloadJson,ProcessDto.class).processDefName);
     }
-    @Test void supportsThreeLevelsMultipleChildTypesAndMultipleRoots() throws Exception {
+    @Test void supportsThreeLevelsAndMultipleRoots() throws Exception {
         var input=input(example("three-level-processes.json")); prepare(input);
         var defs=definitions(input).processes.processMap;
-        assertEquals("Partition",defs.get("Audit").parentProcessType);
+        assertEquals("Partition",defs.get("Record").parentProcessType);
         assertEquals("Import",defs.get("Partition").parentProcessType);
-        assertEquals(4,defs.size());
+        assertEquals(3,defs.size());
+        @SuppressWarnings("unchecked") var generated=(List<Map<String,Object>>)input.get("processes");
+        var importProcess=generated.stream().filter(p -> p.get("processType").equals("Import")).findFirst().orElseThrow();
+        var partitionProcess=generated.stream().filter(p -> p.get("processType").equals("Partition")).findFirst().orElseThrow();
+        assertEquals("AggregatedResult<AggregatedResult<RecordOutput>>", importProcess.get("outputType"));
+        assertEquals("AggregatedResult<RecordOutput>", importProcess.get("childOutputType"));
+        assertEquals("AggregatedResult<RecordOutput>", partitionProcess.get("outputType"));
         var roots=input("""
             {"processMap":{"One":{"leaf":true},"Two":{"leaf":true}}}
             """);
@@ -153,7 +163,7 @@ class ProcessManagementBlueprintTest {
         context.map=registry;
         assertTrue(assertThrows(IllegalArgumentException.class,()->new GenericInputValidator().execute(context)).getMessage().contains("existingRegistryUrl"));
     }
-    @Test void rendersRegistryChoicesAndOneWorkerJarPerDefinitionThroughTheRealPipeline() throws Exception {
+    @Test void rendersRegistryChoicesAndPerTypeApiAndServiceJarsThroughTheRealPipeline() throws Exception {
         for (String mode : List.of("colocated", "separate", "existing")) {
             var input=input(example("file-upload-processes.json")); withCrons(input,example("file-upload-crons.json"));
             input.put("registryMode", mode.equals("existing") ? "existing" : "create");
@@ -169,10 +179,25 @@ class ProcessManagementBlueprintTest {
             config.setFilename("org/chenile/jgen/template/processors.xml");
             var executor=new OrchExecutorImpl<TemplateContext>(); executor.setOrchConfigurator(config); executor.execute(context);
             Path root=Path.of(input.get("destFolder").toString()).resolve("example");
-            assertTrue(Files.exists(root.resolve("example-api/src/main/java/com/example/process/example/model/ChunkUploadIn.java")));
-            assertTrue(Files.exists(root.resolve("example-FileUpload-workers/src/main/java/com/example/process/example/worker/FileUploadAggregator.java")));
-            assertTrue(Files.exists(root.resolve("example-FileUpload-workers/src/main/java/com/example/process/example/worker/FileUploadSplitter.java")));
-            assertTrue(Files.exists(root.resolve("example-ChunkUpload-workers/src/main/java/com/example/process/example/worker/ChunkUploadExecutor.java")));
+            assertTrue(Files.isExecutable(root.resolve("run-server.sh")));
+            assertTrue(Files.isExecutable(root.resolve("run-workers.sh")));
+            if (mode.equals("separate")) {
+                assertTrue(Files.isExecutable(root.resolve("run-registry.sh")));
+            }
+            assertFalse(Files.exists(root.resolve("example-api/src/main/java/com/example/process/example/model/ChunkUploadIn.java")));
+            assertTrue(Files.exists(root.resolve("example-FileUpload-workers/api/pom.xml")));
+            assertTrue(Files.exists(root.resolve("example-FileUpload-workers/service/pom.xml")));
+            assertTrue(Files.exists(root.resolve("example-FileUpload-workers/service/src/main/java/com/example/process/example/worker/FileUploadAggregator.java")));
+            assertTrue(Files.exists(root.resolve("example-FileUpload-workers/service/src/main/java/com/example/process/example/worker/FileUploadSplitter.java")));
+            assertTrue(Files.exists(root.resolve("example-ChunkUpload-workers/api/src/main/java/com/example/process/example/model/ChunkUploadIn.java")));
+            assertTrue(Files.exists(root.resolve("example-ChunkUpload-workers/api/src/main/java/com/example/process/example/model/ChunkUploadOutput.java")));
+            assertTrue(Files.exists(root.resolve("example-ChunkUpload-workers/service/src/main/java/com/example/process/example/worker/ChunkUploadExecutor.java")));
+            String childApiPom=Files.readString(root.resolve("example-FileUpload-workers/api/pom.xml"));
+            assertTrue(childApiPom.contains("example-ChunkUpload-api"));
+            String aggregator=Files.readString(root.resolve("example-FileUpload-workers/service/src/main/java/com/example/process/example/worker/FileUploadAggregator.java"));
+            assertTrue(aggregator.contains("AggregatedResult<ChunkUploadOutput>"));
+            assertTrue(aggregator.contains("out.outputs.add(childOutput)"));
+            assertTrue(aggregator.contains("out.errors.addAll(error.errors)"));
             assertFalse(Files.exists(root.resolve("example-server-service/src/main/java/com/example/process/example/worker")));
             String service=Files.readString(root.resolve("example-server-service/src/main/java/com/example/process/example/service/FileUploadServiceImpl.java"));
             assertTrue(service.contains("manager.create(dto)")); assertFalse(service.contains("ProcessWorkers"));
@@ -186,7 +211,8 @@ class ProcessManagementBlueprintTest {
             assertTrue(steps.contains("the committed process is published to Kafka"));
             assertFalse(steps.contains("localhost:9092"));
             String workerPom=Files.readString(root.resolve("exampleWorker/exampleWorker-package/pom.xml"));
-            assertTrue(workerPom.contains("example-FileUpload-workers")); assertTrue(workerPom.contains("example-ChunkUpload-workers"));
+            assertTrue(workerPom.contains("example-FileUpload-service"));
+            assertTrue(workerPom.contains("example-ChunkUpload-service"));
             assertFalse(workerPom.contains("process-service"));
             String serverPom=Files.readString(root.resolve("exampleServer/exampleServer-package/pom.xml"));
             assertEquals(mode.equals("colocated"), serverPom.contains("service-registry-service"));

@@ -9,5 +9,8 @@
       "parentProcessType": "file",
       "config": {"executor_key": "executor_value"}
     }
+  },
+  "outputFields": {
+    "chunk": {"processed": "boolean"}
   }
 }

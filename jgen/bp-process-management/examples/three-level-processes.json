@@ -13,10 +13,6 @@
     "Record": {
       "parentProcessType": "Partition",
       "leaf": true
-    },
-    "Audit": {
-      "parentProcessType": "Partition",
-      "leaf": true
     }
   },
   "inputFields": {
@@ -29,9 +25,12 @@
     "Record": {
       "recordId": "string",
       "overwrite": "boolean"
-    },
-    "Audit": {
-      "recordId": "string"
+    }
+  },
+  "outputFields": {
+    "Record": {
+      "processed": "boolean",
+      "recordNumber": "long"
     }
   }
 }

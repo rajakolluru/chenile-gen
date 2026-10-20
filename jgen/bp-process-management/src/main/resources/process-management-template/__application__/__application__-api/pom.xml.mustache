@@ -2,5 +2,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent><groupId>{{packageName}}</groupId><artifactId>{{application}}-parent</artifactId><version>{{applicationVersion}}</version><relativePath>../pom.xml</relativePath></parent>
     <artifactId>{{application}}-api</artifactId>
-    <dependencies><dependency><groupId>org.chenile.orchestrator.process</groupId><artifactId>process-api</artifactId><version>{{chenileVersion}}</version></dependency></dependencies>
+    <dependencies>
+        <dependency><groupId>org.chenile.orchestrator.process</groupId><artifactId>process-api</artifactId><version>{{chenileVersion}}</version></dependency>
+        {{#processes}}
+        <dependency><groupId>{{packageName}}</groupId><artifactId>{{apiArtifact}}</artifactId><version>{{applicationVersion}}</version></dependency>
+        {{/processes}}
+    </dependencies>
 </project>

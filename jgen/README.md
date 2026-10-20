@@ -219,18 +219,20 @@ This is the safest way to learn a blueprint because the generated JSON shows exa
 Add `-e` to emit blueprint-owned sample files alongside the main input JSON:
 
 ```bash
-jgen-cli/bin/jgen.sh -g chenile-process-management -o process-input.json -e
-jgen-cli/bin/jgen.sh -g wfcustom -o workflow-input.json -e
-# Equivalent shorthand:
-jgen-cli/bin/jgen.sh -g wfcustom -e workflow-input.json
+jgen-cli/bin/jgen.sh -g chenile-process-management -e process-specs
+jgen-cli/bin/jgen.sh -g wfcustom -e workflow-specs
 ```
 
-The first command emits `process-input-processSpec.json` and
-`process-input-cronSpec.json`; the second emits `workflow-input-xmlFile.xml`.
-The main input JSON contains absolute paths to these companions. Fill in required
-project/service names and customize the samples, then run `jgen -f <input.json>`.
-Emission never runs project-generation hooks and refuses to overwrite existing
-main or companion files. Without `-e`, `-g` retains its existing placeholder behavior.
+The first command creates `process-specs/input-file.json`,
+`process-specs/input-file-processSpec.json` and
+`process-specs/input-file-cronSpec.json`; the second creates
+`workflow-specs/input-file.json` and `workflow-specs/input-file-xmlFile.xml`.
+The main input JSON contains paths to these companions. Fill in required
+project/service names and customize the samples, then run
+`jgen -f process-specs/input-file.json`. Emission never runs project-generation
+hooks and refuses to overwrite existing main or companion files. Without `-e`,
+`-g` retains its existing placeholder behavior. The legacy `-o <input-file>` form
+remains available when `-e` has no folder argument.
 Standalone `-e <config-file>` still emits global configuration.
 
 Blueprint authors register `SampleInputFile` emitters in

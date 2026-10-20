@@ -9,6 +9,7 @@ import org.chenile.jgen.template.model.TemplateContext;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  * Looks for Mustache files. Treats them as templates and passes the map to mustache for execution.
@@ -25,9 +26,12 @@ public class FileTemplateExecutor extends FileProcessor {
         String out = n.substring(0,n.length() - MUSTACHE_EXTENSION.length());
         try (java.io.FileReader fileReader = new FileReader(n)) {
             Mustache m = mf.compile(fileReader,n);
-            FileWriter fileWriter = new FileWriter(out);
-            m.execute(fileWriter,context.map).flush();
-            fileWriter.close();
+            try (FileWriter fileWriter = new FileWriter(out)) {
+                m.execute(fileWriter, context.map).flush();
+            }
+            if (out.endsWith(".sh") && !new File(out).setExecutable(true, false)) {
+                throw new IOException("Unable to make generated shell script executable: " + out);
+            }
             FileUtils.deleteQuietly(new File(n));
         } catch (Exception e) {
             throw new RuntimeException(e);

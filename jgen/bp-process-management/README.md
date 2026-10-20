@@ -12,9 +12,9 @@ From `chenile-gen/jgen`:
 
 ```sh
 mvn install
-jgen-cli/bin/jgen.sh -g chenile-process-management -o process-input.json -e
-# Edit process-input.json and its companion process/cron specifications.
-jgen-cli/bin/jgen.sh -f process-input.json
+jgen-cli/bin/jgen.sh -g chenile-process-management -e process-specs
+# Edit process-specs/input-file.json and its companion process/cron specifications.
+jgen-cli/bin/jgen.sh -f process-specs/input-file.json
 # Or use the checked-in example:
 jgen-cli/bin/jgen.sh -f bp-process-management/examples/file-upload-input.json
 cd output/uploads
@@ -25,6 +25,11 @@ The generated README lists the exact executable JARs, deployment URLs, topic nam
 startup order and environment settings. Kafka is the currently supported queue
 transport. Generated splitter/executor hooks throw until implemented; they are
 application code, not example file-upload implementations.
+
+For the process manager UI, start the generated server and run `process-ui` from the
+`chenile-process-management` checkout with `PROCESS_API_TARGET` set to the server
+URL (default `http://localhost:8000`). Enter tenant `default` and the server's
+`PROCESS_MANAGEMENT_API_KEY` in the UI. The generated README includes these steps.
 
 ## Inputs
 
@@ -56,12 +61,15 @@ the explicit registry choices above.
 
 ## Generated modules
 
-- `<application>-api`: shared typed payloads and process-start service contracts.
+- `<application>-api`: process-start service contracts, depending on each process type's API.
 - `<application>-server-config`: native definitions and cron seeds, server only.
 - `<application>-server-service`: typed Chenile HTTP services, process bootstrap,
   runtime services and acknowledged Kafka publication; no business workers.
-- `<application>-<processType>-workers`: one plain JAR per definition. Leaf types
-  get an executor; non-leaf types get a splitter and aggregator in the same JAR.
+- `<application>-<processType>-workers`: a Maven parent per process type, containing
+  `<application>-<processType>-api` and `<application>-<processType>-service` JARs.
+  The API owns that process type's input and output models. Leaf types get a typed
+  executor; non-leaf types get a splitter and a typed `AggregatedResult<ChildOutput>`
+  aggregator in the service JAR.
 - `<application>-worker-listener`: a headless Chenile listener, Kafka subscription,
   tenant validation/restoration, process delegate and retry handling.
 - `<application>Server` and `<application>Worker`: composed `minimonolith` projects.
@@ -82,17 +90,29 @@ plan. Its template includes:
   %{{minimonolith role=registry}}/
 ```
 
-The reusable `chenile-process-workers` blueprint consumes the prepared definition
-through scalar fields (`processType`, `name`, `inputType`, `leaf`, `children`),
-plus `workerModule`, `application`, `packageName`, version, parent and dependency
-inputs. Its payload model is supplied by the application's API JAR.
+The reusable `chenile-process-workers` blueprint consumes each prepared definition,
+including input/output types and fields, child API dependencies and the generated API
+and service artifact names. It owns both API and service JARs so each process type's
+contracts travel with its implementation without depending on a shared application
+payload module.
 
 ## Process and cron specifications
 
 The process file retains the runtime's native `processMap` structure, with optional
-`inputFields` metadata either at document level or inside a definition. Names and
-model types are validated before any generated files are written. Domain config
+`inputFields` and `outputFields` metadata either at document level or inside a
+definition. Output fields apply to leaf process types; their generated output model
+is `<ProcessType>Output`. Composite output types are
+`AggregatedResult<ImmediateChildOutput>` from `process-delegate`, which carries typed
+child outputs, completion counts, and errors. Siblings must have the same output type
+so their aggregator can retain a single concrete generic type. The executor implements
+the input-to-output transform; the aggregator collects child outputs and errors. Names
+and model types are validated before
+any generated files are written. Domain config
 remains opaque, apart from validating/filling the queue topic required for dispatch.
+
+The checked-in processSpec examples include `outputFields` on their leaf definitions
+to show the generated output contract. If omitted, the blueprint still generates an
+empty `<ProcessType>Output` model.
 
 Cron schedules remain a separate JSON array read by `JsonCrontabRepository`.
 Only the server packages and seeds these resources. Bootstrap creates missing

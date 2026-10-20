@@ -35,10 +35,12 @@ public class ProcessDefinitionConfigurator extends ProcessConfigurator {
 
   public static class Definition extends ProcessDef {
     public Map<String, String> inputFields;
+    public Map<String, String> outputFields;
   }
 
   public static class Definitions extends Processes {
     public Map<String, Map<String, String>> inputFields = new LinkedHashMap<>();
+    public Map<String, Map<String, String>> outputFields = new LinkedHashMap<>();
 
     @JsonDeserialize(contentAs = Definition.class)
     public void setProcessMap(Map<String, ProcessDef> definitions) {
@@ -66,14 +68,17 @@ public class ProcessDefinitionConfigurator extends ProcessConfigurator {
     var spec = (Definitions) document;
     require(spec.processMap != null && !spec.processMap.isEmpty(), "processMap must be nonempty");
     require(spec.inputFields != null, "inputFields cannot be null");
+    require(spec.outputFields != null, "outputFields cannot be null");
     spec.processMap = new TreeMap<>(spec.processMap);
     require(
         spec.processMap.keySet().containsAll(spec.inputFields.keySet()),
         "Unknown inputFields process type");
+    require(
+        spec.processMap.keySet().containsAll(spec.outputFields.keySet()),
+        "Unknown outputFields process type");
     Set<String> models =
         new HashSet<>(
             Set.of(
-                "ProcessResult",
                 "Process",
                 "WorkerDto",
                 "SubProcessPayload",
@@ -86,6 +91,8 @@ public class ProcessDefinitionConfigurator extends ProcessConfigurator {
                 "List",
                 "Map"));
     Set<String> classes = new HashSet<>(), services = new HashSet<>();
+    validateLinks(spec.processMap, d -> d.parentProcessType, "parent hierarchy");
+    validateLinks(spec.processMap, d -> d.predecessorProcessType, "predecessor chain");
     for (var def : spec.processMap.values()) {
       identifier(def.processType);
       String name = capitalizeFirst(def.processType);
@@ -100,18 +107,40 @@ public class ProcessDefinitionConfigurator extends ProcessConfigurator {
             "Duplicate inputFields declaration: " + def.processType);
         spec.inputFields.put(def.processType, extended.inputFields);
       }
+      if (def instanceof Definition extended && extended.outputFields != null) {
+        require(
+            !spec.outputFields.containsKey(def.processType),
+            "Duplicate outputFields declaration: " + def.processType);
+        spec.outputFields.put(def.processType, extended.outputFields);
+      }
       String type = def.args == null ? name + "In" : modelName(def.args);
       upperIdentifier(type);
       require(models.add(type), "Duplicate or reserved input type: " + type);
+      if (def.leaf)
+        require(
+            models.add(name + "Output"),
+            "Duplicate or reserved output type: " + name + "Output");
       def.args = packageName + ".model." + type;
       require(def.config != null, "config cannot be null");
       require(
           def.leaf == children(spec, def).isEmpty(),
           "leaf must match the hierarchy: " + def.processType);
       fields(spec, def.processType);
+      require(
+          def.leaf || spec.outputFields.getOrDefault(def.processType, Map.of()).isEmpty(),
+          "outputFields may only be declared for leaf processes: " + def.processType);
+      outputFields(spec, def.processType);
     }
-    validateLinks(spec.processMap, d -> d.parentProcessType, "parent hierarchy");
-    validateLinks(spec.processMap, d -> d.predecessorProcessType, "predecessor chain");
+    for (var def : spec.processMap.values()) {
+      List<ProcessDef> children = children(spec, def);
+      if (!children.isEmpty()) {
+        String output = outputType(spec, children.get(0));
+        require(
+            children.stream().allMatch(child -> output.equals(outputType(spec, child))),
+            "All immediate children must have the same output type for typed aggregation: "
+                + def.processType);
+      }
+    }
   }
 
   public List<ProcessDef> children(ProcessDef parent) {
@@ -139,6 +168,38 @@ public class ProcessDefinitionConfigurator extends ProcessConfigurator {
 
   public List<Map<String, String>> fields(String type) {
     return fields((Definitions) processes, type);
+  }
+
+  public List<Map<String, String>> outputFields(String type) {
+    return outputFields((Definitions) processes, type);
+  }
+
+  public String outputType(String type) {
+    return outputType((Definitions) processes, ((Definitions) processes).processMap.get(type));
+  }
+
+  public String childOutputType(String type) {
+    var spec = (Definitions) processes;
+    var process = spec.processMap.get(type);
+    return outputType(spec, children(spec, process).get(0));
+  }
+
+  private String outputType(Definitions spec, ProcessDef def) {
+    List<ProcessDef> children = children(spec, def);
+    if (children.isEmpty()) return capitalizeFirst(def.processType) + "Output";
+    return "AggregatedResult<" + outputType(spec, children.get(0)) + ">";
+  }
+
+  private static List<Map<String, String>> outputFields(Definitions spec, String type) {
+    var fields = spec.outputFields.getOrDefault(type, Map.of());
+    require(fields != null, "outputFields cannot be null: " + type);
+    return fields.entrySet().stream()
+        .map(
+            e -> {
+              require(TYPES.containsKey(e.getValue()), "Unsupported field type: " + e.getValue());
+              return Map.of("name", identifier(e.getKey()), "javaType", TYPES.get(e.getValue()));
+            })
+        .toList();
   }
 
   private static List<Map<String, String>> fields(Definitions spec, String type) {

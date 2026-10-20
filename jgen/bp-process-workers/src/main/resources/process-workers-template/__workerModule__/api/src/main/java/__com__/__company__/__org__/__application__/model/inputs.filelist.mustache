@@ -1,0 +1,22 @@
+--START--{{inputType}}.java
+package {{packageName}}.model;
+
+/** Typed input for {{name}}. */
+public class {{inputType}} {
+{{#fields}}
+    public {{javaType}} {{name}};
+{{/fields}}
+}
+--END--
+{{#leaf}}
+--START--{{outputType}}.java
+package {{packageName}}.model;
+
+/** Typed output produced by the {{name}} executor. */
+public class {{outputType}} {
+{{#outputFields}}
+    public {{javaType}} {{name}};
+{{/outputFields}}
+}
+--END--
+{{/leaf}}

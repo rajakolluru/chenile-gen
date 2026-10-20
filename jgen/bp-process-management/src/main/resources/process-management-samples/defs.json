@@ -1,6 +1,11 @@
 {
   "processMap": {
     "batch": {"inputFields": {"batchId": "string"}},
-    "item": {"leaf": true, "parentProcessType": "batch", "inputFields": {"itemId": "string"}}
+    "item": {
+      "leaf": true,
+      "parentProcessType": "batch",
+      "inputFields": {"itemId": "string"},
+      "outputFields": {"processed": "boolean", "itemNumber": "long"}
+    }
   }
 }

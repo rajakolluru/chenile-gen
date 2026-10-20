@@ -18,6 +18,7 @@ import picocli.CommandLine;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -39,11 +40,11 @@ public class GenMain implements Runnable {
     @CommandLine.Option(names = {"-c", "--config"}, description = "Name of config file.")
     private File configFile;
     @CommandLine.Option(names = {"-e", "--emit-config"}, arity = "0..1", fallbackValue = "",
-            description = "Emits config; with -g, emits companion input-file samples (use -o or provide a path)")
+            description = "Emits config; with -g, argument is a folder for input-file.json and companion samples")
     private File configFileToEmit;
     @CommandLine.Option(names = {"-f", "--input-file"}, description = "Uses the input file instead of prompting")
     private File inputFile;
-    @CommandLine.Option(names = {"-o", "--output-file"}, description = "Writes to the output file (applicable for the g option) ")
+    @CommandLine.Option(names = {"-o", "--output-file"}, description = "Writes the generated blueprint input file (for -g without a folder-valued -e)")
     private File outputFile;
     @CommandLine.Option(names = {"-g", "--generate-blueprint-file"}, description = "Generates a sample input file for the specified blueprint")
     private String generateBluePrint;
@@ -57,12 +58,6 @@ public class GenMain implements Runnable {
     public void run() {
         try {
             if (generateBluePrint != null){
-                if (configFileToEmit != null && !configFileToEmit.getPath().isBlank()) {
-                    if (outputFile != null && !outputFile.toPath().toAbsolutePath().normalize()
-                            .equals(configFileToEmit.toPath().toAbsolutePath().normalize()))
-                        throw new IllegalArgumentException("Use one output path for -e and -o");
-                    outputFile = configFileToEmit;
-                }
                 generateBluePrintFile();
                 return;
             }
@@ -99,20 +94,33 @@ public class GenMain implements Runnable {
         for(InputField inf: blueprintConfig.inputFields){
             expectedMap.put(inf.name, (inf.type == FieldType.RECORD_ARRAY || inf.type == FieldType.POM_Dependencies) ? List.of() : resolveDefaultValue(inf, configMap));
         }
+        File destination = outputFile;
+        if (configFileToEmit != null && !configFileToEmit.getPath().isBlank()) {
+            if (outputFile != null)
+                throw new IllegalArgumentException("Use -e <folder> without -o; the input filename is input-file.json");
+            Path folder = configFileToEmit.toPath().toAbsolutePath().normalize();
+            if (Files.exists(folder) && !Files.isDirectory(folder))
+                throw new IllegalArgumentException("The -e destination must be a folder: " + folder);
+            Files.createDirectories(folder);
+            destination = folder.resolve("input-file.json").toFile();
+        } else if (configFileToEmit != null && destination == null) {
+            throw new IllegalArgumentException("Use -e <folder> when generating blueprint samples");
+        }
         if (configFileToEmit != null) {
-            if (outputFile == null) throw new IllegalArgumentException("Companion samples require -o <input.json>");
-            BlueprintSampleEmitter.emit(blueprintConfig, outputFile.toPath(), expectedMap);
+            if (destination == null)
+                throw new IllegalArgumentException("Companion samples require -e <folder>");
+            BlueprintSampleEmitter.emit(blueprintConfig, destination.toPath(), expectedMap);
         }
         String s = prettyWriter.writeValueAsString(expectedMap);
-        if (outputFile == null) {
+        if (destination == null) {
             System.out.println(s);
             return;
         }
-        try (FileWriter writer = new FileWriter(outputFile)) {
+        try (FileWriter writer = new FileWriter(destination)) {
             writer.write(s);
-            System.out.println("The file " + outputFile + " generated successfully with the inputs expected from blueprint " + generateBluePrint);
+            System.out.println("The file " + destination + " generated successfully with the inputs expected from blueprint " + generateBluePrint);
         } catch (IOException e) {
-            throw new IOException("Cannot write blueprint input file: " + outputFile, e);
+            throw new IOException("Cannot write blueprint input file: " + destination, e);
         }
     }
 

@@ -1,0 +1,15 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent><groupId>{{packageName}}</groupId><artifactId>{{workerModule}}</artifactId><version>{{applicationVersion}}</version><relativePath>../pom.xml</relativePath></parent>
+    <artifactId>{{serviceArtifact}}</artifactId>
+    <dependencies>
+        <dependency><groupId>{{packageName}}</groupId><artifactId>{{apiArtifact}}</artifactId><version>{{applicationVersion}}</version></dependency>
+        <dependency><groupId>org.chenile.orchestrator.process</groupId><artifactId>process-delegate</artifactId><version>{{chenileVersion}}</version></dependency>
+        {{#children}}
+        <dependency><groupId>{{packageName}}</groupId><artifactId>{{childApiArtifact}}</artifactId><version>{{applicationVersion}}</version></dependency>
+        {{/children}}
+        {{#dependencies}}
+        <dependency><groupId>{{groupId}}</groupId><artifactId>{{artifactId}}</artifactId>{{#version}}<version>{{version}}</version>{{/version}}</dependency>
+        {{/dependencies}}
+    </dependencies>
+</project>

@@ -20,5 +20,11 @@
     "ChunkUpload": {
       "filename": "string"
     }
+  },
+  "outputFields": {
+    "ChunkUpload": {
+      "accepted": "boolean",
+      "storedPath": "string"
+    }
   }
 }

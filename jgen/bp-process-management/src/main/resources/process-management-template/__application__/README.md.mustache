@@ -16,9 +16,14 @@ The registry endpoint is {{serviceRegistryUrl}}.
 mvn install
 export KAFKA_BOOTSTRAP_SERVERS=localhost:9092
 export PROCESS_MANAGEMENT_API_KEY=$(openssl rand -hex 32)
-{{#separateRegistry}}java -jar {{registryMonolith}}/{{registryMonolith}}-package/target/{{registryMonolith}}-package-{{applicationVersion}}.jar
-{{/separateRegistry}}java -jar {{serverMonolith}}/{{serverMonolith}}-package/target/{{serverMonolith}}-package-{{applicationVersion}}.jar
+{{#separateRegistry}}
+./run-registry.sh OR
+java -jar {{registryMonolith}}/{{registryMonolith}}-package/target/{{registryMonolith}}-package-{{applicationVersion}}.jar
+{{/separateRegistry}}
+./run-server.sh OR
+java -jar {{serverMonolith}}/{{serverMonolith}}-package/target/{{serverMonolith}}-package-{{applicationVersion}}.jar
 # In another terminal, after the server has registered processService:
+./run-workers.sh OR
 java -jar {{workerMonolith}}/{{workerMonolith}}-package/target/{{workerMonolith}}-package-{{applicationVersion}}.jar
 ```
 
@@ -35,11 +40,12 @@ runs on the worker.
 
 Each process definition has a worker JAR:
 {{#processes}}
-- `{{workerModule}}`: {{#leaf}}executor{{/leaf}}{{#composite}}splitter and aggregator{{/composite}} for `{{processType}}`.
+- `{{workerModule}}`: parent for `{{apiArtifact}}` and `{{serviceArtifact}}`; its API owns `{{inputType}}` and `{{outputType}}`, while its service contains the {{#leaf}}executor{{/leaf}}{{#composite}}splitter and typed aggregator{{/composite}}.
 {{/processes}}
 Implement the generated splitter/executor hooks before submitting real work.
 They deliberately throw until application logic is supplied. Aggregators collect
-child results and errors without interpreting domain data.
+typed child results and errors using `AggregatedResult<ChildOutput>` from
+`process-delegate`, without defining an application-specific aggregate model.
 
 The server owns `{{application}}-server-config`, including definitions and optional
 cron schedules. Bootstrap inserts missing records only; restarts preserve saved
@@ -76,3 +82,20 @@ The server initializes the runtime's idempotent outbox/receipt SQL schema;
 Hibernate manages the process, definition and crontab entities in the local
 default configuration. For an externally managed schema, disable automatic SQL
 initialization after provisioning those tables and select schema validation.
+
+## Process manager UI
+
+After starting the server above, run the UI from the Chenile process-management
+checkout in another terminal:
+
+```sh
+cd process-ui
+npm ci
+PROCESS_API_TARGET={{serverDeploymentUrl}} npm run dev
+```
+
+Open the Vite URL, enter tenant `default` and the same
+`PROCESS_MANAGEMENT_API_KEY` exported for the server. The UI's development proxy
+adds `/process-management/api`; `PROCESS_API_TARGET` should be the server origin,
+without that path. If `definitionSource` is `json`, definitions are read-only in
+the UI; use `database` when administrators need to create or edit definitions.

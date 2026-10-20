@@ -50,6 +50,8 @@ public class ProcessDeploymentPlan {
       Map<String, Object> process = new LinkedHashMap<>(processes.get(i));
       String type = process.get("processType").toString();
       process.put("workerModule", app + "-" + type + "-workers");
+      process.put("apiArtifact", app + "-" + type + "-api");
+      process.put("serviceArtifact", app + "-" + type + "-service");
       processes.set(i, process);
       ProcessDef definition = definitions.get(type);
       if (definition.config == null) definition.config = new LinkedHashMap<>();
@@ -88,7 +90,7 @@ public class ProcessDeploymentPlan {
       child.put("application", app);
       child.put("applicationVersion", version);
       child.put("packageName", group);
-      child.put("dependencies", List.of(dependency(group, app + "-api", version)));
+      child.put("dependencies", List.of());
       return child;
     }
     if (!blueprint.equals("minimonolith"))
@@ -114,7 +116,7 @@ public class ProcessDeploymentPlan {
     if (worker) {
       deps.add(dependency(group, app + "-worker-listener", version));
       for (Object item : (List<?>) current.get("processes"))
-        deps.add(dependency(group, ((Map<?, ?>) item).get("workerModule").toString(), version));
+        deps.add(dependency(group, ((Map<?, ?>) item).get("serviceArtifact").toString(), version));
     } else if (role.equals("server")) {
       deps.add(dependency(group, app + "-server-service", version));
       deps.add(dependency(group, app + "-server-config", version));

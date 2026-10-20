@@ -1,0 +1,77 @@
+{{#leaf}}
+--START--{{name}}Executor.java
+package {{packageName}}.worker;
+
+import {{packageName}}.model.{{inputType}};
+import {{packageName}}.model.{{outputType}};
+import org.chenile.orchestrator.process.model.WorkerDto;
+import org.chenile.orchestrator.process.utils.base.ExecutorBase;
+
+public class {{name}}Executor extends ExecutorBase<{{inputType}}, {{outputType}}> {
+    @Override
+    protected {{outputType}} doStart(WorkerDto worker, {{inputType}} input) {
+        // Transform the typed input into the typed output.
+        throw new UnsupportedOperationException("Implement {{name}}Executor.doStart");
+    }
+}
+--END--
+{{/leaf}}
+{{#composite}}
+--START--{{name}}Splitter.java
+package {{packageName}}.worker;
+
+import {{packageName}}.model.*;
+import org.chenile.orchestrator.process.model.WorkerDto;
+import org.chenile.orchestrator.process.model.payload.SubProcessPayload;
+import org.chenile.orchestrator.process.utils.base.SplitterBase;
+import java.util.List;
+
+public class {{name}}Splitter extends SplitterBase<{{inputType}}, Object> {
+    @Override
+    protected List<SubProcessPayload> doStart(WorkerDto worker, {{inputType}} input) {
+        // Return makeSubProcessPayload(typedChildInput, childProcessType) for every child.
+{{#children}}
+        // {{name}} accepts {{inputType}} and produces {{outputType}}
+{{/children}}
+        throw new UnsupportedOperationException("Implement {{name}}Splitter.doStart");
+    }
+}
+--END--
+--START--{{name}}Aggregator.java
+package {{packageName}}.worker;
+
+import {{packageName}}.model.{{inputType}};
+import {{packageName}}.model.*;
+import org.chenile.orchestrator.process.model.WorkerDto;
+import org.chenile.orchestrator.process.model.Process;
+import org.chenile.orchestrator.process.utils.AggregatedResult;
+import org.chenile.orchestrator.process.utils.base.AggregatorBase;
+import org.chenile.orchestrator.process.model.payload.SubProcessError;
+
+/** Collects immediate child outputs and errors into a typed result. */
+public class {{name}}Aggregator extends AggregatorBase<{{inputType}}, {{{outputType}}}, {{{childOutputType}}}> {
+    @Override
+    protected {{{outputType}}} doStart({{{outputType}}} out, {{inputType}} input,
+            {{{childOutputType}}} childOutput, WorkerDto worker, Process child) {
+        if (out == null) {
+            out = new AggregatedResult<>();
+        }
+        if (child.errors == null || child.errors.isEmpty()) {
+            out.completedChildren++;
+        } else {
+            out.failedChildren++;
+            for (SubProcessError error : child.errors) {
+                if (error.errors != null) out.errors.addAll(error.errors);
+                if (error.exceptionMessage != null && !error.exceptionMessage.isBlank()) {
+                    out.errors.add(error.exceptionMessage);
+                }
+            }
+        }
+        if (childOutput != null) {
+            out.outputs.add(childOutput);
+        }
+        return out;
+    }
+}
+--END--
+{{/composite}}
