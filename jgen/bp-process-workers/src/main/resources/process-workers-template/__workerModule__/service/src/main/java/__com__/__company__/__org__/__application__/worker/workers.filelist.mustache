@@ -11,7 +11,8 @@ public class {{name}}Executor extends ExecutorBase<{{inputType}}, {{outputType}}
     @Override
     protected {{outputType}} doStart(WorkerDto worker, {{inputType}} input) {
         // Transform the typed input into the typed output.
-        throw new UnsupportedOperationException("Implement {{name}}Executor.doStart");
+        // throw new UnsupportedOperationException("Implement {{name}}Executor.doStart");
+        return new {{outputType}}();
     }
 }
 --END--
@@ -24,16 +25,21 @@ import {{packageName}}.model.*;
 import org.chenile.orchestrator.process.model.WorkerDto;
 import org.chenile.orchestrator.process.model.payload.SubProcessPayload;
 import org.chenile.orchestrator.process.utils.base.SplitterBase;
+import {{packageName}}.model.{{inputType}};
 import java.util.List;
+import java.util.ArrayList;
 
 public class {{name}}Splitter extends SplitterBase<{{inputType}}, Object> {
     @Override
     protected List<SubProcessPayload> doStart(WorkerDto worker, {{inputType}} input) {
         // Return makeSubProcessPayload(typedChildInput, childProcessType) for every child.
+    List<SubProcessPayload> payloads = new ArrayList<>();
 {{#children}}
-        // {{name}} accepts {{inputType}} and produces {{outputType}}
+        // {{name}} accepts {{inputType}} and produces {{childOutputType}}
+    payloads.add(makeSubProcessPayload(new {{inputType}}(),"{{name}}"));
 {{/children}}
-        throw new UnsupportedOperationException("Implement {{name}}Splitter.doStart");
+        return payloads;
+        // throw new UnsupportedOperationException("Implement {{name}}Splitter.doStart");
     }
 }
 --END--
