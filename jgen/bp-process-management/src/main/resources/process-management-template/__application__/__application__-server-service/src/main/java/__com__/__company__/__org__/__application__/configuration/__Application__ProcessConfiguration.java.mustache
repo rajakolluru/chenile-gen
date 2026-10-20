@@ -1,13 +1,24 @@
 package {{packageName}}.configuration;
+
 import {{packageName}}.service.*;
 import org.chenile.orchestrator.process.api.ProcessManager;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.*;
+
 @Configuration
 public class {{Application}}ProcessConfiguration {
- @Bean @org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean(com.fasterxml.jackson.databind.ObjectMapper.class)
- public com.fasterxml.jackson.databind.ObjectMapper processObjectMapper() { return new com.fasterxml.jackson.databind.ObjectMapper(); }
+    @Bean
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean(
+            com.fasterxml.jackson.databind.ObjectMapper.class)
+    public com.fasterxml.jackson.databind.ObjectMapper processObjectMapper() {
+        return new com.fasterxml.jackson.databind.ObjectMapper();
+    }
+
 {{#processes}}
- @Bean public {{name}}ServiceImpl _{{serviceId}}Service_(@Qualifier("_processStateEntityService_") ProcessManager manager) { return new {{name}}ServiceImpl(manager); }
+    @Bean
+    public {{name}}ServiceImpl _{{serviceId}}Service_(
+            @Qualifier("_processStateEntityService_") ProcessManager manager) {
+        return new {{name}}ServiceImpl(manager);
+    }
 {{/processes}}
 }

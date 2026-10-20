@@ -1,6 +1,12 @@
 package {{packageName}}.bdd;
+
 @org.junit.runner.RunWith(io.cucumber.junit.Cucumber.class)
-@io.cucumber.junit.CucumberOptions(features="src/test/resources/features", glue={"{{packageName}}.bdd", "org.chenile.cucumber.rest"}, plugin="pretty")
+@io.cucumber.junit.CucumberOptions(
+        features = "src/test/resources/features",
+        glue = {"{{packageName}}.bdd", "org.chenile.cucumber.rest"},
+        plugin = "pretty")
 public class CukesRestTest extends org.chenile.mqtt.test.KafkaBaseTest {
- public static String bootstrapServers() { return kafkaContainer.getBootstrapServers(); }
+    public static String bootstrapServers() {
+        return kafkaContainer.getBootstrapServers();
+    }
 }

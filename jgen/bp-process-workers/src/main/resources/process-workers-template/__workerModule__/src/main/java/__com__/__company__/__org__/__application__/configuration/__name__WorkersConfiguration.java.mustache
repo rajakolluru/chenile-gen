@@ -1,13 +1,25 @@
 package {{packageName}}.configuration;
+
 import {{packageName}}.worker.*;
 import org.springframework.context.annotation.*;
+
 @Configuration
 public class {{name}}WorkersConfiguration {
 {{#leaf}}
- @Bean(name="{{processType}}Executor") public {{name}}Executor executor() { return new {{name}}Executor(); }
+    @Bean(name = "{{processType}}Executor")
+    public {{name}}Executor executor() {
+        return new {{name}}Executor();
+    }
 {{/leaf}}
 {{#composite}}
- @Bean(name="{{processType}}Splitter") public {{name}}Splitter splitter() { return new {{name}}Splitter(); }
- @Bean(name="{{processType}}Aggregator") public {{name}}Aggregator aggregator() { return new {{name}}Aggregator(); }
+    @Bean(name = "{{processType}}Splitter")
+    public {{name}}Splitter splitter() {
+        return new {{name}}Splitter();
+    }
+
+    @Bean(name = "{{processType}}Aggregator")
+    public {{name}}Aggregator aggregator() {
+        return new {{name}}Aggregator();
+    }
 {{/composite}}
 }

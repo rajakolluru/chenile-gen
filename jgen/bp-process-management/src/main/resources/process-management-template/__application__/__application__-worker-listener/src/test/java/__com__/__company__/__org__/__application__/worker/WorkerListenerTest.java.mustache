@@ -1,4 +1,5 @@
 package {{packageName}}.worker;
+
 import {{packageName}}.configuration.*;
 import org.chenile.orchestrator.process.api.ProcessManager;
 import org.chenile.orchestrator.process.model.*;
@@ -18,61 +19,136 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import static org.junit.jupiter.api.Assertions.*;
-@SpringBootTest(classes=WorkerListenerTest.Host.class, properties={
- "spring.autoconfigure.exclude=org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration,org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration",
-  "spring.kafka.consumer.auto-offset-reset=earliest", "process.work.topics=test-work", "process.work.consumer-group=test-workers"})
+
+@SpringBootTest(
+        classes = WorkerListenerTest.Host.class,
+        properties = {
+            "spring.autoconfigure.exclude=org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration,org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration",
+            "spring.kafka.consumer.auto-offset-reset=earliest",
+            "process.work.topics=test-work",
+            "process.work.consumer-group=test-workers"
+        })
 @RunWith(SpringRunner.class)
 public class WorkerListenerTest extends org.chenile.mqtt.test.KafkaBaseTest {
- @DynamicPropertySource static void kafkaProperties(DynamicPropertyRegistry registry) {
-  registry.add("spring.kafka.bootstrap-servers", () -> kafkaContainer.getBootstrapServers());
- }
- @Autowired KafkaTemplate<String,String> kafka;
- @SpringBootApplication(scanBasePackages={"org.chenile.configuration", "org.chenile.service.registry.configuration", "{{packageName}}.configuration"})
- public static class Host {
-  @Bean(name="testExecutor") public TestWorker testWorker() { return new TestWorker(); }
- }
- public static class TestWorker implements IWorker<Object> {
-  static volatile boolean fail;
-  static final java.util.concurrent.BlockingQueue<String> deliveries = new java.util.concurrent.LinkedBlockingQueue<>();
-  static final java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
-  public void doStart(WorkerDto dto, Object input) {}
-  public void start(WorkerDto dto, Object input) { if (fail) throw new IllegalStateException("domain failure"); assertEquals("tenant0", ContextContainer.CONTEXT_CONTAINER.getTenant()); calls.incrementAndGet(); deliveries.add(ContextContainer.CONTEXT_CONTAINER.getTenant()); }
- }
- @MockitoBean(name="processServiceProxy") ProcessManager manager;
- @Autowired KafkaWorkSubscriber subscriber;
- @Autowired ApplicationContext beans;
- @Test public void executesAHeadlessEventWithoutAProcessDatasourceAndRestoresTenant() throws Exception {
-  assertFalse(beans.containsBean("dataSource"));
-  var context = ContextContainer.CONTEXT_CONTAINER; var snapshot = context.snapshot();
-  try {
-   context.setTenant("original");
-   var dto = new WorkerDto(); dto.process = new org.chenile.orchestrator.process.model.Process();
-   dto.process.id="worker-test-id"; dto.process.tenant="tenant0"; dto.process.processType="test"; dto.workerType=WorkerType.EXECUTOR;
-   dto.process.input="{}";
-   String json;
-   try { json = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(dto); }
-   catch (Exception e) { throw new IllegalStateException(e); }
-   var record = new org.apache.kafka.clients.consumer.ConsumerRecord<String,String>("test-work",0,0L,null,json);
-   record.headers().add("x-chenile-tenant-id", "tenant0".getBytes(java.nio.charset.StandardCharsets.UTF_8));
-   TestWorker.calls.set(0); TestWorker.deliveries.clear();
-   var publication = new org.apache.kafka.clients.producer.ProducerRecord<String,String>("test-work", null, json);
-   publication.headers().add("x-chenile-tenant-id", "tenant0".getBytes(java.nio.charset.StandardCharsets.UTF_8));
-   kafka.send(publication).get(30, java.util.concurrent.TimeUnit.SECONDS);
-   assertEquals("tenant0", TestWorker.deliveries.poll(30, java.util.concurrent.TimeUnit.SECONDS), "Kafka must deliver to the generated headless worker service");
-   assertEquals(1,TestWorker.calls.get()); assertEquals("original",context.getTenant());
-   record.headers().remove("x-chenile-tenant-id");
-   record.headers().add("x-chenile-tenant-id", "another-tenant".getBytes(java.nio.charset.StandardCharsets.UTF_8));
-   assertThrows(IllegalStateException.class, () -> subscriber.receive(record));
-   assertEquals(1,TestWorker.calls.get()); assertEquals("original",context.getTenant());
-   record.headers().remove("x-chenile-tenant-id");
-   record.headers().add("x-chenile-tenant-id", "tenant0".getBytes(java.nio.charset.StandardCharsets.UTF_8));
-   org.mockito.Mockito.when(manager.processById(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any()))
-       .thenThrow(new IllegalStateException("server unreachable"));
-   TestWorker.fail=true;
-   try { assertThrows(IllegalStateException.class, () -> subscriber.receive(record)); }
-   finally { TestWorker.fail=false; }
-   org.mockito.Mockito.verify(manager).processById(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any());
-   assertEquals("original",context.getTenant());
-  } finally { context.restore(snapshot); }
- }
+    @DynamicPropertySource
+    static void kafkaProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.kafka.bootstrap-servers", () -> kafkaContainer.getBootstrapServers());
+    }
+
+    @Autowired KafkaTemplate<String, String> kafka;
+
+    @SpringBootApplication(
+            scanBasePackages = {
+                "org.chenile.configuration",
+                "org.chenile.service.registry.configuration",
+                "{{packageName}}.configuration"
+            })
+    public static class Host {
+        @Bean(name = "testExecutor")
+        public TestWorker testWorker() {
+            return new TestWorker();
+        }
+    }
+
+    public static class TestWorker implements IWorker<Object> {
+        static volatile boolean fail;
+        static final java.util.concurrent.BlockingQueue<String> deliveries =
+                new java.util.concurrent.LinkedBlockingQueue<>();
+        static final java.util.concurrent.atomic.AtomicInteger calls =
+                new java.util.concurrent.atomic.AtomicInteger();
+
+        public void doStart(WorkerDto dto, Object input) {}
+
+        public void start(WorkerDto dto, Object input) {
+            if (fail) {
+                throw new IllegalStateException("domain failure");
+            }
+            assertEquals("tenant0", ContextContainer.CONTEXT_CONTAINER.getTenant());
+            calls.incrementAndGet();
+            deliveries.add(ContextContainer.CONTEXT_CONTAINER.getTenant());
+        }
+    }
+
+    @MockitoBean(name = "processServiceProxy") ProcessManager manager;
+    @Autowired KafkaWorkSubscriber subscriber;
+    @Autowired ApplicationContext beans;
+
+    @Test
+    public void executesAHeadlessEventWithoutAProcessDatasourceAndRestoresTenant() throws Exception {
+        assertFalse(beans.containsBean("dataSource"));
+        var context = ContextContainer.CONTEXT_CONTAINER;
+        var snapshot = context.snapshot();
+        try {
+            context.setTenant("original");
+            var dto = new WorkerDto();
+            dto.process = new org.chenile.orchestrator.process.model.Process();
+            dto.process.id = "worker-test-id";
+            dto.process.tenant = "tenant0";
+            dto.process.processType = "test";
+            dto.workerType = WorkerType.EXECUTOR;
+            dto.process.input = "{}";
+            String json;
+            try {
+                json = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(dto);
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+            var record =
+                    new org.apache.kafka.clients.consumer.ConsumerRecord<String, String>(
+                            "test-work", 0, 0L, null, json);
+            record.headers()
+                    .add(
+                            "x-chenile-tenant-id",
+                            "tenant0".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            TestWorker.calls.set(0);
+            TestWorker.deliveries.clear();
+            var publication =
+                    new org.apache.kafka.clients.producer.ProducerRecord<String, String>(
+                            "test-work", null, json);
+            publication.headers()
+                    .add(
+                            "x-chenile-tenant-id",
+                            "tenant0".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            kafka.send(publication).get(30, java.util.concurrent.TimeUnit.SECONDS);
+            assertEquals(
+                    "tenant0",
+                    TestWorker.deliveries.poll(30, java.util.concurrent.TimeUnit.SECONDS),
+                    "Kafka must deliver to the generated headless worker service");
+            assertEquals(1, TestWorker.calls.get());
+            assertEquals("original", context.getTenant());
+            record.headers().remove("x-chenile-tenant-id");
+            record.headers()
+                    .add(
+                            "x-chenile-tenant-id",
+                            "another-tenant".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            assertThrows(IllegalStateException.class, () -> subscriber.receive(record));
+            assertEquals(1, TestWorker.calls.get());
+            assertEquals("original", context.getTenant());
+            record.headers().remove("x-chenile-tenant-id");
+            record.headers()
+                    .add(
+                            "x-chenile-tenant-id",
+                            "tenant0".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            org.mockito.Mockito.when(
+                            manager.processById(
+                                    org.mockito.ArgumentMatchers.anyString(),
+                                    org.mockito.ArgumentMatchers.anyString(),
+                                    org.mockito.ArgumentMatchers.any()))
+                    .thenThrow(new IllegalStateException("server unreachable"));
+            TestWorker.fail = true;
+            try {
+                assertThrows(IllegalStateException.class, () -> subscriber.receive(record));
+            } finally {
+                TestWorker.fail = false;
+            }
+            org.mockito.Mockito.verify(manager)
+                    .processById(
+                            org.mockito.ArgumentMatchers.anyString(),
+                            org.mockito.ArgumentMatchers.anyString(),
+                            org.mockito.ArgumentMatchers.any());
+            assertEquals("original", context.getTenant());
+        } finally {
+            context.restore(snapshot);
+        }
+    }
 }

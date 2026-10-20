@@ -1,18 +1,31 @@
 package {{packageName}}.configuration;
+
 import org.chenile.core.context.ContextContainer;
 import org.chenile.orchestrator.process.model.WorkerDto;
 import org.chenile.orchestrator.process.utils.base.BatchServiceBase;
+
 /** Shared routing for every generated process-type worker. */
 public class ProcessWorkers extends BatchServiceBase<Object> {
- @Override protected String getTenant() { return ContextContainer.CONTEXT_CONTAINER.getTenant(); }
- @Override public boolean startWorker(WorkerDto dto) {
-  var context = ContextContainer.CONTEXT_CONTAINER; var snapshot = context.snapshot();
-  try {
-   String tenant = context.getTenant();
-   if (tenant == null || dto == null || dto.process == null || !tenant.equals(dto.process.tenant))
-    throw new IllegalArgumentException("Worker message tenant must match its process tenant");
-   if (!super.startWorker(dto)) throw new IllegalStateException("Worker callback failed; retry delivery");
-   return true;
-  } finally { context.restore(snapshot); }
- }
+    @Override
+    protected String getTenant() {
+        return ContextContainer.CONTEXT_CONTAINER.getTenant();
+    }
+
+    @Override
+    public boolean startWorker(WorkerDto dto) {
+        var context = ContextContainer.CONTEXT_CONTAINER;
+        var snapshot = context.snapshot();
+        try {
+            String tenant = context.getTenant();
+            if (tenant == null || dto == null || dto.process == null || !tenant.equals(dto.process.tenant)) {
+                throw new IllegalArgumentException("Worker message tenant must match its process tenant");
+            }
+            if (!super.startWorker(dto)) {
+                throw new IllegalStateException("Worker callback failed; retry delivery");
+            }
+            return true;
+        } finally {
+            context.restore(snapshot);
+        }
+    }
 }
