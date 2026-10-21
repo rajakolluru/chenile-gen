@@ -29,6 +29,7 @@ The repository currently packages these built-in blueprints:
 - `wfcustom`: generates a custom workflow service from a workflow XML file
 - `chenile-interceptor`: generates a Chenile interceptor
 - `batch`: generates a batch process from a batch definition JSON file
+- `chenile-process-worker-set`: expands a complete prepared process definition set
 - `chenile-process-workers`: generates one definition's executor or splitter/aggregator JAR
 - `chenile-process-management`: generates a process server and worker mini-monoliths, per-definition worker JARs and an optional registry host ([guide](bp-process-management/README.md))
 - `it`: generates an integration test project

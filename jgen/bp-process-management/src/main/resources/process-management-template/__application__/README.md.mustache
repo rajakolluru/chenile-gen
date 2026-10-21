@@ -27,7 +27,7 @@ java -jar {{serverMonolith}}/{{serverMonolith}}-package/target/{{serverMonolith}
 java -jar {{workerMonolith}}/{{workerMonolith}}-package/target/{{workerMonolith}}-package-{{applicationVersion}}.jar
 ```
 
-Start Kafka first. Create topics `{{workTopics}}`; the worker consumes all of them
+Start Kafka first. Create topics `{{workTopics}}` and their `.DLT` dead-letter topics; the worker consumes all of them
 using consumer group `{{application}}-workers` (override with
 `PROCESS_WORK_CONSUMER_GROUP`). Worker replicas share that group. Preserve
 `x-chenile-tenant-id` in messages and callbacks.
@@ -35,8 +35,9 @@ using consumer group `{{application}}-workers` (override with
 The worker uses `process-delegate` and the service registry to discover
 `processService`; the server deployment URL is advertised to that registry.
 Its headless work operation has no HTTP route. The worker deployment URL describes
-the host, not the message transport. No process datasource or outbox dispatcher
-runs on the worker.
+the host, not the message transport. `process-delegate` provides the shared worker-dispatch
+service; the blueprint generates only the headless event controller. No process datasource
+or outbox dispatcher runs on the worker.
 
 Each process definition has a worker JAR:
 {{#processes}}
@@ -51,6 +52,11 @@ The server owns `{{application}}-server-config`, including definitions and optio
 cron schedules. Bootstrap inserts missing records only; restarts preserve saved
 administrator changes. Generated cron schedules remain disabled unless enabled
 in the input specification.
+
+Start a process through the process service's generic `POST /process` endpoint.
+Provide `processDefName` and an `args` object containing that process definition's
+input fields. The server does not generate a separate start service for each
+process type.
 
 ## Persistence and configuration
 

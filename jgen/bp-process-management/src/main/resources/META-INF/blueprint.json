@@ -116,7 +116,7 @@
       "name": "workTopic",
       "type": "STRING",
       "description": "Default Kafka topic when a process definition has no config.queue",
-      "defaultValue": "${application}-work",
+      "defaultValue": "process-work",
       "validation": "KAFKA_TOPIC"
     },
     {

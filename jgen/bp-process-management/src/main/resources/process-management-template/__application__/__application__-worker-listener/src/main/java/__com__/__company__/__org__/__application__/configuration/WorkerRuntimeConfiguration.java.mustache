@@ -1,32 +1,26 @@
 package {{packageName}}.configuration;
 
 import org.chenile.orchestrator.configuration.DelegateConfiguration;
+import org.chenile.pubsub.configuration.PubSubConfiguration;
+import org.chenile.pubsub.kafka.configuration.CustomKafkaConsumer;
+import org.chenile.pubsub.kafka.configuration.KafkaConfiguration;
+import org.chenile.pubsub.kafka.configuration.KafkaConsumerConfig;
+import org.chenile.pubsub.kafka.configuration.KafkaProducerConfig;
 import org.springframework.context.annotation.*;
-import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.listener.*;
-import org.springframework.util.backoff.FixedBackOff;
 
 @Configuration
-@EnableKafka
-@Import(DelegateConfiguration.class)
+@Import({
+    DelegateConfiguration.class,
+    PubSubConfiguration.class,
+    KafkaConfiguration.class,
+    KafkaProducerConfig.class,
+    KafkaConsumerConfig.class,
+    CustomKafkaConsumer.class
+})
 public class WorkerRuntimeConfiguration {
-    @Bean
-    public ProcessWorkers _processWorkService_() {
-        return new ProcessWorkers();
-    }
-
     @Bean
     public ProcessWorkListener processWorkListener() {
         return new ProcessWorkListener();
     }
 
-    @Bean
-    public KafkaWorkSubscriber kafkaWorkSubscriber(org.chenile.core.event.EventProcessor events) {
-        return new KafkaWorkSubscriber(events);
-    }
-
-    @Bean
-    public CommonErrorHandler processWorkErrorHandler() {
-        return new DefaultErrorHandler(new FixedBackOff(1000L, FixedBackOff.UNLIMITED_ATTEMPTS));
-    }
 }

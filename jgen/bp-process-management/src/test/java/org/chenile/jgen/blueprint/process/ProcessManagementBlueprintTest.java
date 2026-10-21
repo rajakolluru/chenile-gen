@@ -29,6 +29,7 @@ class ProcessManagementBlueprintTest {
         map.put("application","example"); map.put("applicationVersion","0.0.1-SNAPSHOT");
         map.put("destFolder",temporary.resolve(UUID.randomUUID().toString()).toString());
         map.put("processSpec",file.toString()); map.put("com","com"); map.put("company","example"); map.put("org","process");
+        map.put("workTopic", "process-work");
         map.put("definitionSource","json"); map.put("registerInServiceRegistry",false);
         return map;
     }
@@ -71,6 +72,9 @@ class ProcessManagementBlueprintTest {
         assertTrue(defs.get("ChunkUpload").leaf);
         assertEquals("FileUpload",defs.get("ChunkUpload").parentProcessType);
         assertEquals("1048576",defs.get("FileUpload").config.get("chunkBytes"));
+        assertEquals("process-work", defs.get("FileUpload").config.get("queue"));
+        assertEquals("process-work", input.get("workTopics"));
+        assertEquals("{\"process-work\"}", input.get("workTopicEvents"));
         assertEquals("com.example.process.example.model.FileUploadIn",defs.get("FileUpload").args);
         @SuppressWarnings("unchecked") var generated=(List<Map<String,Object>>)input.get("processes");
         var fileUpload=generated.stream().filter(p -> p.get("processType").equals("FileUpload")).findFirst().orElseThrow();
@@ -109,6 +113,15 @@ class ProcessManagementBlueprintTest {
         assertEquals("application decides",defs.get("One").config.get("chunkBytes"));
         assertEquals(PredecessorArgs.OUTPUT,defs.get("Two").predecessorArgs);
         assertEquals("One",defs.get("Two").predecessorProcessType);
+    }
+    @Test void configuredTopicIsAlsoGeneratedAsTheChenileEventName() throws Exception {
+        var input = input("""
+            {"processMap":{"One":{"leaf":true,"config":{"queue":"billing.process-work"}}}}
+            """);
+        prepare(input);
+        assertEquals("billing.process-work", input.get("workTopics"));
+        assertEquals("{\"billing.process-work\"}", input.get("workTopicEvents"));
+        assertEquals("billing.process-work", definitions(input).processes.processMap.get("One").config.get("queue"));
     }
     @Test void rejectsDuplicateUnknownAndCyclicHierarchy() throws Exception {
         reject("""
@@ -199,8 +212,9 @@ class ProcessManagementBlueprintTest {
             assertTrue(aggregator.contains("out.outputs.add(childOutput)"));
             assertTrue(aggregator.contains("out.errors.addAll(error.errors)"));
             assertFalse(Files.exists(root.resolve("example-server-service/src/main/java/com/example/process/example/worker")));
-            String service=Files.readString(root.resolve("example-server-service/src/main/java/com/example/process/example/service/FileUploadServiceImpl.java"));
-            assertTrue(service.contains("manager.create(dto)")); assertFalse(service.contains("ProcessWorkers"));
+            assertFalse(Files.exists(root.resolve("example-api")));
+            assertFalse(Files.exists(root.resolve("example-server-service/src/main/java/com/example/process/example/service")));
+            assertFalse(Files.exists(root.resolve("example-server-service/src/main/java/com/example/process/example/configuration/controller/FileUploadController.java")));
             String serverServicePom=Files.readString(root.resolve("example-server-service/pom.xml"));
             assertTrue(serverServicePom.contains("<artifactId>chenile-kafka</artifactId>"));
             String serverConfig=Files.readString(root.resolve("example-server-service/src/main/java/com/example/process/example/configuration/ExampleProcessConfiguration.java"));
@@ -211,10 +225,18 @@ class ProcessManagementBlueprintTest {
             assertTrue(serverTest.contains("extends org.chenile.mqtt.test.KafkaBaseTest"));
             String workerTest=Files.readString(root.resolve("example-worker-listener/src/test/java/com/example/process/example/worker/WorkerListenerTest.java"));
             assertTrue(workerTest.contains("extends org.chenile.mqtt.test.KafkaBaseTest"));
-            assertTrue(workerTest.contains("kafka.send(publication)"));
+            assertTrue(workerTest.contains("kafka.send(record("));
+            String listener=Files.readString(root.resolve("example-worker-listener/src/main/java/com/example/process/example/configuration/ProcessWorkListener.java"));
+            assertTrue(listener.contains("@EventsSubscribedTo({\"process-work\"})"), listener);
+            assertTrue(workerTest.contains(".DLT\""));
             assertFalse(workerTest.contains("listener.auto-startup=false"));
+            assertFalse(Files.exists(root.resolve("example-worker-listener/src/main/java/com/example/process/example/configuration/KafkaWorkSubscriber.java")));
+            assertFalse(Files.exists(root.resolve("example-worker-listener/src/main/java/com/example/process/example/configuration/ProcessWorkers.java")));
             String steps=Files.readString(root.resolve("example-server-service/src/test/java/com/example/process/example/bdd/CukesSteps.java"));
             assertTrue(steps.contains("the committed process is published to Kafka"));
+            String feature=Files.readString(root.resolve("example-server-service/src/test/resources/features/process.feature"));
+            assertTrue(feature.contains("URL \"/process\""));
+            assertTrue(feature.contains("\"processDefName\":\"FileUpload\""));
             assertTrue(steps.contains("pubsub.publish.waitTime=30000"));
             assertFalse(steps.contains("localhost:9092"));
             String workerPom=Files.readString(root.resolve("exampleWorker/exampleWorker-package/pom.xml"));
@@ -235,6 +257,7 @@ class ProcessManagementBlueprintTest {
             assertEquals(mode.equals("separate"), Files.exists(root.resolve("exampleRegistry")));
             String properties=Files.readString(root.resolve("exampleWorker/exampleWorker-configurations/src/main/resources/application.properties"));
             assertTrue(properties.contains("DataSourceAutoConfiguration")); assertTrue(properties.contains("server.port=${SERVER_PORT:8001}"));
+            assertTrue(properties.contains("chenile.kafka.consumer.topic-bindings[process-work]=process-work"));
             String registry=Files.readString(root.resolve("exampleWorker/exampleWorker-configurations/src/main/resources/application.yml"));
             assertTrue(registry.contains(mode.equals("existing") ? "http://registry.example:9000" : mode.equals("separate") ? "http://localhost:8002" : "http://localhost:8000"));
             try (var paths=Files.walk(root)) { assertFalse(paths.anyMatch(p -> p.toString().endsWith(".mustache") || p.toString().contains("%{{") || p.toString().contains(".jgen-child-"))); }

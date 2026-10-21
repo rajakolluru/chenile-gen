@@ -11,5 +11,5 @@
   "serverDeploymentUrl": "http://localhost:8000",
   "workerDeploymentUrl": "http://localhost:8001",
   "transport": "kafka",
-  "workTopic": "uploads-work"
+  "workTopic": "process-work"
 }

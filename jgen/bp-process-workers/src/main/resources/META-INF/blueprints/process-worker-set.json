@@ -1,0 +1,18 @@
+{
+  "name": "chenile-process-worker-set",
+  "description": "Generates worker API and service JARs for a complete process definition set",
+  "sinceVersion": "2.1.32",
+  "initHook": "org.chenile.jgen.blueprint.workers.InitProcessWorkerSetBlueprint",
+  "templateFolder": "process-worker-set-template",
+  "inputFields": [
+    {"name": "application", "type": "STRING", "description": "Application", "validation": "JAVA_IDENTIFIER"},
+    {"name": "applicationVersion", "type": "STRING", "description": "Application version", "validation": "VERSION"},
+    {"name": "com", "type": "STRING", "description": "Java package segment"},
+    {"name": "company", "type": "STRING", "description": "Java package segment"},
+    {"name": "org", "type": "STRING", "description": "Java package segment"},
+    {"name": "destFolder", "type": "STRING", "description": "Destination folder"},
+    {"name": "processSpec", "type": "FILE", "description": "Native process definitions", "required": true},
+    {"name": "definitionSource", "type": "DROPDOWN", "description": "Definition source", "validValues": ["json", "database"], "defaultValue": "json"},
+    {"name": "super_pom", "type": "SuperPOM", "description": "Parent POM", "required": false}
+  ]
+}

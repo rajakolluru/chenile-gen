@@ -46,7 +46,7 @@ Existing inputs remain: `application`, `applicationVersion`, `destFolder`,
 | `workerDeploymentUrl` | `http://localhost:8001` |
 | `registryDeploymentUrl` | `http://localhost:8002`; asked only for a separate registry |
 | `transport` | `kafka` |
-| `workTopic` | `<application>-work`; fills absent `config.queue` values |
+| `workTopic` | `process-work`; fills absent `config.queue` values |
 
 All generated hosts have distinct deployment URLs. A colocated registry uses the
 server URL. Existing per-definition queue names are retained, and the worker
@@ -70,31 +70,39 @@ the explicit registry choices above.
   The API owns that process type's input and output models. Leaf types get a typed
   executor; non-leaf types get a splitter and a typed `AggregatedResult<ChildOutput>`
   aggregator in the service JAR.
-- `<application>-worker-listener`: a headless Chenile listener, Kafka subscription,
-  tenant validation/restoration, process delegate and retry handling.
+- `<application>-worker-listener`: a headless Chenile controller and Chenile Kafka consumer,
+  using the shared `BatchServiceBase` from `process-delegate`, with configurable topic-to-event
+  bindings, tenant context restoration, bounded retries and dead-letter handling.
 - `<application>Server` and `<application>Worker`: composed `minimonolith` projects.
 - `<application>Registry`: composed only for a separate generated registry.
+
+The process-management blueprint owns queue selection and defaults. It generates the
+listener module's Chenile event subscriptions and Kafka topic bindings from that same
+deployment plan. The listener is a single module shared by all generated worker JARs.
 
 The worker has no process datasource, process service, JDBC starter or outbox
 worker. The server uses exactly one queue-based starter. Process callbacks use
 the registry-backed delegate; the server advertises its deployment URL.
 
-The aggregate parses the process specification once and computes a deployment
-plan. Its template includes:
+The process-worker blueprint module owns process-definition validation and derives
+the typed per-process API/service plan, including worker artifact IDs. Process-management
+owns queue assignment, the shared listener, server-side definition seeding and
+mini-monolith composition. It invokes `chenile-process-worker-set` once with the
+process specification; that blueprint owns the loop which invokes the per-type worker
+blueprint. Its template includes:
 
 ```text
-%{{chenile-process-workers forEach=processes as=process}}/
+%{{chenile-process-worker-set}}/
 %{{minimonolith role=server}}/
 %{{minimonolith role=worker}}/
 %%separateRegistry=true%%/
   %{{minimonolith role=registry}}/
 ```
 
-The reusable `chenile-process-workers` blueprint consumes each prepared definition,
-including input/output types and fields, child API dependencies and the generated API
-and service artifact names. It owns both API and service JARs so each process type's
-contracts travel with its implementation without depending on a shared application
-payload module.
+The `chenile-process-worker-set` blueprint owns iteration over the complete definition
+set. For each definition it invokes `chenile-process-workers`, which generates the typed
+API and service JARs, including child API dependencies. Each process type's contracts
+travel with its implementation without depending on a shared application payload module.
 
 ## Process and cron specifications
 

@@ -1,3 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
 <parent><groupId>org.chenile</groupId><artifactId>jgen</artifactId><version>${revision}</version><relativePath>../pom.xml</relativePath></parent>
-<artifactId>bp-process-workers</artifactId><dependencies><dependency><groupId>org.chenile</groupId><artifactId>jgen-base</artifactId></dependency></dependencies></project>
+<artifactId>bp-process-workers</artifactId>
+<dependencies>
+    <dependency><groupId>org.chenile</groupId><artifactId>jgen-base</artifactId></dependency>
+    <dependency><groupId>org.chenile.orchestrator.process</groupId><artifactId>process-api</artifactId></dependency>
+    <dependency><groupId>org.chenile.orchestrator.process</groupId><artifactId>crontab-api</artifactId><version>${chenile.process.management}</version></dependency>
+</dependencies>
+</project>

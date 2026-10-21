@@ -28,6 +28,20 @@ public class Registry {
                 json = e.nextElement();
                 register(json);
             }
+            Enumeration<URL> indexes = Thread.currentThread().getContextClassLoader().getResources("META-INF/blueprints.list");
+            while (indexes.hasMoreElements()) {
+                URL index = indexes.nextElement();
+                try (var lines = new java.io.BufferedReader(new java.io.InputStreamReader(index.openStream()))) {
+                    for (String resource; (resource = lines.readLine()) != null; ) {
+                        String name = resource.trim();
+                        if (!name.isEmpty()) {
+                            URL blueprint = Thread.currentThread().getContextClassLoader().getResource(name);
+                            if (blueprint == null) throw new IOException("Missing blueprint resource " + name);
+                            register(blueprint);
+                        }
+                    }
+                }
+            }
         } catch (Exception e) {
             System.err.println("Cannot initialize blueprint " + json + " error = " + e.getMessage());
         }

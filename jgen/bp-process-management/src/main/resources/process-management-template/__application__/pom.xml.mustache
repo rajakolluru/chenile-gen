@@ -3,7 +3,7 @@
 {{^parentArtifactId}}<parent><groupId>{{chenilePackage}}</groupId><artifactId>chenile-parent</artifactId><version>{{chenileVersion}}</version></parent>{{/parentArtifactId}}
 <groupId>{{packageName}}</groupId><artifactId>{{application}}-parent</artifactId><version>{{applicationVersion}}</version><packaging>pom</packaging>
 <properties><revision>{{applicationVersion}}</revision></properties>
-<modules><module>{{application}}-api</module><module>{{application}}-server-config</module><module>{{application}}-server-service</module>
+<modules><module>{{application}}-server-config</module><module>{{application}}-server-service</module>
 {{#processes}}<module>{{workerModule}}</module>{{/processes}}
 <module>{{application}}-worker-listener</module><module>{{serverMonolith}}</module><module>{{workerMonolith}}</module>
 {{#separateRegistry}}<module>{{registryMonolith}}</module>{{/separateRegistry}}

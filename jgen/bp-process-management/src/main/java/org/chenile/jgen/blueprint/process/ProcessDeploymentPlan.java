@@ -2,6 +2,7 @@ package org.chenile.jgen.blueprint.process;
 
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.chenile.orchestrator.process.config.model.ProcessDef;
 
 /** Owns process deployment decisions; the shared expander only handles generic maps and lists. */
@@ -20,7 +21,7 @@ public class ProcessDeploymentPlan {
     input.putIfAbsent("workerDeploymentUrl", "http://localhost:8001");
     input.putIfAbsent("registryDeploymentUrl", "http://localhost:8002");
     input.putIfAbsent("transport", "kafka");
-    input.putIfAbsent("workTopic", app + "-work");
+    input.putIfAbsent("workTopic", "process-work");
     String mode = text(input, "registryMode"), placement = text(input, "registryPlacement");
     if (!Set.of("create", "existing").contains(mode))
       throw new IllegalArgumentException("Invalid registryMode");
@@ -46,22 +47,28 @@ public class ProcessDeploymentPlan {
       if (!urls.add(input.get(key).toString().replaceAll("/+$", "")))
         throw new IllegalArgumentException("Mini-monolith deployment URLs must be distinct");
     Set<String> topics = new TreeSet<>();
-    for (int i = 0; i < processes.size(); i++) {
-      Map<String, Object> process = new LinkedHashMap<>(processes.get(i));
-      String type = process.get("processType").toString();
-      process.put("workerModule", app + "-" + type + "-workers");
-      process.put("apiArtifact", app + "-" + type + "-api");
-      process.put("serviceArtifact", app + "-" + type + "-service");
-      processes.set(i, process);
-      ProcessDef definition = definitions.get(type);
-      if (definition.config == null) definition.config = new LinkedHashMap<>();
-      String topic =
-          definition.config.computeIfAbsent("queue", ignored -> text(input, "workTopic"));
-      if (topic == null || !topic.matches("[A-Za-z0-9][A-Za-z0-9._-]{0,248}") || topic.equals(".."))
-        throw new IllegalArgumentException("Invalid Kafka queue for " + type);
+    for (ProcessDef definition : definitions.values()) {
+      if (definition.config == null) {
+        definition.config = new LinkedHashMap<>();
+      }
+      String topic = definition.config.computeIfAbsent("queue", ignored -> text(input, "workTopic"));
+      if (topic == null || !topic.matches("[A-Za-z0-9][A-Za-z0-9._-]{0,248}") || topic.equals("..")) {
+        throw new IllegalArgumentException("Invalid Kafka queue for " + definition.processType);
+      }
       topics.add(topic);
     }
     input.put("workTopics", String.join(",", topics));
+    input.put(
+        "workTopicEvents",
+        "{"
+            + topics.stream().map(topic -> "\"" + topic + "\"").collect(Collectors.joining(", "))
+            + "}");
+    ProcessDef root =
+        definitions.values().stream()
+            .filter(def -> def.parentProcessType == null || def.parentProcessType.isBlank())
+            .findFirst()
+            .orElseThrow();
+    input.put("testWorkTopic", root.config.get("queue"));
     input.put("serverMonolith", app + "Server");
     input.put("workerMonolith", app + "Worker");
     input.put("registryMonolith", app + "Registry");
@@ -83,14 +90,15 @@ public class ProcessDeploymentPlan {
             version,
             "relativePath",
             "../pom.xml"));
-    if (blueprint.equals("chenile-process-workers")) {
-      @SuppressWarnings("unchecked")
-      Map<String, Object> process = (Map<String, Object>) current.get("process");
-      child.putAll(process);
+    if (blueprint.equals("chenile-process-worker-set")) {
       child.put("application", app);
       child.put("applicationVersion", version);
       child.put("packageName", group);
-      child.put("dependencies", List.of());
+      child.put("com", current.get("com"));
+      child.put("company", current.get("company"));
+      child.put("org", current.get("org"));
+      child.put("processSpec", current.get("processSpec"));
+      child.put("definitionSource", current.get("definitionSource"));
       return child;
     }
     if (!blueprint.equals("minimonolith"))
@@ -127,17 +135,24 @@ public class ProcessDeploymentPlan {
     List<Map<String, String>> properties = new ArrayList<>();
     property(properties, "server.port", "${SERVER_PORT:" + port(deploymentUrl) + "}");
     property(properties, "spring.application.name", monolith);
+    property(properties, "spring.kafka.bootstrap-servers", "${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}");
     if (worker) {
       property(
           properties,
           "spring.autoconfigure.exclude",
           "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration,org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration");
       property(properties, "chenile.service.registry.read-only", "true");
-      property(properties, "process.work.topics", text(current, "workTopics"));
+      property(properties, "pubsub.topic.separator", "_");
       property(
           properties,
-          "process.work.consumer-group",
+          "chenile.kafka.consumer.group-id",
           "${PROCESS_WORK_CONSUMER_GROUP:" + app + "-workers}");
+      for (String topic : text(current, "workTopics").split(",")) {
+        property(
+            properties,
+            "chenile.kafka.consumer.topic-bindings[" + topic + "]",
+            topic);
+      }
     } else {
       property(
           properties,

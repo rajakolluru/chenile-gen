@@ -1,11 +1,11 @@
 Feature: Generated process server REST contracts
- Scenario: Publish a typed process to the worker queue after committing its state
+ Scenario: Publish a process to the worker queue after committing its state
   Given generated process host
   When I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
-  And I POST a REST request to URL "/{{testServiceId}}" with payload
+  And I POST a REST request to URL "/process" with payload
   """
-  {"filename":"generated-test.dat"}
+  {"processDefName":"{{testProcessType}}","args":{"filename":"generated-test.dat"}}
   """
-  Then the REST response key "processType" is "{{testProcessType}}"
-  And the REST response key "tenant" is "tenant0"
+  Then the REST response key "mutatedEntity.processType" is "{{testProcessType}}"
+  And the REST response key "mutatedEntity.tenant" is "tenant0"
   And the committed process is published to Kafka
