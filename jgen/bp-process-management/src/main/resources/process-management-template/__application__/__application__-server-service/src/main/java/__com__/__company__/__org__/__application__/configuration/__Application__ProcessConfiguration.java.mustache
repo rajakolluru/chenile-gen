@@ -12,7 +12,7 @@ public class {{Application}}ProcessConfiguration {
     @Bean
     @ConditionalOnMissingBean(ObjectMapper.class)
     public ObjectMapper processObjectMapper() {
-        return ObjectMapper();
+        return new ObjectMapper();
     }
 
 }

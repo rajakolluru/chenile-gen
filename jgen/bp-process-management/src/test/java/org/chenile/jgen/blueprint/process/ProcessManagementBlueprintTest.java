@@ -220,6 +220,7 @@ class ProcessManagementBlueprintTest {
             String serverConfig=Files.readString(root.resolve("example-server-service/src/main/java/com/example/process/example/configuration/ExampleProcessConfiguration.java"));
             assertTrue(serverConfig.contains("PubSubConfiguration.class"));
             assertTrue(serverConfig.contains("KafkaConfiguration.class"));
+            assertTrue(serverConfig.contains("return new ObjectMapper();"));
             assertFalse(Files.exists(root.resolve("example-server-service/src/main/java/com/example/process/example/configuration/ProcessKafkaPublisher.java")));
             String serverTest=Files.readString(root.resolve("example-server-service/src/test/java/com/example/process/example/bdd/CukesRestTest.java"));
             assertTrue(serverTest.contains("extends org.chenile.mqtt.test.KafkaBaseTest"));
@@ -228,6 +229,8 @@ class ProcessManagementBlueprintTest {
             assertTrue(workerTest.contains("kafka.send(record("));
             String listener=Files.readString(root.resolve("example-worker-listener/src/main/java/com/example/process/example/configuration/controller/ProcessWorkListener.java"));
             assertTrue(listener.contains("@EventsSubscribedTo({\"process-work\"})"), listener);
+            String workerRuntime=Files.readString(root.resolve("example-worker-listener/src/main/java/com/example/process/example/configuration/WorkerRuntimeConfiguration.java"));
+            assertTrue(workerRuntime.contains("import com.example.process.example.configuration.controller.ProcessWorkListener;"));
             assertTrue(workerTest.contains(".DLT\""));
             assertFalse(workerTest.contains("listener.auto-startup=false"));
             assertFalse(Files.exists(root.resolve("example-worker-listener/src/main/java/com/example/process/example/configuration/KafkaWorkSubscriber.java")));
