@@ -201,6 +201,12 @@ class ProcessManagementBlueprintTest {
             assertFalse(Files.exists(root.resolve("example-server-service/src/main/java/com/example/process/example/worker")));
             String service=Files.readString(root.resolve("example-server-service/src/main/java/com/example/process/example/service/FileUploadServiceImpl.java"));
             assertTrue(service.contains("manager.create(dto)")); assertFalse(service.contains("ProcessWorkers"));
+            String serverServicePom=Files.readString(root.resolve("example-server-service/pom.xml"));
+            assertTrue(serverServicePom.contains("<artifactId>chenile-kafka</artifactId>"));
+            String serverConfig=Files.readString(root.resolve("example-server-service/src/main/java/com/example/process/example/configuration/ExampleProcessConfiguration.java"));
+            assertTrue(serverConfig.contains("PubSubConfiguration.class"));
+            assertTrue(serverConfig.contains("KafkaConfiguration.class"));
+            assertFalse(Files.exists(root.resolve("example-server-service/src/main/java/com/example/process/example/configuration/ProcessKafkaPublisher.java")));
             String serverTest=Files.readString(root.resolve("example-server-service/src/test/java/com/example/process/example/bdd/CukesRestTest.java"));
             assertTrue(serverTest.contains("extends org.chenile.mqtt.test.KafkaBaseTest"));
             String workerTest=Files.readString(root.resolve("example-worker-listener/src/test/java/com/example/process/example/worker/WorkerListenerTest.java"));
@@ -209,6 +215,7 @@ class ProcessManagementBlueprintTest {
             assertFalse(workerTest.contains("listener.auto-startup=false"));
             String steps=Files.readString(root.resolve("example-server-service/src/test/java/com/example/process/example/bdd/CukesSteps.java"));
             assertTrue(steps.contains("the committed process is published to Kafka"));
+            assertTrue(steps.contains("pubsub.publish.waitTime=30000"));
             assertFalse(steps.contains("localhost:9092"));
             String workerPom=Files.readString(root.resolve("exampleWorker/exampleWorker-package/pom.xml"));
             assertTrue(workerPom.contains("example-FileUpload-service"));
@@ -219,6 +226,10 @@ class ProcessManagementBlueprintTest {
             assertTrue(serverPom.contains("spring-boot-h2console"));
             String serverProperties=Files.readString(root.resolve("exampleServer/exampleServer-configurations/src/main/resources/application.properties"));
             assertTrue(serverProperties.contains("spring.h2.console.enabled=${PROCESS_H2_CONSOLE_ENABLED:true}"));
+            assertTrue(serverProperties.contains("pubsub.topic.separator=_"));
+            assertTrue(
+                serverProperties.contains("pubsub.publish.waitTime=${PUBSUB_PUBLISH_WAIT_TIME_MS:30000}"),
+                serverProperties);
             String serverYaml=Files.readString(root.resolve("exampleServer/exampleServer-configurations/src/main/resources/application.yml"));
             assertTrue(serverYaml.contains("enabled: ${PROCESS_H2_CONSOLE_ENABLED:true}"));
             assertEquals(mode.equals("separate"), Files.exists(root.resolve("exampleRegistry")));

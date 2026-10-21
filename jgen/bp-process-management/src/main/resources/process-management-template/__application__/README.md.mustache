@@ -69,7 +69,9 @@ administrator routes; configure your application's HTTP authentication for
 public process, trigger, crontab and registry routes before exposing them.
 
 Kafka publications wait for broker acknowledgement before the outbox command can
-complete. Worker delivery failures remain retryable; external business effects
+complete. The generated server sets `pubsub.publish.waitTime` to
+`${PUBSUB_PUBLISH_WAIT_TIME_MS:30000}` milliseconds; set it to `0` to disable waiting.
+Worker delivery failures remain retryable; external business effects
 must still tolerate redelivery. The generated tests verify the REST contract,
 committed-process publication to Kafka, broker delivery to the headless worker,
 tenant restoration and failed-publication propagation. Run `mvn install` with

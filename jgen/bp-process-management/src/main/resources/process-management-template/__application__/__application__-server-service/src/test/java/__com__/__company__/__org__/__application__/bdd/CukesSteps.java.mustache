@@ -21,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.*;
             "spring.liquibase.enabled=false",
             "spring.sql.init.mode=always",
             "spring.sql.init.schema-locations=classpath:chenile-process-outbox-schema.sql",
+            "pubsub.topic.separator=_",
+            "pubsub.publish.waitTime=30000",
             "chenile.process.outbox.run-dispatcher=true",
             "chenile.process.management.enabled=false",
             "chenile.process.configurator={{definitionSource}}"

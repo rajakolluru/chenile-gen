@@ -159,6 +159,11 @@ public class ProcessDeploymentPlan {
       if (role.equals("server")) {
         property(properties, "chenile.process.configurator", text(current, "definitionSource"));
         property(properties, "chenile.process.outbox.run-dispatcher", "true");
+        property(properties, "pubsub.topic.separator", "_");
+        property(
+            properties,
+            "pubsub.publish.waitTime",
+            "${PUBSUB_PUBLISH_WAIT_TIME_MS:30000}");
         property(properties, "spring.sql.init.mode", "always");
         property(
             properties,

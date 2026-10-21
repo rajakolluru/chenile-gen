@@ -2,16 +2,20 @@ package {{packageName}}.configuration;
 
 import {{packageName}}.service.*;
 import org.chenile.orchestrator.process.api.ProcessManager;
+import org.chenile.pubsub.configuration.PubSubConfiguration;
+import org.chenile.pubsub.kafka.configuration.KafkaConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.*;
 
 @Configuration
+@Import({PubSubConfiguration.class, KafkaConfiguration.class})
 public class {{Application}}ProcessConfiguration {
     @Bean
-    @org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean(
-            com.fasterxml.jackson.databind.ObjectMapper.class)
-    public com.fasterxml.jackson.databind.ObjectMapper processObjectMapper() {
-        return new com.fasterxml.jackson.databind.ObjectMapper();
+    @ConditionalOnMissingBean(ObjectMapper.class)
+    public ObjectMapper processObjectMapper() {
+        return ObjectMapper();
     }
 
 {{#processes}}
