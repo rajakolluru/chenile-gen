@@ -226,7 +226,7 @@ class ProcessManagementBlueprintTest {
             String workerTest=Files.readString(root.resolve("example-worker-listener/src/test/java/com/example/process/example/worker/WorkerListenerTest.java"));
             assertTrue(workerTest.contains("extends org.chenile.mqtt.test.KafkaBaseTest"));
             assertTrue(workerTest.contains("kafka.send(record("));
-            String listener=Files.readString(root.resolve("example-worker-listener/src/main/java/com/example/process/example/configuration/ProcessWorkListener.java"));
+            String listener=Files.readString(root.resolve("example-worker-listener/src/main/java/com/example/process/example/configuration/controller/ProcessWorkListener.java"));
             assertTrue(listener.contains("@EventsSubscribedTo({\"process-work\"})"), listener);
             assertTrue(workerTest.contains(".DLT\""));
             assertFalse(workerTest.contains("listener.auto-startup=false"));
