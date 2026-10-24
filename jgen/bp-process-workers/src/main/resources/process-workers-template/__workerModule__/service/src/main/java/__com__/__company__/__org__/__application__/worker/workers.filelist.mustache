@@ -4,12 +4,12 @@ package {{packageName}}.worker;
 
 import {{packageName}}.model.{{inputType}};
 import {{packageName}}.model.{{outputType}};
-import org.chenile.orchestrator.process.model.WorkerDto;
-import org.chenile.orchestrator.process.utils.base.ExecutorBase;
+import org.chenile.orchestrator.process.worker.ExecutorWorkListener;
+import org.chenile.orchestrator.process.workers.WorkListenerInput;
 
-public class {{name}}Executor extends ExecutorBase<{{inputType}}, {{outputType}}> {
+public class {{name}}Executor extends ExecutorWorkListener<{{inputType}}, {{outputType}}> {
     @Override
-    protected {{outputType}} doStart(WorkerDto worker, {{inputType}} input) {
+    protected {{outputType}} doStart(WorkListenerInput<{{inputType}}> input) {
         // Transform the typed input into the typed output.
         // throw new UnsupportedOperationException("Implement {{name}}Executor.doStart");
         return new {{outputType}}();
@@ -22,16 +22,16 @@ public class {{name}}Executor extends ExecutorBase<{{inputType}}, {{outputType}}
 package {{packageName}}.worker;
 
 import {{packageName}}.model.*;
-import org.chenile.orchestrator.process.model.WorkerDto;
 import org.chenile.orchestrator.process.model.payload.SubProcessPayload;
-import org.chenile.orchestrator.process.utils.base.SplitterBase;
+import org.chenile.orchestrator.process.worker.SplitterWorkListener;
+import org.chenile.orchestrator.process.workers.WorkListenerInput;
 import {{packageName}}.model.{{inputType}};
 import java.util.List;
 import java.util.ArrayList;
 
-public class {{name}}Splitter extends SplitterBase<{{inputType}}, Object> {
+public class {{name}}Splitter extends SplitterWorkListener<{{inputType}}, Object> {
     @Override
-    protected List<SubProcessPayload> doStart(WorkerDto worker, {{inputType}} input) {
+    protected List<SubProcessPayload> doStart(WorkListenerInput<{{inputType}}> input) {
         // Return makeSubProcessPayload(typedChildInput, childProcessType) for every child.
     List<SubProcessPayload> payloads = new ArrayList<>();
 {{#children}}
@@ -48,17 +48,20 @@ package {{packageName}}.worker;
 
 import {{packageName}}.model.{{inputType}};
 import {{packageName}}.model.*;
-import org.chenile.orchestrator.process.model.WorkerDto;
 import org.chenile.orchestrator.process.model.Process;
 import org.chenile.orchestrator.process.utils.AggregatedResult;
-import org.chenile.orchestrator.process.utils.base.AggregatorBase;
+import org.chenile.orchestrator.process.worker.AggregatorWorkListener;
 import org.chenile.orchestrator.process.model.payload.SubProcessError;
+import org.chenile.orchestrator.process.workers.WorkListenerInput;
 
 /** Collects immediate child outputs and errors into a typed result. */
-public class {{name}}Aggregator extends AggregatorBase<{{inputType}}, {{{outputType}}}, {{{childOutputType}}}> {
+public class {{name}}Aggregator extends AggregatorWorkListener<{{inputType}}, {{{outputType}}}, {{{childOutputType}}}> {
     @Override
-    protected {{{outputType}}} doStart({{{outputType}}} out, {{inputType}} input,
-            {{{childOutputType}}} childOutput, WorkerDto worker, Process child) {
+    protected {{{outputType}}} doStart(
+            {{{outputType}}} out,
+            WorkListenerInput<{{inputType}}> input,
+            {{{childOutputType}}} childOutput,
+            Process child) {
         if (out == null) {
             out = new AggregatedResult<>();
         }

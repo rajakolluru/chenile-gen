@@ -3,8 +3,8 @@ package {{packageName}}.bdd;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.chenile.orchestrator.process.model.WorkerDto;
 import org.chenile.orchestrator.process.configuration.dao.ProcessRepository;
+import org.chenile.orchestrator.process.workers.WorkListenerInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -53,11 +53,14 @@ public class CukesSteps {
         long deadline = System.nanoTime() + Duration.ofSeconds(30).toNanos();
         while (System.nanoTime() < deadline) {
             for (var record : consumer.poll(Duration.ofMillis(250))) {
-                WorkerDto work = new ObjectMapper().readValue(record.value(), WorkerDto.class);
-                if (!"{{testProcessType}}".equals(work.process.processType)) {
+                WorkListenerInput<?> work =
+                        new ObjectMapper().readValue(record.value(), WorkListenerInput.class);
+                String processType = new String(
+                        record.headers().lastHeader("processType").value(),
+                        java.nio.charset.StandardCharsets.UTF_8);
+                if (!"{{testProcessType}}".equals(processType)) {
                     continue;
                 }
-                assertEquals("tenant0", work.process.tenant);
                 assertEquals(
                         "tenant0",
                         new String(
@@ -65,8 +68,10 @@ public class CukesSteps {
                                         .lastHeader("x-chenile-tenant-id")
                                         .value(),
                                 java.nio.charset.StandardCharsets.UTF_8));
+                assertEquals("{{testWorkTopic}}", work.execDef.get("queue"));
+                assertTrue(work.dispatchId != null && !work.dispatchId.isBlank());
                 assertTrue(
-                        processes.findById(work.process.id).isPresent(),
+                        processes.findById(work.processId).isPresent(),
                         "Dispatch must follow the process commit");
                 return;
             }

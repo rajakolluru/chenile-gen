@@ -71,8 +71,11 @@ the explicit registry choices above.
   executor; non-leaf types get a splitter and a typed `AggregatedResult<ChildOutput>`
   aggregator in the service JAR.
 - `<application>-worker-listener`: a headless Chenile controller and Chenile Kafka consumer,
-  using the shared `BatchServiceBase` from `process-delegate`, with configurable topic-to-event
-  bindings, tenant context restoration, bounded retries and dead-letter handling.
+  exposing the shared `WorkListenerService` contract from `process-api`. Its service selector
+  routes each message to the generated executor, splitter or aggregator using the `processType`
+  and `workerType` headers; its body selector binds the payload to the selected worker's typed
+  input. Topic-to-event bindings, tenant context restoration, bounded retries and dead-letter
+  handling are configured by the process-management blueprint.
 - `<application>Server` and `<application>Worker`: composed `minimonolith` projects.
 - `<application>Registry`: composed only for a separate generated registry.
 

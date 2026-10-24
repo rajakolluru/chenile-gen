@@ -4,10 +4,10 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.chenile.core.context.ContextContainer;
 import org.chenile.orchestrator.process.api.ProcessManager;
-import org.chenile.orchestrator.process.model.Process;
-import org.chenile.orchestrator.process.model.WorkerDto;
-import org.chenile.orchestrator.process.model.WorkerType;
-import org.chenile.orchestrator.process.utils.api.IWorker;
+import org.chenile.orchestrator.process.worker.ExecutorWorkListener;
+import org.chenile.orchestrator.process.workers.WorkListenerInput;
+import org.chenile.orchestrator.process.workers.WorkerConstants;
+import org.chenile.workflow.dto.StateEntityServiceResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest(
         classes = WorkerListenerTest.Host.class,
@@ -69,21 +71,21 @@ public class WorkerListenerTest extends org.chenile.mqtt.test.KafkaBaseTest {
         }
     }
 
-    public static class TestWorker implements IWorker<Object> {
+    public static class TestWorker extends ExecutorWorkListener<WorkerPayload, WorkerOutput> {
         static volatile boolean fail;
         static final java.util.concurrent.BlockingQueue<String> deliveries =
                 new java.util.concurrent.LinkedBlockingQueue<>();
         static final AtomicInteger calls = new AtomicInteger();
 
-        public void doStart(WorkerDto dto, Object input) {}
-
-        public void start(WorkerDto dto, Object input) {
+        public WorkerOutput doStart(WorkListenerInput<WorkerPayload> input) {
             calls.incrementAndGet();
             if (fail) {
                 throw new IllegalStateException("domain failure");
             }
             assertEquals("tenant0", ContextContainer.CONTEXT_CONTAINER.getTenant());
+            assertEquals("payload-value", input.payload.value);
             deliveries.add(ContextContainer.CONTEXT_CONTAINER.getTenant());
+            return new WorkerOutput();
         }
     }
 
@@ -92,6 +94,10 @@ public class WorkerListenerTest extends org.chenile.mqtt.test.KafkaBaseTest {
     @Test
     public void consumesConfiguredProcessWorkTopicAndDeadLettersAfterRetries() throws Exception {
         assertFalse(beans.containsBean("dataSource"));
+        StateEntityServiceResponse<org.chenile.orchestrator.process.model.Process> callbackResponse =
+                new StateEntityServiceResponse<>();
+        callbackResponse.setMutatedEntity(new org.chenile.orchestrator.process.model.Process());
+        when(manager.processById(anyString(), anyString(), any())).thenReturn(callbackResponse);
         TestWorker.fail = false;
         TestWorker.calls.set(0);
         TestWorker.deliveries.clear();
@@ -104,12 +110,17 @@ public class WorkerListenerTest extends org.chenile.mqtt.test.KafkaBaseTest {
                 "The configured Kafka topic must route to its matching Chenile event");
         assertEquals(1, TestWorker.calls.get());
 
-        when(manager.processById(anyString(), anyString(), any()))
-                .thenThrow(new IllegalStateException("process server unavailable"));
         TestWorker.fail = true;
+        kafka.send(record("{{testWorkTopic}}", workerMessage("worker-failure-id"))).get(30, TimeUnit.SECONDS);
+        long callbackDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(30);
+        while (TestWorker.calls.get() < 2 && System.nanoTime() < callbackDeadline) {
+            Thread.sleep(25);
+        }
+        verify(manager).processById(eq("worker-failure-id"), eq("doneWithErrors"), any());
+        TestWorker.fail = false;
         try (KafkaConsumer<String, String> deadLetterConsumer = deadLetterConsumer()) {
             deadLetterConsumer.subscribe(List.of("{{testWorkTopic}}.DLT"));
-            kafka.send(record("{{testWorkTopic}}", workerMessage("worker-failure-id")))
+            kafka.send(record("{{testWorkTopic}}", workerMessage("worker-unroutable-id"), "missing"))
                     .get(30, TimeUnit.SECONDS);
 
             long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(30);
@@ -122,11 +133,21 @@ public class WorkerListenerTest extends org.chenile.mqtt.test.KafkaBaseTest {
         } finally {
             TestWorker.fail = false;
         }
-        assertEquals(4, TestWorker.calls.get(), "The initial delivery and two configured retries are expected");
+        assertEquals(2, TestWorker.calls.get(), "The domain failure is reported to the process manager");
     }
 
     private static ProducerRecord<String, String> record(String topic, String payload) {
+        return record(topic, payload, "test");
+    }
+
+    private static ProducerRecord<String, String> record(String topic, String payload, String processType) {
         ProducerRecord<String, String> record = new ProducerRecord<>(topic, null, payload);
+        record.headers().add(
+                WorkerConstants.PROCESS_TYPE,
+                processType.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        record.headers().add(
+                WorkerConstants.WORKER_TYPE,
+                "EXECUTOR".getBytes(java.nio.charset.StandardCharsets.UTF_8));
         record.headers().add(
                 "x-chenile-tenant-id",
                 "tenant0".getBytes(java.nio.charset.StandardCharsets.UTF_8));
@@ -134,14 +155,21 @@ public class WorkerListenerTest extends org.chenile.mqtt.test.KafkaBaseTest {
     }
 
     private static String workerMessage(String id) throws Exception {
-        WorkerDto dto = new WorkerDto();
-        dto.process = new Process();
-        dto.process.id = id;
-        dto.process.tenant = "tenant0";
-        dto.process.processType = "test";
-        dto.workerType = WorkerType.EXECUTOR;
-        dto.process.input = "{}";
-        return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(dto);
+        WorkListenerInput<WorkerPayload> input = new WorkListenerInput<>();
+        input.processId = id;
+        input.dispatchId = id + "-dispatch";
+        input.payload = new WorkerPayload();
+        input.payload.value = "payload-value";
+        input.execDef = java.util.Map.of("queue", "{{testWorkTopic}}");
+        return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(input);
+    }
+
+    public static class WorkerPayload {
+        public String value;
+    }
+
+    public static class WorkerOutput {
+        public String result = "complete";
     }
 
     private static KafkaConsumer<String, String> deadLetterConsumer() {

@@ -229,6 +229,11 @@ class ProcessManagementBlueprintTest {
             assertTrue(workerTest.contains("kafka.send(record("));
             String listener=Files.readString(root.resolve("example-worker-listener/src/main/java/com/example/process/example/configuration/controller/ProcessWorkListener.java"));
             assertTrue(listener.contains("@EventsSubscribedTo({\"process-work\"})"), listener);
+            assertTrue(listener.contains("interfaceClass = WorkListenerService.class"), listener);
+            assertTrue(listener.contains("serviceSelector = \"processWorkServiceSelector\""), listener);
+            assertTrue(listener.contains("@BodyTypeSelector(\"processWorkBodyTypeSelector\")"), listener);
+            assertTrue(listener.contains("WorkListenerInput<Object> input"), listener);
+            assertFalse(listener.contains("BatchService.class"), listener);
             String workerRuntime=Files.readString(root.resolve("example-worker-listener/src/main/java/com/example/process/example/configuration/WorkerRuntimeConfiguration.java"));
             assertTrue(workerRuntime.contains("import com.example.process.example.configuration.controller.ProcessWorkListener;"));
             assertTrue(workerTest.contains(".DLT\""));
@@ -246,6 +251,15 @@ class ProcessManagementBlueprintTest {
             assertTrue(workerPom.contains("example-FileUpload-service"));
             assertTrue(workerPom.contains("example-ChunkUpload-service"));
             assertFalse(workerPom.contains("process-service"));
+            try (var paths = Files.walk(root)) {
+                var generatedExecutor = paths
+                    .filter(path -> path.getFileName().toString().equals("ChunkUploadExecutor.java"))
+                    .findFirst()
+                    .orElseThrow();
+                String generatedExecutorSource = Files.readString(generatedExecutor);
+                assertTrue(generatedExecutorSource.contains("extends ExecutorWorkListener<"), generatedExecutorSource);
+                assertTrue(generatedExecutorSource.contains("doStart(WorkListenerInput<"), generatedExecutorSource);
+            }
             String serverPom=Files.readString(root.resolve("exampleServer/exampleServer-package/pom.xml"));
             assertEquals(mode.equals("colocated"), serverPom.contains("service-registry-service"));
             assertTrue(serverPom.contains("spring-boot-h2console"));
