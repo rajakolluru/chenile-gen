@@ -78,7 +78,7 @@ class BlueprintPayloadValidatorTest {
             """);
         assertTrue(result.valid());
         assertEquals("mycompany", result.inputs().get("company"), "config values come from the config, not the payload");
-        assertEquals(List.of("company", "colour"), paths(result.warnings()).stream().sorted().toList());
+        assertEquals(List.of("colour", "company"), paths(result.warnings()).stream().sorted().toList());
         assertEquals(PayloadIssue.UNKNOWN_FIELD, result.warnings().get(0).code());
     }
 
