@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import org.chenile.jgen.blueprints.BlueprintConfig;
 import org.chenile.jgen.blueprints.BlueprintExecutor;
 import org.chenile.jgen.blueprints.BlueprintInputService;
+import org.chenile.jgen.blueprints.BlueprintPayloadValidator;
+import org.chenile.jgen.blueprints.PayloadIssue;
+import org.chenile.jgen.blueprints.PayloadValidation;
 import org.chenile.jgen.blueprints.BlueprintSampleEmitter;
 import org.chenile.jgen.blueprints.Registry;
 import org.chenile.jgen.blueprints.model.FieldType;
@@ -198,6 +201,7 @@ public class GenMain implements Runnable {
             }
         }
 
+        if (inputMap != null) checkInputFile(blueprintConfig, config, inputMap);
         Map<String,Object> map = new HashMap<>(configMap);
         buildInputMap(map,blueprintConfig,configMap,scanner,inputMap);
         blueprintExecutor.execute(blueprintConfig, config, map);
@@ -209,8 +213,24 @@ public class GenMain implements Runnable {
         try {
             return objectMapper.readValue(inputFile, Map.class);
         }catch(Exception e){
-            throw new RuntimeException("Cannot read the input file " + inputFile);
+            throw new RuntimeException("Cannot read the input file " + inputFile + ": " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Reports every problem in an input file at once, using the same validator as every other input path.
+     * Warnings (undeclared or hidden keys) are printed; errors stop generation before anything is written.
+     */
+    private void checkInputFile(BlueprintConfig blueprintConfig, Config config, Map<String,Object> inputMap) {
+        PayloadValidation validation = BlueprintPayloadValidator.validate(blueprintConfig, config, inputMap);
+        for (PayloadIssue warning : validation.warnings())
+            System.err.println("Warning: " + warning);
+        if (validation.valid()) return;
+        StringBuilder message = new StringBuilder("Input file " + inputFile + " has "
+                + validation.errors().size() + " error(s) for blueprint " + blueprintConfig.name + ":");
+        for (PayloadIssue error : validation.errors())
+            message.append(System.lineSeparator()).append("  - ").append(error);
+        throw new IllegalArgumentException(message.toString());
     }
 
     private BlueprintConfig getBlueprintFromInput(Map<String,Object> map, List<BlueprintConfig> list) {

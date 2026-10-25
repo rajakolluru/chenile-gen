@@ -18,6 +18,14 @@ public class FieldUtils {
     }
 
     public static boolean isValid(InputField field, String input) {
+        return isValid(field, input, true);
+    }
+
+    /**
+     * @param checkFiles whether a FILE field's path must exist. Payload validation passes {@code false} so it
+     *                   never touches the filesystem; generation re-checks file paths at its own boundary.
+     */
+    public static boolean isValid(InputField field, String input, boolean checkFiles) {
         if (input == null || input.isEmpty()) return !isRequired(field);
         if (field.type == FieldType.MULTI_SELECT) {
             for (String item : input.split(",", -1))
@@ -27,7 +35,7 @@ public class FieldUtils {
             input = input.toLowerCase(Locale.ROOT);
             return "y".equals(input) || "n".equals(input) || "true".equals(input) || "false".equals(input);
         }
-        if (field.type == FieldType.FILE){
+        if (checkFiles && field.type == FieldType.FILE){
             File file = new File(input);
             if (!file.exists())return false;
         }
@@ -56,6 +64,10 @@ public class FieldUtils {
     }
 
     public static boolean isValidRecordArray(InputField field, List<Map<String, Object>> records) {
+        return isValidRecordArray(field, records, true);
+    }
+
+    public static boolean isValidRecordArray(InputField field, List<Map<String, Object>> records, boolean checkFiles) {
         if (records == null) return true;
         if (field.childFields == null || field.childFields.isEmpty()) return false;
         InputField anchorField = field.childFields.get(0);
@@ -73,13 +85,13 @@ public class FieldUtils {
                 }
                 continue;
             }
-            if (!isValid(anchorField, anchorValue.toString())) {
+            if (!isValid(anchorField, anchorValue.toString(), checkFiles)) {
                 return false;
             }
             for (int i = 1; i < field.childFields.size(); i++) {
                 InputField child = field.childFields.get(i);
                 Object childValue = record.get(child.name);
-                if (childValue != null && !childValue.toString().isBlank() && !isValid(child, childValue.toString())) {
+                if (childValue != null && !childValue.toString().isBlank() && !isValid(child, childValue.toString(), checkFiles)) {
                     return false;
                 }
             }

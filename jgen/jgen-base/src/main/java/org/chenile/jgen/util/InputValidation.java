@@ -2,8 +2,13 @@ package org.chenile.jgen.util;
 
 import org.chenile.jgen.blueprints.BlueprintConfig;
 import org.chenile.jgen.blueprints.BlueprintInputService;
+import org.chenile.jgen.blueprints.PayloadIssue;
+import org.chenile.jgen.blueprints.model.FieldType;
 import org.chenile.jgen.blueprints.model.InputField;
 import org.chenile.jgen.blueprints.model.ValidationType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,17 +37,25 @@ public final class InputValidation {
         }
     }
 
+    /** Fail-fast form: throws on the first problem. Kept for the execution boundary and older callers. */
     public static void validateBlueprint(BlueprintConfig blueprint, Map<String,Object> input) {
-        if (blueprint.inputFields != null) validateFields(blueprint.inputFields, input, "");
+        List<PayloadIssue> issues = new ArrayList<>();
+        collectBlueprint(blueprint, input, issues);
+        throwFirst(issues);
     }
 
-    private static void validateFields(List<InputField> fields, Map<?,?> values, String prefix) {
+    /** Collect-all form: appends one issue per invalid field (or list element) to {@code issues}. */
+    public static void collectBlueprint(BlueprintConfig blueprint, Map<String,Object> input, List<PayloadIssue> issues) {
+        if (blueprint.inputFields != null) collectFields(blueprint.inputFields, input, "", issues);
+    }
+
+    private static void collectFields(List<InputField> fields, Map<?,?> values, String prefix, List<PayloadIssue> issues) {
         var service = new BlueprintInputService();
-        Map<String,Object> visibility = new java.util.HashMap<>();
+        Map<String,Object> visibility = new HashMap<>();
         values.forEach((k,v) -> visibility.put(k.toString(), v));
         for (InputField field : fields) {
             if (!service.isVisible(field, visibility)) continue;
-            validateField(field, values.get(field.name), prefix + field.name);
+            collectField(field, values.get(field.name), prefix + field.name, issues);
         }
     }
 
@@ -51,35 +64,57 @@ public final class InputValidation {
                 && field.childFields.stream().anyMatch(InputValidation::hasValidation);
     }
 
+    /** Fail-fast form of {@link #collectField}. */
     public static void validateField(InputField field, Object value, String path) {
+        List<PayloadIssue> issues = new ArrayList<>();
+        collectField(field, value, path, issues);
+        throwFirst(issues);
+    }
+
+    /**
+     * Checks a field's declarative {@code validation} rule, and those of its child fields, appending one issue per
+     * failing value. Fields with no rules anywhere in their tree are not checked here.
+     */
+    public static void collectField(InputField field, Object value, String path, List<PayloadIssue> issues) {
         if (!hasValidation(field)) return;
         if (field.validation != null) {
-            if (field.type == org.chenile.jgen.blueprints.model.FieldType.MULTI_SELECT && value instanceof String text && !text.isEmpty())
-                value = java.util.Arrays.stream(text.split(",", -1)).map(String::trim).toList();
+            if (field.type == FieldType.MULTI_SELECT && value instanceof String text && !text.isEmpty())
+                value = Arrays.stream(text.split(",", -1)).map(String::trim).toList();
             if (value instanceof List<?> list) {
                 if (list.isEmpty() && FieldUtils.isRequired(field))
-                    throw new IllegalArgumentException("Field " + path + " is required (" + field.validation + ")");
-                for (int i = 0; i < list.size(); i++) validateValue(field, list.get(i), path + "[" + i + "]");
-            } else validateValue(field, value, path);
+                    issues.add(new PayloadIssue(path, PayloadIssue.REQUIRED,
+                            "Field " + path + " is required (" + field.validation + ")"));
+                for (int i = 0; i < list.size(); i++) collectValue(field, list.get(i), path + "[" + i + "]", issues);
+            } else collectValue(field, value, path, issues);
         }
         if (field.childFields == null || value == null) return;
         if (value instanceof List<?> list) {
             for (int i = 0; i < list.size(); i++) {
-                if (!(list.get(i) instanceof Map<?,?> record))
-                    throw new IllegalArgumentException("Field " + path + "[" + i + "] must be a record");
-                validateFields(field.childFields, record, path + "[" + i + "].");
+                if (!(list.get(i) instanceof Map<?,?> record)) {
+                    issues.add(new PayloadIssue(path + "[" + i + "]", PayloadIssue.INVALID_VALUE,
+                            "Field " + path + "[" + i + "] must be a record"));
+                    continue;
+                }
+                collectFields(field.childFields, record, path + "[" + i + "].", issues);
             }
         } else if (value instanceof Map<?,?> record) {
-            validateFields(field.childFields, record, path + ".");
-        } else throw new IllegalArgumentException("Field " + path + " must contain records");
+            collectFields(field.childFields, record, path + ".", issues);
+        } else issues.add(new PayloadIssue(path, PayloadIssue.INVALID_VALUE, "Field " + path + " must contain records"));
     }
 
-    private static void validateValue(InputField field, Object value, String path) {
+    private static void collectValue(InputField field, Object value, String path, List<PayloadIssue> issues) {
         if (value == null || value instanceof String text && text.isEmpty()) {
-            if (FieldUtils.isRequired(field)) throw new IllegalArgumentException("Field " + path + " is required (" + field.validation + ")");
+            if (FieldUtils.isRequired(field))
+                issues.add(new PayloadIssue(path, PayloadIssue.REQUIRED,
+                        "Field " + path + " is required (" + field.validation + ")"));
             return;
         }
         if (!(value instanceof String text) || !isValid(field.validation, text))
-            throw new IllegalArgumentException("Field " + path + " must satisfy " + field.validation);
+            issues.add(new PayloadIssue(path, PayloadIssue.INVALID_VALUE,
+                    "Field " + path + " must satisfy " + field.validation));
+    }
+
+    private static void throwFirst(List<PayloadIssue> issues) {
+        if (!issues.isEmpty()) throw new IllegalArgumentException(issues.get(0).message());
     }
 }

@@ -20,18 +20,23 @@ public class BlueprintInputService {
         return new HashMap<>(configProvider.getConfigAsMap(config));
     }
 
+    /**
+     * Resolves and validates submitted inputs, throwing on any error. The checks live in
+     * {@link BlueprintPayloadValidator#validateFields}; this adds only the filesystem check for FILE fields.
+     * Generic project checks run at the generation boundary ({@code GenericInputValidator}).
+     */
     public Map<String, Object> buildInputMap(BlueprintConfig blueprintConfig, Config config, Map<String, Object> submitted) {
-        Map<String, Object> result = resolvedDefaults(config);
-        Map<String, Object> source = submitted == null ? Map.of() : submitted;
-        for (InputField field : blueprintConfig.inputFields) {
-            if (!isVisible(field, result)) continue;
-            Object value = PomInputs.supports(field)
-                    ? PomInputs.normalize(field, PomInputs.suppliedValue(field, source), result)
-                    : normalizeFieldValue(field, resolveSubmittedValue(field, result, source));
-            validateValue(field, value);
-            if (value != null) result.put(field.name, value);
+        Map<String, Object> result = new HashMap<>(
+                BlueprintPayloadValidator.validateFields(blueprintConfig, config, submitted).orThrow());
+        if (blueprintConfig.inputFields != null) {
+            for (InputField field : blueprintConfig.inputFields) {
+                Object value = result.get(field.name);
+                if (field.type == FieldType.FILE && value != null && !value.toString().isEmpty()
+                        && !new java.io.File(value.toString()).exists()) {
+                    throw new IllegalArgumentException("Field " + field.name + " names a file that does not exist: " + value);
+                }
+            }
         }
-        PomInputs.normalizeBlueprintInputs(blueprintConfig, result);
         return result;
     }
 
@@ -69,7 +74,7 @@ public class BlueprintInputService {
         return true;
     }
 
-    private Object resolveSubmittedValue(InputField field, Map<String, Object> values, Map<String, Object> submitted) {
+    Object resolveSubmittedValue(InputField field, Map<String, Object> values, Map<String, Object> submitted) {
         Object raw = submitted.get(field.name);
         if (raw == null || raw.toString().isBlank()) {
             if (field.type == FieldType.RECORD_ARRAY) return List.of();
@@ -104,43 +109,6 @@ public class BlueprintInputService {
             fields.add(describeField(child, defaults));
         }
         return fields;
-    }
-
-    private void validateValue(InputField field, Object value) {
-        org.chenile.jgen.util.InputValidation.validateField(field, value, field.name);
-        if (PomInputs.supports(field)) { PomInputs.normalize(field, value, Map.of()); return; }
-        if (field.type == FieldType.RECORD_ARRAY) {
-            if (value == null) return;
-            if (!(value instanceof List<?> records)) {
-                throw new IllegalArgumentException("Field " + field.name + " must be a list of records.");
-            }
-            List<Map<String, Object>> normalized = new ArrayList<>();
-            for (Object record : records) {
-                if (!(record instanceof Map<?, ?> rawMap)) {
-                    throw new IllegalArgumentException("Field " + field.name + " must contain only record objects.");
-                }
-                Map<String, Object> converted = new HashMap<>();
-                for (Map.Entry<?, ?> entry : rawMap.entrySet()) {
-                    converted.put(entry.getKey().toString(), entry.getValue());
-                }
-                normalized.add(converted);
-            }
-            if (!FieldUtils.isValidRecordArray(field, normalized)) {
-                throw new IllegalArgumentException("Field " + field.name + " has invalid record values.");
-            }
-            return;
-        }
-        if (field.type == FieldType.MULTI_SELECT && value instanceof List<?> list) {
-            for (Object item : list) {
-                if (!FieldUtils.isValid(field, item == null ? null : item.toString())) {
-                    throw new IllegalArgumentException("Field " + field.name + " has an invalid value.");
-                }
-            }
-            return;
-        }
-        if (!FieldUtils.isValid(field, value == null ? null : value.toString())) {
-            throw new IllegalArgumentException("Field " + field.name + " has an invalid value.");
-        }
     }
 
     private String substitute(Map<String, Object> values, String value) {
