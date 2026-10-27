@@ -14,6 +14,7 @@ import org.chenile.jgen.blueprints.model.FieldType;
 import org.chenile.jgen.blueprints.model.InputField;
 import org.chenile.jgen.config.Config;
 import org.chenile.jgen.config.ConfigProvider;
+import org.chenile.jgen.provenance.Regenerator;
 import org.chenile.jgen.util.CopyFromJar;
 import org.chenile.workflow.cli.VersionProvider;
 import picocli.CommandLine;
@@ -51,6 +52,10 @@ public class GenMain implements Runnable {
     private File outputFile;
     @CommandLine.Option(names = {"-g", "--generate-blueprint-file"}, description = "Generates a sample input file for the specified blueprint")
     private String generateBluePrint;
+    @CommandLine.Option(names = {"-r", "--regenerate"}, description = "Regenerates a JGen-generated project with the current blueprint version into a separate folder and reports what changed")
+    private File regenerateProject;
+    @CommandLine.Option(names = {"--into"}, description = "With -r: the folder to regenerate into (default: <project>.regenerated next to the project)")
+    private File regenerateInto;
     private final BlueprintExecutor  blueprintExecutor = new BlueprintExecutor();
     private final BlueprintInputService blueprintInputService = new BlueprintInputService();
     private final ConfigProvider configProvider = new ConfigProvider();
@@ -60,6 +65,10 @@ public class GenMain implements Runnable {
     @Override
     public void run() {
         try {
+            if (regenerateProject != null){
+                regenerate();
+                return;
+            }
             if (generateBluePrint != null){
                 generateBluePrintFile();
                 return;
@@ -77,6 +86,25 @@ public class GenMain implements Runnable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void regenerate() throws Exception {
+        Path project = regenerateProject.toPath().toAbsolutePath().normalize();
+        Path into = regenerateInto != null ? regenerateInto.toPath()
+                : project.resolveSibling(project.getFileName() + ".regenerated");
+        Config override = configFile != null ? obtainConfig() : null;
+        Regenerator.RegenerationReport report = new Regenerator().regenerate(project, into, override);
+        Path reportFile = Regenerator.writeReport(report);
+        System.out.println("Regenerated " + report.previous().blueprint.name + " into " + report.regenerated());
+        for (Regenerator.Change change : Regenerator.Change.values()) {
+            var files = report.only(change);
+            if (files.isEmpty()) continue;
+            System.out.println(change + " (" + files.size() + ")");
+            files.forEach(f -> System.out.println("  " + f.path()));
+        }
+        if (report.changes().isEmpty()) System.out.println("No differences: the project matches the current blueprint.");
+        System.out.println("Report: " + reportFile);
+        System.out.println("Compare with: git diff --no-index " + project + " " + report.regenerated());
     }
 
     private void generateBluePrintFile() throws Exception{

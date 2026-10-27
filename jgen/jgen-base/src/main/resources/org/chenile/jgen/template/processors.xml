@@ -10,6 +10,8 @@
             <version-validator/>
             <!-- validates common inputs before blueprint hooks and any generated file writes -->
             <generic-input-validator/>
+            <!-- Captures the validated inputs before hooks add derived values, for the generation record -->
+            <input-snapshot/>
             <!-- Allows the Blueprint author to manipulate the input map before we start the process -->
             <post-input-executor/>
             <!-- copies the blueprint folder to the destination folder. Blueprint folder is in the blueprint jar. -->
@@ -28,6 +30,8 @@
             <blueprint-expander/>
             <!-- Allows the blueprint author to change the destination folder if required with custom logic -->
             <post-process-executor/>
+            <!-- Writes .jgen/generation.json: blueprint, config, inputs and a hash of every generated file -->
+            <provenance-writer/>
         </processor-chain>
     </flow>
 </flows>

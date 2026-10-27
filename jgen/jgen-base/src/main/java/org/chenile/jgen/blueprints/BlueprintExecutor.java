@@ -27,6 +27,8 @@ public class BlueprintExecutor {
         templateContext.config = config;
         templateContext.map = inputMap;
         templateContext.blueprintPath = blueprintConfig.name == null ? List.of() : List.of(blueprintConfig.name);
+        templateContext.isJar = blueprintConfig.templateFolder == null
+                || !java.nio.file.Files.isDirectory(java.nio.file.Path.of(blueprintConfig.templateFolder));
         orchExecutor.execute(templateContext);
     }
     /** Invokes a child with the same configuration and a separate input map and ancestry. */

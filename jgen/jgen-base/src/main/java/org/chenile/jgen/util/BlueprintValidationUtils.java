@@ -90,7 +90,8 @@ public final class BlueprintValidationUtils {
         }
     }
 
-    private static String projectField(BlueprintConfig blueprint) {
+    /** The input field that names the generated project: {@code projectNameField}, else the first input field. */
+    public static String projectField(BlueprintConfig blueprint) {
         String projectField = blueprint.projectNameField;
         if (projectField == null || projectField.isBlank()) {
             require(blueprint.inputFields != null && !blueprint.inputFields.isEmpty(),

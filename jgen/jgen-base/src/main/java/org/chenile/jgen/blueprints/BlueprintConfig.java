@@ -33,4 +33,7 @@ public class BlueprintConfig {
      * Final processing post the code generation
      */
     public Consumer<Map<String,Object>> postProcessHook;
+    /** Where this blueprint's descriptor was loaded from (a jar: or file: URL); recorded in generation records. */
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public String source;
 }

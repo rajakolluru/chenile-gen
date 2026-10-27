@@ -50,6 +50,7 @@ public class Registry {
     private static void register(URL url) throws Exception{
         try {
             BlueprintConfig blueprintConfig = objectMapper.readValue(url,BlueprintConfig.class);
+            blueprintConfig.source = url.toString();
             if (blueprintConfig.initHook != null) {
                 InitHook onBoarder = blueprintConfig.initHook.getDeclaredConstructor(new Class[]{}).newInstance();
                 onBoarder.init(blueprintConfig);
