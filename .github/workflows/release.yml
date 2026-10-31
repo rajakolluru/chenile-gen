@@ -1,6 +1,7 @@
 # Publishes JGen when a version tag is pushed (e.g. `git push origin 2.1.35`), or on demand.
-# Needs a repository secret JRELEASER_GITHUB_TOKEN: a token with write access to rajakolluru/chenile-gen
-# (to create the release) and to ajapros/homebrew-jgen-tap (to update the formula).
+# The release in this repository uses the workflow's own GITHUB_TOKEN. Updating the Homebrew formula needs a
+# repository secret JRELEASER_HOMEBREW_GITHUB_TOKEN: a fine-grained personal access token whose resource owner is
+# ajapros, limited to ajapros/homebrew-jgen-tap, with "Contents: Read and write".
 name: Release JGen
 
 on:
@@ -52,7 +53,8 @@ jobs:
           arguments: full-release
         env:
           JRELEASER_PROJECT_VERSION: ${{ env.VERSION }}
-          JRELEASER_GITHUB_TOKEN: ${{ secrets.JRELEASER_GITHUB_TOKEN }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JRELEASER_HOMEBREW_GITHUB_TOKEN: ${{ secrets.JRELEASER_HOMEBREW_GITHUB_TOKEN }}
 
       - name: Keep JReleaser output
         if: always()

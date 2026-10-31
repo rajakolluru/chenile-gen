@@ -30,8 +30,9 @@ https://jgen.chenile.org/manual/. Tab completion for bash, zsh and fish: Homebre
 Pushing a version tag (e.g. `2.1.35`) runs `.github/workflows/release.yml`, which builds JGen and runs JReleaser
 (`jreleaser.yml`). JReleaser publishes the GitHub release (the distribution zip and a version-free `jgen-cli.jar`
 that `jbang-catalog.json` points at) and updates the Homebrew formula in `ajapros/homebrew-jgen-tap`. The
-workflow needs a `JRELEASER_GITHUB_TOKEN` secret with write access to both repositories, and the Chenile
-artifacts of that version must already be on Maven Central.
+release itself uses the workflow's built-in token; the formula update needs a `JRELEASER_HOMEBREW_GITHUB_TOKEN`
+secret (a fine-grained token for `ajapros/homebrew-jgen-tap` with Contents read and write). The Chenile artifacts
+of that version must already be on Maven Central.
 
 ## Building from source: requirements
 You need a power shell in Windows or the MAC zsh / Linux bash to execute these scripts. We have tested these scripts across Linux and MAC and we have seen they work. 
