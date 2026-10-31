@@ -9,7 +9,18 @@ import java.util.Collections;
 
 public class CopyFromJar {
     public void copyFromJar(String source, final Path target) throws URISyntaxException, IOException {
-        URI resource = getClass().getClassLoader().getResource(source).toURI();
+        copyFromJar(getClass().getClassLoader(), source, target);
+    }
+
+    /**
+     * Copies a resource folder from the given class loader. For a blueprint loaded from its own jar the folder is
+     * looked up in that jar first, so a same-named folder elsewhere on the class path cannot shadow it.
+     */
+    public void copyFromJar(ClassLoader loader, String source, final Path target) throws URISyntaxException, IOException {
+        java.net.URL url = loader instanceof java.net.URLClassLoader own ? own.findResource(source) : null;
+        if (url == null) url = loader.getResource(source);
+        if (url == null) throw new IOException("Template folder " + source + " not found");
+        URI resource = url.toURI();
         if (resource.getScheme().equals("file")) {
             copyTree(Paths.get(resource), target);
             return;

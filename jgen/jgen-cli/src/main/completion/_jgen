@@ -1,0 +1,57 @@
+#compdef jgen jgen.sh
+# zsh completion for jgen
+#
+# Install:  source <(jgen --completion zsh)        (add to ~/.zshrc, after compinit)
+# or save it as _jgen in a folder on $fpath. Homebrew installs it for you.
+#
+# Blueprint names come from `jgen --list-blueprints`, cached for 10 minutes (or until a jar is added to
+# ~/.jgen/blueprints) so that pressing Tab does not start a JVM every time.
+
+_jgen_blueprints() {
+  local cache="${XDG_CACHE_HOME:-$HOME/.cache}/jgen/blueprint-names"
+  if [[ ! -s $cache || -n $(find "$cache" -mmin +10 2>/dev/null) ||
+        ( -d $HOME/.jgen/blueprints && -n $(find "$HOME/.jgen/blueprints" -newer "$cache" 2>/dev/null | head -1) ) ]]; then
+    mkdir -p "${cache:h}" 2>/dev/null
+    if command jgen --list-blueprints >"$cache.$$" 2>/dev/null; then
+      mv -f "$cache.$$" "$cache"
+    else
+      rm -f "$cache.$$"
+    fi
+  fi
+  local -a entries
+  local line
+  if [[ -s $cache ]]; then
+    for line in "${(@f)$(<$cache)}"; do
+      # name<TAB>description -> name:description, with colons in the name escaped for _describe
+      entries+=("${${line%%$'\t'*}//:/\\:}:${line#*$'\t'}")
+    done
+  fi
+  _describe -t blueprints 'blueprint' entries
+  compadd -S '' -X 'or a GitHub reference' -- 'github:'
+}
+
+_jgen() {
+  _arguments -s -S \
+    '(-c --config)'{-c+,--config=}'[use this JGen configuration]:config file:_files -g "*.json(-.)"' \
+    '(-e --emit-config)'{-e+,--emit-config=}'[emit the configuration; with -g, a folder for samples]::file or folder:_files' \
+    '(-f --input-file)'{-f+,--input-file=}'[generate from a JSON input file]:input file:_files -g "*.json(-.)"' \
+    '(-o --output-file)'{-o+,--output-file=}'[write the sample input to this file]:file:_files' \
+    '(-g --generate-blueprint-file)'{-g+,--generate-blueprint-file=}'[emit a sample input for a blueprint]:blueprint:_jgen_blueprints' \
+    '(-r --regenerate)'{-r+,--regenerate=}'[regenerate a generated project and classify every file]:project:_directories' \
+    '--into=[folder to regenerate into]:folder:_directories' \
+    '--blueprint=[regenerate with this blueprint instead]:blueprint:_jgen_blueprints' \
+    '--fetch=[fetch, verify and cache a blueprint]:blueprint:_jgen_blueprints' \
+    '--trust[trust the blueprint sources used in this run]' \
+    '--offline[use only installed and cached blueprints]' \
+    '--completion=[print a completion script]:shell:(bash zsh fish)' \
+    '(- *)'{-h,--help}'[show help]' \
+    '(- *)'{-V,--version}'[show the version]'
+}
+
+if [[ $zsh_eval_context[-1] == loadautofunc ]]; then
+  # Autoloaded from $fpath.
+  _jgen "$@"
+else
+  # Sourced, e.g. source <(jgen --completion zsh).
+  compdef _jgen jgen jgen.sh
+fi

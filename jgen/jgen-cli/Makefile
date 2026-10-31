@@ -18,6 +18,11 @@ copy-scripts:
 create-bin:
 	if [ ! -d bin ]; then mkdir bin; fi
 
+## man: Regenerate the manual page src/man/jgen.1 from src/man/jgen.1.md (needs pandoc)
+.PHONY: man
+man:
+	pandoc -s -f markdown -t man src/man/jgen.1.md -o src/man/jgen.1
+
 ## clean: Clean everything
 .PHONY: clean
 clean:

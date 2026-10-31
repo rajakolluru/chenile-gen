@@ -1,0 +1,64 @@
+# Release configuration for JGen. Run by .github/workflows/release.yml when a version tag (e.g. 2.1.35) is pushed.
+# Local dry run:  jreleaser full-release --dry-run -Djreleaser.project.version=2.1.35
+project:
+  name: jgen
+  description: Blueprint-driven code generator for Chenile, and for anything else that is text
+  longDescription: |
+    JGen generates projects from blueprints: a typed input contract, a template tree whose file and folder names
+    carry instructions (placeholders, conditional folders, file lists, child blueprints) and optional Java hooks,
+    all packaged in one jar. It ships with blueprints for Chenile services, workflows, mini-monoliths and process
+    deployments, and accepts new blueprint jars without a rebuild.
+  links:
+    homepage: https://jgen.chenile.org
+    documentation: https://jgen.chenile.org/install/
+  authors:
+    - Raja Shankar Kolluru
+  license: MIT
+  inceptionYear: '2019'
+  stereotype: CLI
+  languages:
+    java:
+      groupId: org.chenile
+      artifactId: jgen-cli
+      version: '25'
+
+release:
+  github:
+    owner: rajakolluru
+    name: chenile-gen
+    # Chenile tags are plain versions (2.1.35) and are pushed by the maintainer, not created here.
+    tagName: '{{projectVersion}}'
+    skipTag: true
+    overwrite: true
+    changelog:
+      formatted: ALWAYS
+      contributors:
+        enabled: false
+
+files:
+  artifacts:
+    # A version-free copy of the jar, so https://github.com/rajakolluru/chenile-gen/releases/latest/download/jgen-cli.jar
+    # always points at the newest release (used by jbang-catalog.json).
+    - path: jgen/jgen-cli/target/jgen-cli.jar
+
+distributions:
+  jgen:
+    type: JAVA_BINARY
+    executable:
+      name: jgen
+      windowsExtension: cmd
+    artifacts:
+      - path: 'jgen/jgen-cli/target/jgen-cli-{{projectVersion}}-dist.zip'
+        transform: 'jgen-{{projectVersion}}.zip'
+    extraProperties:
+      # depends_on "openjdk" rather than a versioned keg; Homebrew's openjdk is 25 or later.
+      useVersionedJava: false
+    brew:
+      active: ALWAYS
+      formulaName: Jgen
+      repository:
+        owner: ajapros
+        name: homebrew-jgen-tap
+      commitAuthor:
+        name: Raja Shankar Kolluru
+        email: raja@thekollurus.com

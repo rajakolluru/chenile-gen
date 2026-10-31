@@ -1,0 +1,62 @@
+# Publishes JGen when a version tag is pushed (e.g. `git push origin 2.1.35`), or on demand.
+# Needs a repository secret JRELEASER_GITHUB_TOKEN: a token with write access to rajakolluru/chenile-gen
+# (to create the release) and to ajapros/homebrew-jgen-tap (to update the formula).
+name: Release JGen
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (an existing tag, e.g. 2.1.35)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.event.inputs.version || github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VERSION }}
+          fetch-depth: 0
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Build JGen
+        # Chenile ${VERSION} artifacts must already be on Maven Central (release chenile-parent and friends first).
+        run: mvn -B -ntp -f jgen/pom.xml install -DskipTests
+
+      - name: Check the distribution
+        run: |
+          test -f "jgen/jgen-cli/target/jgen-cli-${VERSION}-dist.zip"
+          cp "jgen/jgen-cli/target/jgen-cli-${VERSION}.jar" jgen/jgen-cli/target/jgen-cli.jar
+          unzip -q "jgen/jgen-cli/target/jgen-cli-${VERSION}-dist.zip" -d /tmp/jgen-dist
+          "/tmp/jgen-dist/jgen-${VERSION}/bin/jgen" --version
+
+      - name: Release
+        uses: jreleaser/release-action@v2
+        with:
+          arguments: full-release
+        env:
+          JRELEASER_PROJECT_VERSION: ${{ env.VERSION }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.JRELEASER_GITHUB_TOKEN }}
+
+      - name: Keep JReleaser output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jreleaser-output
+          path: out/jreleaser

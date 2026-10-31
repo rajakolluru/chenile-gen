@@ -135,6 +135,8 @@ public final class ProvenanceRecorder {
         GenerationRecord.BlueprintRef ref = new GenerationRecord.BlueprintRef();
         ref.name = blueprint.name;
         ref.version = blueprint.version;
+        ref.reference = blueprint.fetchedFrom;
+        ref.sha256 = blueprint.sha256;
         Properties pom = jarPom(blueprint.source);
         if (pom != null) {
             ref.groupId = pom.getProperty("groupId");

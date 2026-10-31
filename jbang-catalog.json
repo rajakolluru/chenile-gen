@@ -1,0 +1,10 @@
+{
+  "catalogs": {},
+  "aliases": {
+    "jgen": {
+      "script-ref": "https://github.com/rajakolluru/chenile-gen/releases/latest/download/jgen-cli.jar",
+      "description": "JGen: blueprint-driven code generator for Chenile and beyond (https://jgen.chenile.org)",
+      "java": "25+"
+    }
+  }
+}

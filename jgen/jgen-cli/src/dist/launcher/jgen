@@ -1,0 +1,44 @@
+#!/bin/sh
+# JGen launcher. Finds Java, adds blueprint folders to the classpath and runs the JGen jar.
+#
+# Blueprint folders searched (jars inside them become available as blueprints):
+#   $JGEN_HOME/blueprints   next to this installation
+#   ~/.jgen/blueprints      per user
+#   $JGEN_BLUEPRINTS        extra folders, comma-separated
+# JAVA_OPTS is passed to the JVM.
+
+# Resolve this script through symlinks (Homebrew links bin/jgen into its own bin folder).
+script="$0"
+while [ -h "$script" ]; do
+  link=$(ls -ld "$script" | sed 's/.*-> //')
+  case "$link" in
+    /*) script="$link" ;;
+    *)  script="$(dirname "$script")/$link" ;;
+  esac
+done
+JGEN_HOME=$(cd "$(dirname "$script")/.." && pwd -P)
+export JGEN_HOME
+
+# Find Java: JAVA_HOME, then PATH, then Homebrew's keg-only openjdk.
+if [ -n "$JAVA_HOME" ] && [ -x "$JAVA_HOME/bin/java" ]; then
+  JAVA="$JAVA_HOME/bin/java"
+elif command -v java >/dev/null 2>&1; then
+  JAVA=java
+else
+  for candidate in /opt/homebrew/opt/openjdk/bin/java /usr/local/opt/openjdk/bin/java \
+                   /home/linuxbrew/.linuxbrew/opt/openjdk/bin/java; do
+    if [ -x "$candidate" ]; then JAVA="$candidate"; break; fi
+  done
+fi
+if [ -z "$JAVA" ]; then
+  echo "jgen: Java 25 or later is required. Install it, or set JAVA_HOME." >&2
+  exit 1
+fi
+
+LOADER_PATH="$JGEN_HOME/blueprints,$HOME/.jgen/blueprints"
+if [ -n "$JGEN_BLUEPRINTS" ]; then
+  LOADER_PATH="$LOADER_PATH,$JGEN_BLUEPRINTS"
+fi
+
+# shellcheck disable=SC2086
+exec "$JAVA" $JAVA_OPTS -Dloader.path="$LOADER_PATH" -jar "$JGEN_HOME/lib/jgen-cli.jar" "$@"

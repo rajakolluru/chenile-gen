@@ -19,15 +19,51 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
+            <!-- Not filtered: loader.properties holds ${user.home}, which the launcher must resolve, not Maven. -->
+            <resource>
+                <directory>src/main/loader</directory>
+                <filtering>false</filtering>
+            </resource>
+            <!-- Shell completion scripts printed by the completion option; not filtered (they contain @ and ${}). -->
+            <resource>
+                <directory>src/main/completion</directory>
+                <targetPath>completion</targetPath>
+                <filtering>false</filtering>
+            </resource>
         </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- ZIP layout = PropertiesLauncher, which honours loader.path: blueprint jars can be added at run time. -->
+                    <layout>ZIP</layout>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- Builds target/jgen-cli-<version>-dist.zip, the installable distribution published by JReleaser. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.7.1</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/assembly/dist.xml</descriptor>
+                    </descriptors>
+                    <attach>false</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>dist</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>

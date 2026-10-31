@@ -36,4 +36,12 @@ public class BlueprintConfig {
     /** Where this blueprint's descriptor was loaded from (a jar: or file: URL); recorded in generation records. */
     @com.fasterxml.jackson.annotation.JsonIgnore
     public String source;
+    /** The class loader that holds this blueprint's templates and hooks; null means JGen's own class path. */
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public ClassLoader classLoader;
+    /** Set when the blueprint was fetched from the web: the exact reference it was resolved to, and its jar's hash. */
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public String fetchedFrom;
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public String sha256;
 }

@@ -16,7 +16,9 @@ public class FolderCopier implements Command<TemplateContext> {
     @Override
     public void execute(TemplateContext context) throws Exception {
         if(context.isJar)
-            copyFromJar.copyFromJar(context.blueprintConfig.templateFolder, Paths.get(context.getOutput()));
+            copyFromJar.copyFromJar(context.blueprintConfig.classLoader != null
+                    ? context.blueprintConfig.classLoader : getClass().getClassLoader(),
+                    context.blueprintConfig.templateFolder, Paths.get(context.getOutput()));
         else
             copyFolder(new File(context.blueprintConfig.templateFolder),new File(context.getOutput()));
         context.destination = new File(context.getOutput());

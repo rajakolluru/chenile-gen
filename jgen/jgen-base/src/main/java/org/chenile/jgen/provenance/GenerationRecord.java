@@ -37,5 +37,9 @@ public class GenerationRecord {
         public String groupId;
         public String artifactId;
         public String artifactVersion;
+        /** For a blueprint fetched from the web: the exact reference (e.g. github:acme/jgen-terraform@1.2.0). */
+        public String reference;
+        /** For a blueprint fetched from the web: the SHA-256 of its jar. */
+        public String sha256;
     }
 }

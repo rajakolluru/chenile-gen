@@ -15,6 +15,8 @@ import org.chenile.jgen.blueprints.model.InputField;
 import org.chenile.jgen.config.Config;
 import org.chenile.jgen.config.ConfigProvider;
 import org.chenile.jgen.provenance.Regenerator;
+import org.chenile.jgen.remote.BlueprintResolver;
+import org.chenile.jgen.remote.TrustPrompt;
 import org.chenile.jgen.util.CopyFromJar;
 import org.chenile.workflow.cli.VersionProvider;
 import picocli.CommandLine;
@@ -56,6 +58,21 @@ public class GenMain implements Runnable {
     private File regenerateProject;
     @CommandLine.Option(names = {"--into"}, description = "With -r: the folder to regenerate into (default: <project>.regenerated next to the project)")
     private File regenerateInto;
+    @CommandLine.Option(names = {"--blueprint"}, description = "With -r: regenerate with this blueprint instead, e.g. a newer github:owner/repo@version")
+    private String regenerateWith;
+    @CommandLine.Option(names = {"--fetch"}, description = "Fetches and caches a blueprint (github:owner/repo[@version]) and describes it")
+    private String fetchBlueprint;
+    @CommandLine.Option(names = {"--trust"}, description = "Trusts the blueprint sources used in this run without asking")
+    private boolean trustAll;
+    @CommandLine.Option(names = {"--offline"}, description = "Uses only installed and cached blueprints; never contacts GitHub")
+    private boolean offline;
+    @CommandLine.Option(names = {"--completion"}, paramLabel = "SHELL",
+            description = "Prints the completion script for bash, zsh or fish, e.g. source <(jgen --completion bash)")
+    private String completionShell;
+    @CommandLine.Option(names = {"--list-blueprints"}, hidden = true,
+            description = "Lists installed and cached blueprints, one per line with a tab-separated description (used by completion)")
+    private boolean listBlueprints;
+    private BlueprintResolver resolver;
     private final BlueprintExecutor  blueprintExecutor = new BlueprintExecutor();
     private final BlueprintInputService blueprintInputService = new BlueprintInputService();
     private final ConfigProvider configProvider = new ConfigProvider();
@@ -65,6 +82,18 @@ public class GenMain implements Runnable {
     @Override
     public void run() {
         try {
+            if (completionShell != null){
+                printCompletion();
+                return;
+            }
+            if (listBlueprints){
+                listBlueprints();
+                return;
+            }
+            if (fetchBlueprint != null){
+                fetch();
+                return;
+            }
             if (regenerateProject != null){
                 regenerate();
                 return;
@@ -93,7 +122,7 @@ public class GenMain implements Runnable {
         Path into = regenerateInto != null ? regenerateInto.toPath()
                 : project.resolveSibling(project.getFileName() + ".regenerated");
         Config override = configFile != null ? obtainConfig() : null;
-        Regenerator.RegenerationReport report = new Regenerator().regenerate(project, into, override);
+        Regenerator.RegenerationReport report = new Regenerator().regenerate(project, into, override, resolver(), regenerateWith);
         Path reportFile = Regenerator.writeReport(report);
         System.out.println("Regenerated " + report.previous().blueprint.name + " into " + report.regenerated());
         for (Regenerator.Change change : Regenerator.Change.values()) {
@@ -115,11 +144,7 @@ public class GenMain implements Runnable {
             System.err.println("No blueprints found!");
             return;
         }
-        Optional<BlueprintConfig> bpc = list.stream().filter(bp -> bp.name.equals(generateBluePrint)).findFirst();
-        if (bpc.isEmpty()){
-            throw new IllegalArgumentException("Specified blueprint " + generateBluePrint + " does not exist");
-        }
-        BlueprintConfig blueprintConfig = bpc.get();
+        BlueprintConfig blueprintConfig = resolver().resolve(generateBluePrint);
         Map<String,Object> expectedMap = new HashMap<>();
         expectedMap.put("blueprint",generateBluePrint);
         for(InputField inf: blueprintConfig.inputFields){
@@ -261,9 +286,72 @@ public class GenMain implements Runnable {
         throw new IllegalArgumentException(message.toString());
     }
 
-    private BlueprintConfig getBlueprintFromInput(Map<String,Object> map, List<BlueprintConfig> list) {
-        Optional<BlueprintConfig> optional = list.stream().filter(bp -> bp.name.equals(map.get("blueprint"))).findFirst();
-        return optional.orElse(null);
+    private BlueprintConfig getBlueprintFromInput(Map<String,Object> map, List<BlueprintConfig> list) throws IOException {
+        Object name = map.get("blueprint");
+        if (name == null || name.toString().isBlank()) return null;
+        // A name, or a github: reference, which is fetched on first use.
+        return resolver().resolve(name.toString());
+    }
+
+    private void printCompletion() throws IOException {
+        String resource = switch (completionShell.toLowerCase()) {
+            case "bash" -> "completion/jgen.bash";
+            case "zsh" -> "completion/_jgen";
+            case "fish" -> "completion/jgen.fish";
+            default -> throw new IllegalArgumentException("--completion supports bash, zsh and fish, not " + completionShell);
+        };
+        try (var in = GenMain.class.getClassLoader().getResourceAsStream(resource)) {
+            if (in == null) throw new IOException("Missing " + resource + " in the jgen jar");
+            System.out.print(new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
+        }
+    }
+
+    /** Installed blueprints, then cached github: references, as "name<TAB>description" lines. */
+    private void listBlueprints() throws IOException {
+        Registry.blueprints.values().stream()
+                .sorted(Comparator.comparing((BlueprintConfig b) -> b.name))
+                .forEach(b -> System.out.println(b.name + "\t" + oneLine(b.description)));
+        Path cache = org.chenile.jgen.remote.JgenSettings.home().resolve("cache").resolve("github");
+        if (!Files.isDirectory(cache)) return;
+        try (var versions = Files.find(cache, 3, (p, a) -> a.isDirectory() && cache.relativize(p).getNameCount() == 3)) {
+            versions.map(cache::relativize).sorted()
+                    .forEach(p -> System.out.println("github:" + p.getName(0) + "/" + p.getName(1) + "@" + p.getName(2)
+                            + "\tcached release"));
+        }
+    }
+
+    private static String oneLine(String text) {
+        return text == null ? "" : text.replaceAll("\\s+", " ").trim();
+    }
+
+    private BlueprintResolver resolver() {
+        if (resolver == null) resolver = BlueprintResolver.defaults(consolePrompt(), offline, trustAll);
+        return resolver;
+    }
+
+    private static TrustPrompt consolePrompt() {
+        return reference -> {
+            java.io.Console console = System.console();
+            if (console == null) return TrustPrompt.Decision.DENY;
+            String answer = console.readLine("%ngithub:%s is not a trusted blueprint source. Blueprints run Java code on "
+                    + "your machine.%nTrust it? [y] this time, [a]lways, [N]o: ", reference.repository());
+            if (answer == null) return TrustPrompt.Decision.DENY;
+            return switch (answer.trim().toLowerCase()) {
+                case "y", "yes" -> TrustPrompt.Decision.ALLOW_ONCE;
+                case "a", "always" -> TrustPrompt.Decision.ALLOW_ALWAYS;
+                default -> TrustPrompt.Decision.DENY;
+            };
+        };
+    }
+
+    private void fetch() throws Exception {
+        BlueprintConfig blueprint = resolver().resolve(fetchBlueprint);
+        System.out.println("Blueprint   " + blueprint.name + (blueprint.version == null ? "" : " " + blueprint.version));
+        if (blueprint.description != null) System.out.println("            " + blueprint.description);
+        if (blueprint.fetchedFrom != null) System.out.println("Source      " + blueprint.fetchedFrom);
+        if (blueprint.sha256 != null) System.out.println("SHA-256     " + blueprint.sha256);
+        System.out.println("Use it with: jgen -g " + (blueprint.fetchedFrom != null ? blueprint.fetchedFrom : blueprint.name)
+                + " -o input.json");
     }
 
     private BlueprintConfig captureBlueprint(Scanner scanner,List<BlueprintConfig> list){
