@@ -12,6 +12,7 @@
 	<version>${revision}</version>
 	<modules>
 		<module>jgen-base</module>
+		<module>jgen-ext-pebble</module>
 		<module>bp-interceptor</module>
 		<module>bp-service</module>
 		<module>bp-headless-service</module>
@@ -33,6 +34,8 @@
 	<properties>
 		<jgen.version>${chenile.version}</jgen.version>
 		<revision>${jgen.version}</revision>
+		<!-- polyglot and js-community must share a version -->
+		<graalvm.version>25.0.4</graalvm.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -45,6 +48,11 @@
 			<dependency>
 				<groupId>org.chenile</groupId>
 				<artifactId>jgen-base</artifactId>
+				<version>${jgen.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.chenile</groupId>
+				<artifactId>jgen-ext-pebble</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>

@@ -44,6 +44,7 @@ _jgen() {
     '--trust[trust the blueprint sources used in this run]' \
     '--offline[use only installed and cached blueprints]' \
     '--search=-[search the blueprint catalogs]::text: ' \
+    '--extensions[list installed template engines, language packs and path tags]' \
     '--completion=[print a completion script]:shell:(bash zsh fish)' \
     '(- *)'{-h,--help}'[show help]' \
     '(- *)'{-V,--version}'[show the version]'

@@ -20,14 +20,10 @@
             <lambda-loader/>
             <!-- Uses Mustache to convert all .mustache files to the destination file.  -->
             <file-template-executor/>
-            <!-- Breaks all .filelist files into multiple files. -->
-            <file-splitter/>
-            <!-- Replaces filenames of the form __xxx__ with contents from the map -->
-            <file-name-replacer/>
-            <!-- Turns _DoT_ in file and folder names into a dot: _DoT_gitignore becomes .gitignore -->
-            <dot-replacer/>
-            <!-- Processes conditional files. If a key in the map has a given value then the folder is copied. -->
-            <conditional-processor/>
+            <!-- Applies the path tags to file and folder names, one pass per tag in order:
+                 filelist (split .filelist files), placeholder (__key__), dot (_DoT_ to .), conditional (%%key=value%%),
+                 plus any tags added by extension jars (META-INF/services/org.chenile.jgen.template.tags.PathTag). -->
+            <path-tag-processor/>
             <!-- Expands surviving child markers after parent rendering and conditional selection. -->
             <blueprint-expander/>
             <!-- Allows the blueprint author to change the destination folder if required with custom logic -->

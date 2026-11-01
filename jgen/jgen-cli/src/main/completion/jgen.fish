@@ -47,6 +47,7 @@ complete -c jgen -l fetch -x -a '(__jgen_blueprints)' -d 'Fetch, verify and cach
 complete -c jgen -l trust -d 'Trust the blueprint sources used in this run'
 complete -c jgen -l offline -d 'Use only installed and cached blueprints'
 complete -c jgen -l search -x -d 'Search the blueprint catalogs'
+complete -c jgen -l extensions -d 'List installed template engines, language packs and path tags'
 complete -c jgen -l completion -x -a 'bash zsh fish' -d 'Print a completion script'
 complete -c jgen -s h -l help -d 'Show help'
 complete -c jgen -s V -l version -d 'Show the version'

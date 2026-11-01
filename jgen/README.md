@@ -367,6 +367,8 @@ bp-something/
 
 The JSON file is declarative. It defines the blueprint's public contract. The Java init hook is imperative. It adds any computed values that the templates need.
 
+Hooks can also be JavaScript: `"scripts": {"postInputCapture": "scripts/hooks.js"}` in `blueprint.json` names a file with a `postInputCapture(inputs, jgen)` function. Scripts run in a GraalJS sandbox (no Java, network, processes or files outside the generated project) and need no build, so the blueprint stays template-only. See `org.chenile.jgen.script.ScriptHooks` and https://jgen.chenile.org/scripting/.
+
 When a blueprint sets `sinceVersion`, JGen compares it with the selected
 configuration's `chenileVersion` using Maven version ordering before it emits
 any files. Generation is rejected when the selected version is older or absent.
@@ -424,6 +426,17 @@ The pipeline performs these steps:
 14. with `initGit` true, make the project a local Git repository (and add the blueprint's `gitRepositoryField`
     value as `origin`)
 15. run the blueprint's final hook
+
+Steps 7–10 are path tags (`org.chenile.jgen.template.tags`): `filelist`, `placeholder`, `dot` and `conditional`,
+applied in order by the single `path-tag-processor` step. Extension jars can add tags through
+`META-INF/services/org.chenile.jgen.template.tags.PathTag`; the generation record lists them, and `jgen -r`
+refuses to regenerate without them.
+
+Path tags are one of three extension points in `org.chenile.jgen.ext.Extensions`, with template engines
+(`TemplateEngine`, picked by file extension: Mustache built in, Pebble `.peb` in `jgen-ext-pebble`) and language
+packs (`LanguagePack`: validation rules such as `PYTHON_MODULE` or `NPM_PACKAGE`, and template helpers). A blueprint
+declares the extensions it needs with `"requires": ["pebble", "python"]`. `jgen --extensions` lists what is
+installed. See https://jgen.chenile.org/extensions/.
 
 The execution path in code is:
 

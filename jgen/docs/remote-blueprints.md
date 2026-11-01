@@ -45,7 +45,7 @@ The convention, if you set a repository up by hand:
 
 ## Template-only blueprints (2.1.36)
 
-A blueprint that needs no Java (no init hook) can be used straight from its repository, with no jar to build or
+A blueprint that needs no Java (no init hook; [JavaScript hooks](https://jgen.chenile.org/scripting/) are fine) can be used straight from its repository, with no jar to build or
 release. This suits most blueprints for things that are not Chenile: a Terraform module, a docs site, a GitHub
 Actions starter.
 
@@ -75,7 +75,8 @@ version, it uses the latest release, or else the highest version tag.
 - `#sha256:` pins work.
 
 The hash is taken over the blueprint's files, not over the archive, so it stays stable if GitHub re-packs the tag.
-A descriptor that declares an `initHook` is refused: hooks need Java classes, so publish that blueprint as a jar.
+A descriptor that declares an `initHook` is refused: Java hooks need classes, so publish that blueprint as a jar,
+or write its hooks in [JavaScript](https://jgen.chenile.org/scripting/) instead.
 
 **Local folders while you write one.** `dir:<folder>` uses a template-only blueprint from your disk. The folder can
 be the repository or its `src/main/resources`. It is not cached or locked, and your edits apply on the next run:

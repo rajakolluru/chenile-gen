@@ -26,6 +26,8 @@ jgen - generate projects from blueprints
 
 **jgen** **\--search** \[*text*\] \[**\--offline**\]
 
+**jgen** **\--extensions**
+
 **jgen** **\--completion** *shell*
 
 **jgen** **-h** | **-V**
@@ -150,6 +152,11 @@ jgen does one thing per run. When several mode options are given, the first of *
 :   Search the blueprint catalogs (see **CATALOGS**) for entries whose name, description or tags contain *text*;
     without *text*, list every entry. Each result shows *catalog*/*name*, its description, source and tags.
 
+**\--extensions**
+:   List the installed extensions: template engines with the file extension each renders, language packs with
+    their validation rules and helpers, path tags in the order they run, and every template helper. Built-in
+    extensions are marked; added ones show their class and version. See **EXTENSIONS**.
+
 **\--trust**
 :   Trust every blueprint source used in this run without asking. Use this in scripts and CI only for sources you
     have reviewed. Prefer listing them in *settings.json* (see **FILES**).
@@ -222,6 +229,29 @@ A blueprint can contain Java code, which runs with your permissions. jgen theref
 - records the SHA-256 of each fetched version in *blueprints.lock.json* the first time it is used, and refuses
   the version if its jar later changes.
 - loads each fetched jar in its own class loader.
+
+# EXTENSIONS
+
+Extensions add to what every blueprint can use. There are three kinds:
+
+*Template engines*
+:   render template files chosen by extension. **mustache** (*.mustache*) is built in, and **pebble** (*.peb*) ships
+    with jgen.
+
+*Language packs*
+:   add validation rules and template helpers for a language. **python** (**PYTHON_MODULE**, **PYTHON_PACKAGE**,
+    **PYPI_PROJECT**) and **node** (**NPM_PACKAGE**, **JS_IDENTIFIER**) are built in.
+
+*Path tags*
+:   add rules for file and folder names. **filelist**, **placeholder**, **dot** and **conditional** are built in.
+
+An extension is a jar that lists its classes in **META-INF/services/** under the interface's name. Put the jar in a
+blueprints folder (see **FILES**). Extension names are unique, and built-in extensions can't be replaced.
+
+A blueprint names what it needs in **requires**, as *name* or *name*\@*minimum-version*. jgen refuses a blueprint
+whose requirements aren't installed, before reading its fields. A **validation** name that is neither built in nor
+defined by an installed language pack is an error. The generation record lists the added extensions a project was generated
+with, and **-r** refuses to regenerate a project without them.
 
 # SHELL COMPLETION
 

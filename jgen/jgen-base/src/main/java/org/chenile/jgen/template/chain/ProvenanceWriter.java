@@ -21,7 +21,8 @@ public class ProvenanceWriter implements Command<TemplateContext> {
                 System.err.println("Warning: no generation record written; project folder not found: " + project);
                 return;
             }
-            ProvenanceRecorder.write(context.blueprintConfig, context.config, context.inputSnapshot, project);
+            ProvenanceRecorder.write(context.blueprintConfig, context.config, context.inputSnapshot, project,
+                    context.enginesUsed);
         } catch (Exception e) {
             System.err.println("Warning: could not write the JGen generation record: " + e.getMessage());
         }

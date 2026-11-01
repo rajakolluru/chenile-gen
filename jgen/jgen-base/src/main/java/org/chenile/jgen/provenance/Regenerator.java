@@ -97,6 +97,7 @@ public final class Regenerator {
             throw new IllegalArgumentException("Blueprint " + previous.blueprint.name + " is not installed"
                     + (previous.blueprint.reference == null ? "" : "; it came from " + previous.blueprint.reference));
         }
+        requireRecordedExtensions(previous);
         Config config = configOverride != null ? configOverride
                 : ProvenanceRecorder.MAPPER.convertValue(previous.config, Config.class);
 
@@ -121,6 +122,22 @@ public final class Regenerator {
         Map<String, String> next = current != null ? current.files : ProvenanceRecorder.manifest(regenerated);
         List<FileChange> changes = classify(previous.files, ProvenanceRecorder.manifest(project), next);
         return new RegenerationReport(project, regenerated, previous, current, changes);
+    }
+
+    /**
+     * A project generated with added extensions (path tags, template engines, language packs) must be regenerated
+     * with them: without them its files would come out differently and every file would look changed.
+     */
+    public static void requireRecordedExtensions(GenerationRecord previous) {
+        if (previous.extensions == null || previous.extensions.isEmpty()) return;
+        java.util.Map<String, org.chenile.jgen.ext.Extensions.Entry> installed = org.chenile.jgen.ext.Extensions.all();
+        List<String> missing = new ArrayList<>();
+        for (String recorded : previous.extensions) {
+            if (!installed.containsKey(org.chenile.jgen.ext.Extensions.recordedName(recorded))) missing.add(recorded);
+        }
+        if (!missing.isEmpty())
+            throw new IllegalStateException("The project was generated with extensions that are not installed: "
+                    + missing + ". Add their jars to ~/.jgen/blueprints (or JGEN_BLUEPRINTS) and try again.");
     }
 
     /** Three-way classification of every path known to the original generation or to the new one. */

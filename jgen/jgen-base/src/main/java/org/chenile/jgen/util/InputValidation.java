@@ -39,6 +39,12 @@ public final class InputValidation {
     }
 
     public static void validate(InputField field, String value) {
+        if (field.validation == ValidationType.EXTENSION) {
+            org.chenile.jgen.ext.ValidationRule rule = org.chenile.jgen.ext.Extensions.rule(field.rule);
+            ValidationUtils.require(rule != null, "Validation rule " + field.rule + " is not installed");
+            ValidationUtils.require(rule.isValid(value), "Value " + describe(field));
+            return;
+        }
         if (field.validation != ValidationType.PATTERN) {
             validate(field.validation, value);
             return;
@@ -67,6 +73,7 @@ public final class InputValidation {
                         && !parts[1].equals(".") && !parts[1].equals(".."), "Invalid GitHub repository");
             }
             case PATTERN -> throw new IllegalArgumentException("PATTERN needs the field's pattern; validate the field");
+            case EXTENSION -> throw new IllegalArgumentException("A language pack rule needs the field; validate the field");
         }
     }
 
@@ -84,6 +91,10 @@ public final class InputValidation {
             case GITHUB_REPOSITORY -> "must satisfy GITHUB_REPOSITORY (owner/repo, e.g. acme/jgen-terraform)";
             case PATTERN -> field.patternMessage != null && !field.patternMessage.isBlank()
                     ? field.patternMessage : "must match " + field.pattern;
+            case EXTENSION -> {
+                org.chenile.jgen.ext.ValidationRule rule = org.chenile.jgen.ext.Extensions.rule(field.rule);
+                yield "must satisfy " + field.rule + (rule == null ? "" : " (" + rule.description() + ")");
+            }
         };
     }
 
@@ -106,6 +117,11 @@ public final class InputValidation {
     private static void checkDeclarations(String blueprint, List<InputField> fields, String prefix) {
         for (InputField field : fields) {
             String path = prefix + field.name;
+            if (field.validation == ValidationType.EXTENSION
+                    && org.chenile.jgen.ext.Extensions.rule(field.rule) == null) {
+                throw new IllegalArgumentException("Blueprint " + blueprint + ": field " + path + " uses validation "
+                        + field.rule + ", which is neither a built-in rule nor a rule of an installed language pack");
+            }
             if (field.validation == ValidationType.PATTERN) {
                 if (field.pattern == null || field.pattern.isBlank())
                     throw new IllegalArgumentException("Blueprint " + blueprint + ": field " + path
@@ -120,7 +136,7 @@ public final class InputValidation {
                 }
             } else if (field.pattern != null) {
                 throw new IllegalArgumentException("Blueprint " + blueprint + ": field " + path
-                        + " declares a pattern but its validation is " + field.validation + ", not PATTERN");
+                        + " declares a pattern but its validation is " + field.getValidationName() + ", not PATTERN");
             }
             if (field.childFields != null) checkDeclarations(blueprint, field.childFields, path + ".");
         }
@@ -176,7 +192,7 @@ public final class InputValidation {
             if (value instanceof List<?> list) {
                 if (list.isEmpty() && FieldUtils.isRequired(field))
                     issues.add(new PayloadIssue(path, PayloadIssue.REQUIRED,
-                            "Field " + path + " is required (" + field.validation + ")"));
+                            "Field " + path + " is required (" + field.getValidationName() + ")"));
                 for (int i = 0; i < list.size(); i++) collectValue(field, list.get(i), path + "[" + i + "]", issues);
             } else collectValue(field, value, path, issues);
         }
@@ -199,7 +215,7 @@ public final class InputValidation {
         if (value == null || value instanceof String text && text.isEmpty()) {
             if (FieldUtils.isRequired(field))
                 issues.add(new PayloadIssue(path, PayloadIssue.REQUIRED,
-                        "Field " + path + " is required (" + field.validation + ")"));
+                        "Field " + path + " is required (" + field.getValidationName() + ")"));
             return;
         }
         if (!(value instanceof String text) || !isValid(field, text))

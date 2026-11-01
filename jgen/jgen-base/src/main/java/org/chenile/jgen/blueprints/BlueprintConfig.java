@@ -14,6 +14,18 @@ public class BlueprintConfig {
     /** Minimum Chenile runtime version required by this blueprint, if any. */
     public String sinceVersion;
     public Class<InitHook> initHook;
+    /**
+     * JavaScript hooks, as an alternative (or addition) to {@link #initHook}: hook name to a script resource path,
+     * e.g. {"postInputCapture": "scripts/hooks.js"}. Hook names: postInputCapture, childBlueprintInputs,
+     * postProcess, final. Scripts run sandboxed, so template-only blueprints may use them.
+     */
+    public Map<String, String> scripts;
+    /**
+     * Extensions this blueprint needs: template engines, language packs or path tags, by name, optionally with a
+     * minimum version: {@code ["pebble", "python", "terraform-pack@1.2"]}. A blueprint whose requirements are not
+     * installed is refused when it loads.
+     */
+    public List<String> requires;
     public Consumer<Map<String,Object>> postInputCaptureHook;
     /** Registered by the init hook when this blueprint includes child blueprint markers. */
     @com.fasterxml.jackson.annotation.JsonIgnore

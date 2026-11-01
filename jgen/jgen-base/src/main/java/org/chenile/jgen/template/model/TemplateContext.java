@@ -21,6 +21,8 @@ public class TemplateContext {
    public java.util.List<String> blueprintPath = java.util.List.of();
    /** The validated inputs before hooks ran; captured for top-level generations only, for the generation record. */
    public Map<String, Object> inputSnapshot;
+   /** Names of the template engines that rendered files, shared with child generations, for the record. */
+   public java.util.Set<String> enginesUsed = java.util.concurrent.ConcurrentHashMap.newKeySet();
    /** True when this context generates a child blueprint inside a parent. */
    public boolean isChild() { return blueprintPath.size() > 1; }
    public String getOutput(){

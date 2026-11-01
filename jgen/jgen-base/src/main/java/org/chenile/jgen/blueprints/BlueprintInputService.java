@@ -99,7 +99,8 @@ public class BlueprintInputService {
         map.put("maxSizeBytes", field.maxSizeBytes);
         map.put("multiple", Boolean.TRUE.equals(field.multiple));
         map.put("visibleWhen", field.visibleWhen);
-        map.put("validation", field.validation);
+        map.put("validation", field.validation == org.chenile.jgen.blueprints.model.ValidationType.EXTENSION
+                ? field.rule : field.validation);
         map.put("pattern", field.pattern);
         map.put("patternMessage", field.patternMessage);
         return map;

@@ -72,6 +72,9 @@ public class GenMain implements Runnable {
     @CommandLine.Option(names = {"--search"}, arity = "0..1", fallbackValue = "", paramLabel = "TEXT",
             description = "Searches the blueprint catalogs by name, description or tag; lists everything without TEXT")
     private String searchText;
+    @CommandLine.Option(names = {"--extensions"},
+            description = "Lists the installed extensions: template engines, language packs (with their validation rules and helpers) and path tags")
+    private boolean listExtensions;
     @CommandLine.Option(names = {"--list-blueprints"}, hidden = true,
             description = "Lists installed and cached blueprints, one per line with a tab-separated description (used by completion)")
     private boolean listBlueprints;
@@ -91,6 +94,10 @@ public class GenMain implements Runnable {
             }
             if (searchText != null){
                 search();
+                return;
+            }
+            if (listExtensions){
+                listExtensions();
                 return;
             }
             if (listBlueprints){
@@ -311,6 +318,31 @@ public class GenMain implements Runnable {
             if (in == null) throw new IOException("Missing " + resource + " in the jgen jar");
             System.out.print(new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
         }
+    }
+
+    /** Prints every installed extension, built in or added, grouped by kind. */
+    private void listExtensions() {
+        var all = org.chenile.jgen.ext.Extensions.all();
+        System.out.println("Template engines:");
+        for (var engine : org.chenile.jgen.ext.Extensions.engines())
+            System.out.println("  " + describe(all.get(engine.name())) + "  *" + engine.extension());
+        System.out.println("Language packs:");
+        for (var pack : org.chenile.jgen.ext.Extensions.packs()) {
+            System.out.println("  " + describe(all.get(pack.name())));
+            for (var rule : pack.rules()) System.out.println("      " + rule.name() + "  " + rule.description());
+            for (var helper : new java.util.TreeSet<>(pack.helpers().keySet())) System.out.println("      helper " + helper);
+        }
+        System.out.println("Path tags (in the order they run):");
+        for (var tag : org.chenile.jgen.ext.Extensions.tags())
+            System.out.println("  " + describe(all.get(tag.name())) + "  order " + tag.order());
+        System.out.println("Template helpers: " + String.join(", ",
+                new java.util.TreeSet<>(org.chenile.jgen.ext.Extensions.helpers().keySet())));
+    }
+
+    private static String describe(org.chenile.jgen.ext.Extensions.Entry entry) {
+        String version = entry.version();
+        return entry.name() + (version == null ? "" : " " + version) + (entry.builtIn() ? " (built in)"
+                : " (" + entry.implementation().getClass().getName() + ")");
     }
 
     /** Installed blueprints, then cached github: references, as "name<TAB>description" lines. */

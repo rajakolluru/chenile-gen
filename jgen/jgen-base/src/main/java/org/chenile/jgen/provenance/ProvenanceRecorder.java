@@ -71,6 +71,12 @@ public final class ProvenanceRecorder {
     /** Writes {@code .jgen/generation.json} (and copies of FILE inputs) into the generated project. */
     public static GenerationRecord write(BlueprintConfig blueprint, Config config, Map<String, Object> inputs,
                                          Path projectDir) throws IOException {
+        return write(blueprint, config, inputs, projectDir, java.util.Set.of());
+    }
+
+    /** @param enginesUsed names of the template engines that rendered files in this generation */
+    public static GenerationRecord write(BlueprintConfig blueprint, Config config, Map<String, Object> inputs,
+                                         Path projectDir, java.util.Collection<String> enginesUsed) throws IOException {
         GenerationRecord record = new GenerationRecord();
         record.generatedAt = Instant.now().toString();
         record.jgenVersion = jgenVersion();
@@ -78,6 +84,7 @@ public final class ProvenanceRecorder {
         record.projectDirectory = projectDir.getFileName().toString();
         record.config = new ConfigProvider().getConfigAsMap(config);
         record.inputs = new LinkedHashMap<>(inputs);
+        record.extensions = org.chenile.jgen.ext.Extensions.usedBy(blueprint, enginesUsed);
         Path recordDir = projectDir.resolve(RECORD_FOLDER);
         Files.createDirectories(recordDir);
         if (blueprint.inputFields != null) {

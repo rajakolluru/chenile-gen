@@ -47,7 +47,7 @@ _jgen() {
 
     local options="-c --config -e --emit-config -f --input-file -o --output-file
         -g --generate-blueprint-file -r --regenerate --into --blueprint --fetch
-        --trust --offline --search --completion -h --help -V --version"
+        --trust --offline --search --extensions --completion -h --help -V --version"
 
     case "$prev" in
         -g|--generate-blueprint-file|--blueprint|--fetch)

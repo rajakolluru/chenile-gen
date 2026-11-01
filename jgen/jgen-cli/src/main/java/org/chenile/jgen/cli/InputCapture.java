@@ -61,7 +61,7 @@ public abstract class InputCapture {
             return captureScalarFromInputMap(configMap,field,inputMap,defValue);
         }
         String prompt = field.description;
-        if (field.validation != null) prompt += " [" + field.validation + "]";
+        if (field.validation != null) prompt += " [" + field.getValidationName() + "]";
         if (field.type == FieldType.BOOLEAN) prompt += "(y/n)";
         prompt += "?";
         if (defValue != null)
@@ -95,7 +95,7 @@ public abstract class InputCapture {
         Object raw = inputMap.get(field.name);
         String value = raw != null ? substitute(configMap, raw.toString()) : defValue;
         if (!FieldUtils.isValid(field,value)){
-            String message = "Field " + field.name + " has an invalid value " + value + "specified." + (field.validation == null ? "" : " Expected " + field.validation);
+            String message = "Field " + field.name + " has an invalid value " + value + "specified." + (field.validation == null ? "" : " Expected " + field.getValidationName());
             throw new RuntimeException(message);
         }
         return value;

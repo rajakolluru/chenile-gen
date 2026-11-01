@@ -9,5 +9,10 @@ public enum ValidationType {
     /** A GitHub repository as owner/repo, e.g. acme/jgen-terraform. */
     GITHUB_REPOSITORY,
     /** The whole value must match the field's {@code pattern}; the field's {@code patternMessage} explains it. */
-    PATTERN
+    PATTERN,
+    /**
+     * A rule from a language pack, such as PYTHON_MODULE or NPM_PACKAGE. Blueprints write the rule's own name in
+     * {@code validation}; JGen keeps it in {@link InputField#rule} and sets this value.
+     */
+    EXTENSION
 }

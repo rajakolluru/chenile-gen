@@ -28,6 +28,13 @@ public class GenerationRecord {
     public Map<String, String> fileInputs = new LinkedHashMap<>();
     /** Every generated file (path relative to the project folder, '/'-separated) and its SHA-256. */
     public Map<String, String> files = new TreeMap<>();
+    /**
+     * Added (not built-in) extensions the generation depended on, as {@code kind:name@version}: path tags, template
+     * engines that rendered files, language packs whose rules the blueprint uses, and the blueprint's requires.
+     * Absent when there were none.
+     */
+    @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY)
+    public java.util.List<String> extensions;
 
     public static class BlueprintRef {
         public String name;

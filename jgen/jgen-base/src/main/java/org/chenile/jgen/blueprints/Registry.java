@@ -129,7 +129,12 @@ public class Registry {
      */
     private static BlueprintConfig load(URL descriptor, ClassLoader loader) throws Exception {
         ObjectMapper mapper = objectMapper.copy().setTypeFactory(TypeFactory.defaultInstance().withClassLoader(loader));
-        BlueprintConfig blueprint = mapper.readValue(descriptor, BlueprintConfig.class);
+        // Requirements first: a missing language pack should be reported as missing, not as an unknown rule.
+        com.fasterxml.jackson.databind.JsonNode json = mapper.readTree(descriptor);
+        java.util.List<String> requires = new ArrayList<>();
+        json.path("requires").forEach(entry -> requires.add(entry.asText()));
+        org.chenile.jgen.ext.Extensions.checkRequires(json.path("name").asText("?"), requires);
+        BlueprintConfig blueprint = mapper.treeToValue(json, BlueprintConfig.class);
         blueprint.source = descriptor.toString();
         blueprint.classLoader = loader;
         org.chenile.jgen.util.InputValidation.checkDeclarations(blueprint);
@@ -143,6 +148,8 @@ public class Registry {
                 thread.setContextClassLoader(previous);
             }
         }
+        if (blueprint.scripts != null && !blueprint.scripts.isEmpty())
+            org.chenile.jgen.script.ScriptHooks.install(blueprint, path -> resource(loader, path));
         return blueprint;
     }
 

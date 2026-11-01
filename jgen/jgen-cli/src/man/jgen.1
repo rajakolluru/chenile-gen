@@ -28,6 +28,8 @@ jgen - generate projects from blueprints
 .PP
 \f[B]jgen\f[R] \f[B]--search\f[R] [\f[I]text\f[R]] [\f[B]--offline\f[R]]
 .PP
+\f[B]jgen\f[R] \f[B]--extensions\f[R]
+.PP
 \f[B]jgen\f[R] \f[B]--completion\f[R] \f[I]shell\f[R]
 .PP
 \f[B]jgen\f[R] \f[B]-h\f[R] | \f[B]-V\f[R]
@@ -231,6 +233,13 @@ name, description or tags contain \f[I]text\f[R]; without
 Each result shows \f[I]catalog\f[R]/\f[I]name\f[R], its description,
 source and tags.
 .TP
+\f[B]--extensions\f[R]
+List the installed extensions: template engines with the file extension
+each renders, language packs with their validation rules and helpers,
+path tags in the order they run, and every template helper.
+Built-in extensions are marked; added ones show their class and version.
+See \f[B]EXTENSIONS\f[R].
+.TP
 \f[B]--trust\f[R]
 Trust every blueprint source used in this run without asking.
 Use this in scripts and CI only for sources you have reviewed.
@@ -332,6 +341,41 @@ records the SHA-256 of each fetched version in
 the version if its jar later changes.
 .IP \[bu] 2
 loads each fetched jar in its own class loader.
+.SH EXTENSIONS
+.PP
+Extensions add to what every blueprint can use.
+There are three kinds:
+.TP
+\f[I]Template engines\f[R]
+render template files chosen by extension.
+\f[B]mustache\f[R] (\f[I].mustache\f[R]) is built in, and
+\f[B]pebble\f[R] (\f[I].peb\f[R]) ships with jgen.
+.TP
+\f[I]Language packs\f[R]
+add validation rules and template helpers for a language.
+\f[B]python\f[R] (\f[B]PYTHON_MODULE\f[R], \f[B]PYTHON_PACKAGE\f[R],
+\f[B]PYPI_PROJECT\f[R]) and \f[B]node\f[R] (\f[B]NPM_PACKAGE\f[R],
+\f[B]JS_IDENTIFIER\f[R]) are built in.
+.TP
+\f[I]Path tags\f[R]
+add rules for file and folder names.
+\f[B]filelist\f[R], \f[B]placeholder\f[R], \f[B]dot\f[R] and
+\f[B]conditional\f[R] are built in.
+.PP
+An extension is a jar that lists its classes in
+\f[B]META-INF/services/\f[R] under the interface\[cq]s name.
+Put the jar in a blueprints folder (see \f[B]FILES\f[R]).
+Extension names are unique, and built-in extensions can\[cq]t be
+replaced.
+.PP
+A blueprint names what it needs in \f[B]requires\f[R], as \f[I]name\f[R]
+or \f[I]name\f[R]\[at]\f[I]minimum-version\f[R].
+jgen refuses a blueprint whose requirements aren\[cq]t installed, before
+reading its fields.
+A \f[B]validation\f[R] name that is neither built in nor defined by an
+installed language pack is an error.
+The generation record lists the added extensions a project was generated
+with, and \f[B]-r\f[R] refuses to regenerate a project without them.
 .SH SHELL COMPLETION
 .PP
 Homebrew installs completion for bash, zsh and fish.

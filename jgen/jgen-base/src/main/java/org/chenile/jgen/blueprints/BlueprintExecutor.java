@@ -44,6 +44,7 @@ public class BlueprintExecutor {
         child.isJar = !java.nio.file.Files.isDirectory(java.nio.file.Path.of(blueprint.templateFolder));
         var path = new ArrayList<>(ancestry); path.add(blueprint.name);
         child.blueprintPath = List.copyOf(path);
+        child.enginesUsed = parent.enginesUsed;
         orchExecutor.execute(child);
     }
 }
