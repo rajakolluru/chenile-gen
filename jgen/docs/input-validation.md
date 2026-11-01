@@ -27,8 +27,8 @@ the field and rule, with indexed paths for nested records.
 | `VERSION` | Letters, digits, dots, underscores and hyphens. |
 | `HTTP_URL` | An absolute HTTP or HTTPS URL with a host. |
 | `KAFKA_TOPIC` | 1–249 ASCII letters, digits, dots, underscores or hyphens, excluding `.` and `..`. |
-| `GITHUB_REPOSITORY` | `owner/repo`, e.g. `acme/jgen-terraform`. The owner has at most 39 letters, digits or single hyphens and does not start or end with a hyphen. The repository has 1–100 letters, digits, dots, underscores or hyphens, and is not `.` or `..`. |
-| `PATTERN` | Matches the field's own `pattern` (see below). |
+| `GITHUB_REPOSITORY` (2.1.36) | `owner/repo`, e.g. `acme/jgen-terraform`. The owner has at most 39 letters, digits or single hyphens and does not start or end with a hyphen. The repository has 1–100 letters, digits, dots, underscores or hyphens, and is not `.` or `..`. |
+| `PATTERN` (2.1.36) | Matches the field's own `pattern` (see below). |
 
 Rule names are case-sensitive. An unknown rule is a blueprint configuration error.
 Leaving `validation` out preserves existing field-type validation. Existing

@@ -25,7 +25,10 @@ if [ -n "$JAVA_HOME" ] && [ -x "$JAVA_HOME/bin/java" ]; then
 elif command -v java >/dev/null 2>&1; then
   JAVA=java
 else
-  for candidate in /opt/homebrew/opt/openjdk/bin/java /usr/local/opt/openjdk/bin/java \
+  # The Homebrew formula depends on the keg-only openjdk@25, which is not linked onto the PATH.
+  for candidate in /opt/homebrew/opt/openjdk@25/bin/java /usr/local/opt/openjdk@25/bin/java \
+                   /home/linuxbrew/.linuxbrew/opt/openjdk@25/bin/java \
+                   /opt/homebrew/opt/openjdk/bin/java /usr/local/opt/openjdk/bin/java \
                    /home/linuxbrew/.linuxbrew/opt/openjdk/bin/java; do
     if [ -x "$candidate" ]; then JAVA="$candidate"; break; fi
   done

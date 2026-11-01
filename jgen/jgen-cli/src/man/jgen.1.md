@@ -2,7 +2,7 @@
 title: JGEN
 section: 1
 header: JGen Manual
-footer: jgen 2.1.35
+footer: jgen 2.1.36
 date: October 2026
 ---
 
@@ -38,7 +38,7 @@ Template files ending in *.mustache* are rendered with Mustache. File and folder
 instructions:
 
 - *\_\_name\_\_* is replaced by an input value;
-- *\_DoT\_* becomes a dot, so *\_DoT\_gitignore* is generated as *.gitignore*;
+- *\_DoT\_* becomes a dot, so *\_DoT\_gitignore* is generated as *.gitignore* (since 2.1.36);
 - a folder named *%%key=value%%* is kept only when the input matches;
 - a *.filelist* file is split into several files;
 - an empty folder named *%{{blueprint ...}}* generates a child blueprint in its place.
@@ -50,7 +50,7 @@ rebuild: from blueprint folders (see **FILES**) or straight from a GitHub releas
 Every input path (prompts, input files, the web portal, child blueprints) goes through the same validator. The
 validator reports every problem at once, before any file is written.
 
-A blueprint can ask jgen to make the generated project a local Git repository: when the input **initGit** is
+Since 2.1.36, a blueprint can ask jgen to make the generated project a local Git repository: when the input **initGit** is
 true, jgen runs **git init** (branch **main**), adds every file and makes one commit. If the blueprint names a
 **GITHUB_REPOSITORY** input as its *gitRepositoryField* and that input has a value, jgen adds it as the **origin**
 remote, using SSH, or HTTPS when the configuration sets **gitRemoteProtocol** to **https**. jgen never creates
