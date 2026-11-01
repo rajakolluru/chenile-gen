@@ -24,6 +24,8 @@ jgen - generate projects from blueprints
 
 **jgen** **\--fetch** *reference* \[**\--trust**\] \[**\--offline**\]
 
+**jgen** **\--search** \[*text*\] \[**\--offline**\]
+
 **jgen** **\--completion** *shell*
 
 **jgen** **-h** | **-V**
@@ -144,6 +146,10 @@ jgen does one thing per run. When several mode options are given, the first of *
 :   Fetch the blueprint at *reference*, verify it and cache it. jgen prints its name, description, exact source and
     SHA-256, and the **-g** command to use it.
 
+**\--search** \[*text*\]
+:   Search the blueprint catalogs (see **CATALOGS**) for entries whose name, description or tags contain *text*;
+    without *text*, list every entry. Each result shows *catalog*/*name*, its description, source and tags.
+
 **\--trust**
 :   Trust every blueprint source used in this run without asking. Use this in scripts and CI only for sources you
     have reviewed. Prefer listing them in *settings.json* (see **FILES**).
@@ -163,26 +169,47 @@ jgen does one thing per run. When several mode options are given, the first of *
 
 # BLUEPRINT REFERENCES
 
-A blueprint is named either by its installed name (for example **chenile-service**) or by a reference:
+A blueprint is named by its installed name (for example **chenile-service**), by a catalog name (see **CATALOGS**)
+or by a reference:
 
 **github:***owner*/*repo*\[/*name*\]\[\@*version*\]\[#sha256:*hex*\]
 
 *owner/repo*
-:   The GitHub repository. Its release must carry exactly one blueprint jar, or exactly one named
-    *repo-\*.jar*. Jars ending in *-sources*, *-javadoc* and *-tests* are ignored.
+:   The GitHub repository. If its release carries a blueprint jar (exactly one, or exactly one named
+    *repo-\*.jar*; *-sources*, *-javadoc* and *-tests* jars are ignored), jgen uses the jar. Otherwise, or when the
+    tag has no release, jgen uses the repository's source archive at that tag as a *template-only* blueprint (since
+    2.1.36). A template-only blueprint is laid out like a jar's resources (*src/main/resources/META-INF/blueprint.json*
+    and its template folder) and may not declare an init hook.
 
 *name*
 :   Which blueprint to use, when the jar contains several.
 
 *version*
-:   A release tag. Without it, jgen uses the latest release (or, with **\--offline**, the newest cached one).
+:   A release tag. Without it, jgen uses the latest release, or else the highest version tag (or, with
+    **\--offline**, the newest cached one).
 
 *hex*
-:   The expected SHA-256 of the jar, as 64 hexadecimal digits. A mismatch is an error. Pinning is recommended in
-    scripts and CI.
+:   The expected SHA-256, as 64 hexadecimal digits: of the jar, or, for a template-only blueprint, of its files. A
+    mismatch is an error. Pinning is recommended in scripts and CI.
+
+A local folder holding a template-only blueprint is named with **dir:***folder* (since 2.1.36). The folder may be the
+blueprint's repository or its *src/main/resources*. It is not cached, locked or trust-checked, so edits apply on the
+next run.
 
 Installed blueprints always take precedence. A fetched blueprint whose name is already taken by an installed one
 is refused.
+
+# CATALOGS
+
+Since 2.1.36, a short name that is not installed is looked up in blueprint catalogs:
+\[*catalog*/\]*name*\[\@*version*\]. jgen searches the official catalog (**github:ajapros/jgen-catalog**) first, then
+the catalogs listed in *settings.json*, and uses the first match. *catalog* (the catalog's alias) picks one catalog;
+*version* picks a version, otherwise the latest. The entry's source is then fetched like any **github:** reference,
+and a version the catalog pins to a SHA-256 is checked.
+
+Sources listed in the official catalog are trusted. Sources from other catalogs are trusted only if the catalog is
+marked **trusted** in *settings.json*; otherwise jgen asks as usual. Catalogs are cached for an hour; when GitHub
+cannot be reached, or with **\--offline**, the cached copy is used.
 
 # TRUST
 
@@ -257,7 +284,11 @@ to *~/.jgen/blueprints*, so Tab does not start Java each time.
 
 *~/.jgen/settings.json*
 :   **trustedSources**: a list of trusted blueprint sources, each **github:***owner*/\* or
-    **github:***owner*/*repo*.
+    **github:***owner*/*repo*. **catalogs**: further catalogs, each with **source** (**github:***owner*/*repo*),
+    **alias** and **trusted**. **officialCatalog**: **false** to stop searching the official catalog.
+
+*~/.jgen/cache/catalogs/*
+:   Cached catalogs.
 
 *~/.jgen/blueprints.lock.json*
 :   The SHA-256 first seen for each fetched blueprint version.
@@ -306,6 +337,17 @@ Start a new blueprint in its own Git repository, ready to push (set **standalone
 
     jgen -g jgen-blueprint -o new-blueprint.json
     jgen -f new-blueprint.json
+
+Find a blueprint in the catalogs and use it by name:
+
+    jgen --search terraform
+    jgen -g terraform@1.2.0 -o tf.json
+
+Write a template-only blueprint and try it from its folder, then use it from GitHub once tagged:
+
+    jgen -g dir:./jgen-terraform -o tf.json
+    jgen -f tf.json
+    jgen -g github:acme/jgen-terraform@0.1.0 -o tf.json
 
 Install a blueprint jar of your own:
 

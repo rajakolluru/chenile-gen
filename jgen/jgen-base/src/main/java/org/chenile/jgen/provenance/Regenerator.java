@@ -88,8 +88,10 @@ public final class Regenerator {
         } else if (Registry.blueprints.containsKey(previous.blueprint.name)) {
             blueprint = Registry.blueprints.get(previous.blueprint.name);
         } else if (previous.blueprint.reference != null && resolver != null) {
+            // A local dir: blueprint is expected to change while it is being written, so it is not pinned.
+            boolean local = previous.blueprint.reference.startsWith(BlueprintResolver.DIR_PREFIX);
             String pinned = previous.blueprint.reference
-                    + (previous.blueprint.sha256 == null ? "" : "#sha256:" + previous.blueprint.sha256);
+                    + (previous.blueprint.sha256 == null || local ? "" : "#sha256:" + previous.blueprint.sha256);
             blueprint = resolver.resolve(pinned);
         } else {
             throw new IllegalArgumentException("Blueprint " + previous.blueprint.name + " is not installed"

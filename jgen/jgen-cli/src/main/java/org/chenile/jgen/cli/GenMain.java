@@ -69,6 +69,9 @@ public class GenMain implements Runnable {
     @CommandLine.Option(names = {"--completion"}, paramLabel = "SHELL",
             description = "Prints the completion script for bash, zsh or fish, e.g. source <(jgen --completion bash)")
     private String completionShell;
+    @CommandLine.Option(names = {"--search"}, arity = "0..1", fallbackValue = "", paramLabel = "TEXT",
+            description = "Searches the blueprint catalogs by name, description or tag; lists everything without TEXT")
+    private String searchText;
     @CommandLine.Option(names = {"--list-blueprints"}, hidden = true,
             description = "Lists installed and cached blueprints, one per line with a tab-separated description (used by completion)")
     private boolean listBlueprints;
@@ -84,6 +87,10 @@ public class GenMain implements Runnable {
         try {
             if (completionShell != null){
                 printCompletion();
+                return;
+            }
+            if (searchText != null){
+                search();
                 return;
             }
             if (listBlueprints){
@@ -311,6 +318,14 @@ public class GenMain implements Runnable {
         Registry.blueprints.values().stream()
                 .sorted(Comparator.comparing((BlueprintConfig b) -> b.name))
                 .forEach(b -> System.out.println(b.name + "\t" + oneLine(b.description)));
+        try {
+            for (var catalog : resolver().catalogs().cachedOnly())
+                for (var entry : catalog.catalog().blueprints.entrySet())
+                    System.out.println(entry.getKey() + "\t" + oneLine(entry.getValue().description)
+                            + " (catalog " + catalog.alias() + ")");
+        } catch (IOException ignored) {
+            // completion must never fail
+        }
         Path cache = org.chenile.jgen.remote.JgenSettings.home().resolve("cache").resolve("github");
         if (!Files.isDirectory(cache)) return;
         try (var versions = Files.find(cache, 3, (p, a) -> a.isDirectory() && cache.relativize(p).getNameCount() == 3)) {
@@ -318,6 +333,30 @@ public class GenMain implements Runnable {
                     .forEach(p -> System.out.println("github:" + p.getName(0) + "/" + p.getName(1) + "@" + p.getName(2)
                             + "\tcached release"));
         }
+    }
+
+    private void search() throws IOException {
+        var catalogs = resolver().catalogs();
+        var loaded = catalogs.all();
+        if (loaded.isEmpty()) {
+            System.out.println("No catalogs could be read" + (offline ? " (offline, and none cached)." : "."));
+            return;
+        }
+        var matches = catalogs.search(searchText);
+        if (matches.isEmpty()) {
+            System.out.println("No blueprints match \"" + searchText + "\" in "
+                    + loaded.stream().map(org.chenile.jgen.remote.Catalogs.Loaded::alias).toList());
+            return;
+        }
+        int width = matches.stream().mapToInt(m -> m.catalog().alias().length() + 1 + m.name().length()).max().orElse(10);
+        for (var match : matches) {
+            String id = match.catalog().alias() + "/" + match.name();
+            System.out.printf("%-" + width + "s  %s%n", id, oneLine(match.entry().description));
+            System.out.printf("%-" + width + "s  %s%s%n", "", match.entry().source,
+                    match.entry().tags.isEmpty() ? "" : "  [" + String.join(", ", match.entry().tags) + "]");
+        }
+        System.out.println();
+        System.out.println("Use one with: jgen -g <name> -o input.json   (or <catalog>/<name>, <name>@<version>)");
     }
 
     private static String oneLine(String text) {

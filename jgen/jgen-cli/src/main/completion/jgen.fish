@@ -31,6 +31,7 @@ function __jgen_blueprints
     end
     test -s $cache; and cat $cache
     printf '%s\t%s\n' 'github:' 'a GitHub reference: github:owner/repo[@version]'
+    printf '%s\t%s\n' 'dir:' 'a local template-only blueprint folder'
 end
 
 complete -c jgen -f
@@ -45,6 +46,7 @@ complete -c jgen -l blueprint -x -a '(__jgen_blueprints)' -d 'Regenerate with th
 complete -c jgen -l fetch -x -a '(__jgen_blueprints)' -d 'Fetch, verify and cache a blueprint'
 complete -c jgen -l trust -d 'Trust the blueprint sources used in this run'
 complete -c jgen -l offline -d 'Use only installed and cached blueprints'
+complete -c jgen -l search -x -d 'Search the blueprint catalogs'
 complete -c jgen -l completion -x -a 'bash zsh fish' -d 'Print a completion script'
 complete -c jgen -s h -l help -d 'Show help'
 complete -c jgen -s V -l version -d 'Show the version'

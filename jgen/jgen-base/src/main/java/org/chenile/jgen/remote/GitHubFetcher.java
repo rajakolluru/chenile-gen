@@ -30,13 +30,44 @@ public class GitHubFetcher implements BlueprintFetcher {
 
     @Override
     public String latestVersion(BlueprintReference reference) throws IOException {
-        JsonNode release = getJson(API + reference.repository() + "/releases/latest", reference);
-        return release.path("tag_name").asText(null);
+        try {
+            JsonNode release = getJson(API + reference.repository() + "/releases/latest", reference);
+            return release.path("tag_name").asText(null);
+        } catch (NoSuchReleaseException e) {
+            // A template-only blueprint may be published with tags alone: take the highest version tag.
+            JsonNode tags = getJson(API + reference.repository() + "/tags?per_page=100", reference);
+            String best = null;
+            for (JsonNode tag : tags) {
+                String name = tag.path("name").asText(null);
+                if (name != null && (best == null || BlueprintResolver.compareVersions(name, best) > 0)) best = name;
+            }
+            return best;
+        }
+    }
+
+    @Override
+    public byte[] catalog(String owner, String repo) throws IOException {
+        String url = "https://raw.githubusercontent.com/" + owner + "/" + repo + "/HEAD/catalog.json";
+        HttpResponse<byte[]> response = send(request(url, false).build(), HttpResponse.BodyHandlers.ofByteArray());
+        if (response.statusCode() != 200)
+            throw new IOException("Cannot read catalog github:" + owner + "/" + repo + " (HTTP " + response.statusCode()
+                    + " for " + url + ")");
+        return response.body();
+    }
+
+    /** No such release (or repository). */
+    static class NoSuchReleaseException extends IOException {
+        NoSuchReleaseException(String message) { super(message); }
     }
 
     @Override
     public List<Asset> assets(BlueprintReference reference) throws IOException {
-        JsonNode release = getJson(API + reference.repository() + "/releases/tags/" + reference.version(), reference);
+        JsonNode release;
+        try {
+            release = getJson(API + reference.repository() + "/releases/tags/" + reference.version(), reference);
+        } catch (NoSuchReleaseException e) {
+            return List.of();   // a tag without a release: template-only, from the source archive
+        }
         List<Asset> assets = new ArrayList<>();
         for (JsonNode asset : release.path("assets"))
             assets.add(new Asset(asset.path("name").asText(), asset.path("browser_download_url").asText()));
@@ -60,7 +91,7 @@ public class GitHubFetcher implements BlueprintFetcher {
         HttpResponse<String> response = send(request(url, true).header("Accept", "application/vnd.github+json").build(),
                 HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 404)
-            throw new IOException("No such release: " + reference + " (" + url + ")");
+            throw new NoSuchReleaseException("No such release: " + reference + " (" + url + ")");
         if (response.statusCode() != 200)
             throw new IOException("GitHub returned HTTP " + response.statusCode() + " for " + url
                     + (response.statusCode() == 403 ? "; set GITHUB_TOKEN if you hit the rate limit" : ""));

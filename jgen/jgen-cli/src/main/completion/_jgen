@@ -27,7 +27,7 @@ _jgen_blueprints() {
     done
   fi
   _describe -t blueprints 'blueprint' entries
-  compadd -S '' -X 'or a GitHub reference' -- 'github:'
+  compadd -S '' -X 'or a GitHub reference, or a local template-only folder' -- 'github:' 'dir:'
 }
 
 _jgen() {
@@ -43,6 +43,7 @@ _jgen() {
     '--fetch=[fetch, verify and cache a blueprint]:blueprint:_jgen_blueprints' \
     '--trust[trust the blueprint sources used in this run]' \
     '--offline[use only installed and cached blueprints]' \
+    '--search=-[search the blueprint catalogs]::text: ' \
     '--completion=[print a completion script]:shell:(bash zsh fish)' \
     '(- *)'{-h,--help}'[show help]' \
     '(- *)'{-V,--version}'[show the version]'

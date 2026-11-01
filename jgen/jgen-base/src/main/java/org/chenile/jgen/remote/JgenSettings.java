@@ -26,6 +26,26 @@ public class JgenSettings {
 
     /** Patterns: github:owner/* or github:owner/repo. */
     public List<String> trustedSources = new ArrayList<>(DEFAULT_TRUSTED);
+    /** Whether the official catalog (github:ajapros/jgen-catalog) is searched first. */
+    public boolean officialCatalog = true;
+    /** Further catalogs, searched in order after the official one. */
+    public List<CatalogSource> catalogs = new ArrayList<>();
+
+    /** A catalog to search: a GitHub repository with catalog.json at the root of its default branch. */
+    public static class CatalogSource {
+        /** github:owner/repo */
+        public String source;
+        /** The short name used in alias/name; defaults to the repository owner. */
+        public String alias;
+        /** When true, the sources this catalog lists are trusted without asking (as for the official catalog). */
+        public boolean trusted;
+
+        public CatalogSource() { }
+
+        public CatalogSource(String source, String alias, boolean trusted) {
+            this.source = source; this.alias = alias; this.trusted = trusted;
+        }
+    }
 
     public static Path home() {
         String override = System.getenv("JGEN_HOME_DIR");

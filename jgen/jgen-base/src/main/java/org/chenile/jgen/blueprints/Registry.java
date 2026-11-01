@@ -66,15 +66,39 @@ public class Registry {
      * @return the blueprints the jar contains
      */
     public static synchronized List<BlueprintConfig> loadJar(Path jar) throws Exception {
-        BlueprintJarLoader loader = new BlueprintJarLoader(jar);
+        return loadIsolated(jar, false);
+    }
+
+    /**
+     * Loads a template-only blueprint from a folder laid out like a jar's resources (META-INF/blueprint.json plus
+     * the template folder), through its own class loader. Template-only blueprints carry no Java: a descriptor that
+     * declares an initHook is refused, since its classes would have to come from a built jar.
+     *
+     * @param resources the folder that holds META-INF/blueprint.json (e.g. a repository's src/main/resources)
+     */
+    public static synchronized List<BlueprintConfig> loadTemplateOnly(Path resources) throws Exception {
+        return loadIsolated(resources, true);
+    }
+
+    private static List<BlueprintConfig> loadIsolated(Path location, boolean templateOnly) throws Exception {
+        BlueprintJarLoader loader = new BlueprintJarLoader(location);
         List<URL> descriptors = descriptors(loader);
-        if (descriptors.isEmpty()) throw new IOException("No " + DESCRIPTOR + " in " + jar);
+        if (descriptors.isEmpty()) throw new IOException("No " + DESCRIPTOR + " in " + location);
+        if (templateOnly) {
+            for (URL descriptor : descriptors) {
+                com.fasterxml.jackson.databind.JsonNode json = objectMapper.readTree(descriptor);
+                if (json.hasNonNull("initHook"))
+                    throw new IllegalArgumentException("Blueprint " + json.path("name").asText("?") + " in " + location
+                            + " declares an initHook, so it needs Java classes: publish it as a jar release instead"
+                            + " of a template-only blueprint");
+            }
+        }
         List<BlueprintConfig> loaded = new ArrayList<>();
         for (URL descriptor : descriptors) {
             BlueprintConfig blueprint = load(descriptor, loader);
             BlueprintConfig existing = blueprints.get(blueprint.name);
             if (existing != null && !blueprint.source.equals(existing.source))
-                throw new IllegalStateException("Blueprint " + blueprint.name + " from " + jar
+                throw new IllegalStateException("Blueprint " + blueprint.name + " from " + location
                         + " clashes with a blueprint of the same name from " + existing.source);
             loaded.add(blueprint);
         }
@@ -131,7 +155,7 @@ public class Registry {
         return loader instanceof BlueprintJarLoader jar ? jar.findResource(name) : loader.getResource(name);
     }
 
-    /** The class loader of one blueprint jar, a child of JGen's own. */
+    /** The class loader of one blueprint jar (or template-only folder), a child of JGen's own. */
     static final class BlueprintJarLoader extends URLClassLoader {
         BlueprintJarLoader(Path jar) throws IOException {
             super(new URL[]{jar.toUri().toURL()}, Registry.class.getClassLoader());

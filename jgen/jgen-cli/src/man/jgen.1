@@ -26,6 +26,8 @@ jgen - generate projects from blueprints
 \f[B]jgen\f[R] \f[B]--fetch\f[R] \f[I]reference\f[R] [\f[B]--trust\f[R]]
 [\f[B]--offline\f[R]]
 .PP
+\f[B]jgen\f[R] \f[B]--search\f[R] [\f[I]text\f[R]] [\f[B]--offline\f[R]]
+.PP
 \f[B]jgen\f[R] \f[B]--completion\f[R] \f[I]shell\f[R]
 .PP
 \f[B]jgen\f[R] \f[B]-h\f[R] | \f[B]-V\f[R]
@@ -222,6 +224,13 @@ Fetch the blueprint at \f[I]reference\f[R], verify it and cache it.
 jgen prints its name, description, exact source and SHA-256, and the
 \f[B]-g\f[R] command to use it.
 .TP
+\f[B]--search\f[R] [\f[I]text\f[R]]
+Search the blueprint catalogs (see \f[B]CATALOGS\f[R]) for entries whose
+name, description or tags contain \f[I]text\f[R]; without
+\f[I]text\f[R], list every entry.
+Each result shows \f[I]catalog\f[R]/\f[I]name\f[R], its description,
+source and tags.
+.TP
 \f[B]--trust\f[R]
 Trust every blueprint source used in this run without asking.
 Use this in scripts and CI only for sources you have reviewed.
@@ -243,34 +252,67 @@ Print a usage summary and exit.
 Print the version and exit.
 .SH BLUEPRINT REFERENCES
 .PP
-A blueprint is named either by its installed name (for example
-\f[B]chenile-service\f[R]) or by a reference:
+A blueprint is named by its installed name (for example
+\f[B]chenile-service\f[R]), by a catalog name (see \f[B]CATALOGS\f[R])
+or by a reference:
 .PP
 \f[B]github:\f[R]\f[I]owner\f[R]/\f[I]repo\f[R][/\f[I]name\f[R]][\[at]\f[I]version\f[R]][#sha256:\f[I]hex\f[R]]
 .TP
 \f[I]owner/repo\f[R]
 The GitHub repository.
-Its release must carry exactly one blueprint jar, or exactly one named
-\f[I]repo-*.jar\f[R].
-Jars ending in \f[I]-sources\f[R], \f[I]-javadoc\f[R] and
-\f[I]-tests\f[R] are ignored.
+If its release carries a blueprint jar (exactly one, or exactly one
+named \f[I]repo-*.jar\f[R]; \f[I]-sources\f[R], \f[I]-javadoc\f[R] and
+\f[I]-tests\f[R] jars are ignored), jgen uses the jar.
+Otherwise, or when the tag has no release, jgen uses the
+repository\[cq]s source archive at that tag as a \f[I]template-only\f[R]
+blueprint (since 2.1.36).
+A template-only blueprint is laid out like a jar\[cq]s resources
+(\f[I]src/main/resources/META-INF/blueprint.json\f[R] and its template
+folder) and may not declare an init hook.
 .TP
 \f[I]name\f[R]
 Which blueprint to use, when the jar contains several.
 .TP
 \f[I]version\f[R]
 A release tag.
-Without it, jgen uses the latest release (or, with \f[B]--offline\f[R],
-the newest cached one).
+Without it, jgen uses the latest release, or else the highest version
+tag (or, with \f[B]--offline\f[R], the newest cached one).
 .TP
 \f[I]hex\f[R]
-The expected SHA-256 of the jar, as 64 hexadecimal digits.
+The expected SHA-256, as 64 hexadecimal digits: of the jar, or, for a
+template-only blueprint, of its files.
 A mismatch is an error.
 Pinning is recommended in scripts and CI.
+.PP
+A local folder holding a template-only blueprint is named with
+\f[B]dir:\f[R]\f[I]folder\f[R] (since 2.1.36).
+The folder may be the blueprint\[cq]s repository or its
+\f[I]src/main/resources\f[R].
+It is not cached, locked or trust-checked, so edits apply on the next
+run.
 .PP
 Installed blueprints always take precedence.
 A fetched blueprint whose name is already taken by an installed one is
 refused.
+.SH CATALOGS
+.PP
+Since 2.1.36, a short name that is not installed is looked up in
+blueprint catalogs:
+[\f[I]catalog\f[R]/]\f[I]name\f[R][\[at]\f[I]version\f[R]].
+jgen searches the official catalog
+(\f[B]github:ajapros/jgen-catalog\f[R]) first, then the catalogs listed
+in \f[I]settings.json\f[R], and uses the first match.
+\f[I]catalog\f[R] (the catalog\[cq]s alias) picks one catalog;
+\f[I]version\f[R] picks a version, otherwise the latest.
+The entry\[cq]s source is then fetched like any \f[B]github:\f[R]
+reference, and a version the catalog pins to a SHA-256 is checked.
+.PP
+Sources listed in the official catalog are trusted.
+Sources from other catalogs are trusted only if the catalog is marked
+\f[B]trusted\f[R] in \f[I]settings.json\f[R]; otherwise jgen asks as
+usual.
+Catalogs are cached for an hour; when GitHub cannot be reached, or with
+\f[B]--offline\f[R], the cached copy is used.
 .SH TRUST
 .PP
 A blueprint can contain Java code, which runs with your permissions.
@@ -367,6 +409,14 @@ Blueprint jars shared by everyone using this installation.
 \f[B]trustedSources\f[R]: a list of trusted blueprint sources, each
 \f[B]github:\f[R]\f[I]owner\f[R]/* or
 \f[B]github:\f[R]\f[I]owner\f[R]/\f[I]repo\f[R].
+\f[B]catalogs\f[R]: further catalogs, each with \f[B]source\f[R]
+(\f[B]github:\f[R]\f[I]owner\f[R]/\f[I]repo\f[R]), \f[B]alias\f[R] and
+\f[B]trusted\f[R].
+\f[B]officialCatalog\f[R]: \f[B]false\f[R] to stop searching the
+official catalog.
+.TP
+\f[I]\[ti]/.jgen/cache/catalogs/\f[R]
+Cached catalogs.
 .TP
 \f[I]\[ti]/.jgen/blueprints.lock.json\f[R]
 The SHA-256 first seen for each fetched blueprint version.
@@ -442,6 +492,26 @@ Start a new blueprint in its own Git repository, ready to push (set
 \f[C]
 jgen -g jgen-blueprint -o new-blueprint.json
 jgen -f new-blueprint.json
+\f[R]
+.fi
+.PP
+Find a blueprint in the catalogs and use it by name:
+.IP
+.nf
+\f[C]
+jgen --search terraform
+jgen -g terraform\[at]1.2.0 -o tf.json
+\f[R]
+.fi
+.PP
+Write a template-only blueprint and try it from its folder, then use it
+from GitHub once tagged:
+.IP
+.nf
+\f[C]
+jgen -g dir:./jgen-terraform -o tf.json
+jgen -f tf.json
+jgen -g github:acme/jgen-terraform\[at]0.1.0 -o tf.json
 \f[R]
 .fi
 .PP

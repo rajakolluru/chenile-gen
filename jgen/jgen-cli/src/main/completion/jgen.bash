@@ -25,6 +25,7 @@ _jgen_blueprint_names() {
     fi
     [ -s "$cache" ] && cut -f1 "$cache"
     echo "github:"
+    echo "dir:"
 }
 
 _jgen() {
@@ -46,12 +47,12 @@ _jgen() {
 
     local options="-c --config -e --emit-config -f --input-file -o --output-file
         -g --generate-blueprint-file -r --regenerate --into --blueprint --fetch
-        --trust --offline --completion -h --help -V --version"
+        --trust --offline --search --completion -h --help -V --version"
 
     case "$prev" in
         -g|--generate-blueprint-file|--blueprint|--fetch)
             COMPREPLY=( $(compgen -W "$(_jgen_blueprint_names)" -- "$cur") )
-            if [ ${#COMPREPLY[@]} -eq 1 ] && [ "${COMPREPLY[0]}" = "github:" ]; then
+            if [ ${#COMPREPLY[@]} -eq 1 ] && { [ "${COMPREPLY[0]}" = "github:" ] || [ "${COMPREPLY[0]}" = "dir:" ]; }; then
                 type compopt >/dev/null 2>&1 && compopt -o nospace 2>/dev/null
             fi
             if declare -F __ltrim_colon_completions >/dev/null 2>&1; then
