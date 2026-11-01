@@ -52,7 +52,7 @@ that `jbang-catalog.json` points at) and updates the Homebrew formula in `ajapro
 itself uses the workflow's built-in token; the formula update needs a `JRELEASER_HOMEBREW_GITHUB_TOKEN` secret (a
 fine-grained token for `ajapros/homebrew-jgen-tap` with Contents read and write).
 
-`stm-cli`, which used to live here, is now its own repository (`rajakolluru/stm-cli`) with its own releases. It
+`stm-cli`, which used to live here, is now its own repository (`ajapros/stm-cli`) with its own releases. It
 installs from the same tap: `brew install ajapros/jgen-tap/stm-cli`.
 
 ## Building from source: requirements
