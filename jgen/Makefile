@@ -7,6 +7,13 @@ build:
 	mvn install
 	
 
+## deploy-central: Publishes org.chenile.jgen:jgen (parent pom), jgen-base and jgen-ext-pebble to Maven Central.
+## deploy-central: Usage: make deploy-central version=2.5.1 passphrase=<gpg passphrase>
+.PHONY: deploy-central
+deploy-central:
+	mvn -B -DskipTests -Drevision=$(version) -DperformRelease=true -Dgpg.passphrase="${passphrase}" \
+		-pl jgen-base,jgen-ext-pebble -am deploy
+
 ## make-cli: copies all scripts from the scripts folder to bin
 .PHONY: make-cli
 make-cli: 

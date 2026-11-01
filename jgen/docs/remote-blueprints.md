@@ -1,6 +1,6 @@
 # Blueprints from the web
 
-Status: GitHub releases since 2.1.35; template-only blueprints (from a repository or a local folder) since 2.1.36. catalogs since 2.1.36. Maven references and signatures are the plan.
+Status: GitHub releases since 2.1.35; template-only blueprints (from a repository or a local folder) since 2.5.1. catalogs since 2.5.1. Maven references and signatures are the plan.
 
 JGen finds blueprints the way Maven finds artifacts: installed ones first, then the web. A blueprint is one
 jar (its input contract, templates and hooks), so "fetching a blueprint" means fetching one jar, checking it, and
@@ -13,12 +13,12 @@ A blueprint is named either by its installed name or by a reference:
 | Form | Meaning |
 | --- | --- |
 | `chenile-service` | an installed blueprint (built in, or a jar in a blueprints folder) |
-| `terraform`, `terraform@1.2.0`, `acme/terraform` | a short name from a [catalog](https://jgen.chenile.org/catalogs/) (2.1.36), if not installed |
+| `terraform`, `terraform@1.2.0`, `acme/terraform` | a short name from a [catalog](https://jgen.chenile.org/catalogs/) (2.5.1), if not installed |
 | `github:acme/jgen-terraform` | the latest release of that repository |
 | `github:acme/jgen-terraform@1.2.0` | the release tagged `1.2.0` |
 | `github:acme/jgen-pack/terraform@1.2.0` | one blueprint, when the jar contains several |
 | `…#sha256:<64 hex>` | pins the SHA-256 (of the jar, or of a template-only blueprint's files); recommended in CI and scripts |
-| `dir:./jgen-terraform` | a template-only blueprint in a local folder (2.1.36), for authoring |
+| `dir:./jgen-terraform` | a template-only blueprint in a local folder (2.5.1), for authoring |
 
 References work wherever a blueprint name does: `jgen -g`, the `blueprint` key of an input file for `jgen -f`,
 `jgen -r --blueprint`, and `jgen --fetch`. A sample emitted with `jgen -g github:…` keeps the reference, so
@@ -43,7 +43,7 @@ The convention, if you set a repository up by hand:
   `<repo>-*.jar`; `-sources`, `-javadoc` and `-tests` jars are ignored. Tag releases with plain versions.
 - Add the topic `jgen-blueprint` to the repository so people can find it.
 
-## Template-only blueprints (2.1.36)
+## Template-only blueprints (2.5.1)
 
 A blueprint that needs no Java (no init hook; [JavaScript hooks](https://jgen.chenile.org/scripting/) are fine) can be used straight from its repository, with no jar to build or
 release. This suits most blueprints for things that are not Chenile: a Terraform module, a docs site, a GitHub
@@ -87,7 +87,7 @@ jgen -f tf.json
 jgen -r ./output/infra            # after editing the templates: see what changed
 ```
 
-## Catalogs (2.1.36)
+## Catalogs (2.5.1)
 
 A catalog is a `catalog.json` at the root of a GitHub repository's default branch. It maps short names to `github:`
 sources, with optional description, tags, version pins and the blueprint name inside a multi-blueprint jar.
@@ -155,10 +155,10 @@ Classes: `org.chenile.jgen.remote` (`BlueprintReference`, `BlueprintResolver`, `
 
 ## Later phases
 
-2. **Catalogs.** Shipped in 2.1.36: short names, `jgen --search`, the official catalog and team catalogs. See
+2. **Catalogs.** Shipped in 2.5.1: short names, `jgen --search`, the official catalog and team catalogs. See
    [blueprint catalogs](https://jgen.chenile.org/catalogs/). Still open: resolving child blueprints named by a fetched parent through the
    catalogs (today they must be installed or live in the same jar).
 3. **Maven.** `maven:group:artifact:version` references, from Maven Central or configured repositories (the jar
    only; blueprints bundle their own libraries).
 4. **Signatures.** Optional verification of GitHub artifact attestations or Sigstore signatures. Template-only
-   blueprints, originally planned here, shipped in 2.1.36.
+   blueprints, originally planned here, shipped in 2.5.1.

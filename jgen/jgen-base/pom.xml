@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>jgen</artifactId>
-        <groupId>org.chenile</groupId>
+        <groupId>org.chenile.jgen</groupId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -12,6 +12,26 @@
 
     <artifactId>jgen-base</artifactId>
     <name>Base classes for Java code generation</name>
+
+    <build>
+        <resources>
+            <!-- Only the version file is filtered (@revision@, @chenile.version@); templates must never be. -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>org/chenile/jgen/jgen-version.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>org/chenile/jgen/jgen-version.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
+    </build>
 
     <dependencies>
         <dependency>

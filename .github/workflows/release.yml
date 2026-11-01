@@ -1,4 +1,6 @@
-# Publishes JGen when a version tag is pushed (e.g. `git push origin 2.1.35`), or on demand.
+# Publishes JGen when a version tag is pushed (e.g. `git push origin 2.5.1`), or on demand.
+# JGen is versioned independently of Chenile (2.5.x) and builds only against released Chenile versions.
+# jgen-base and jgen-ext-pebble go to Maven Central separately: `make -C jgen deploy-central version=<v> ...`.
 # The release in this repository uses the workflow's own GITHUB_TOKEN. Updating the Homebrew formula needs a
 # repository secret JRELEASER_HOMEBREW_GITHUB_TOKEN: a fine-grained personal access token whose resource owner is
 # ajapros, limited to ajapros/homebrew-jgen-tap, with "Contents: Read and write".
@@ -11,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (an existing tag, e.g. 2.1.35)'
+        description: 'Version to release (an existing tag, e.g. 2.5.1)'
         required: true
 
 permissions:
@@ -37,8 +39,8 @@ jobs:
           cache: maven
 
       - name: Build JGen
-        # Chenile ${VERSION} artifacts must already be on Maven Central (release chenile-parent and friends first).
-        run: mvn -B -ntp -f jgen/pom.xml install -DskipTests
+        # The tag is the JGen version. Chenile comes from the released chenile-parent in jgen/pom.xml.
+        run: mvn -B -ntp -f jgen/pom.xml install -DskipTests -Drevision=${VERSION}
 
       - name: Check the distribution
         run: |

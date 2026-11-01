@@ -7,6 +7,9 @@
 		<groupId>org.chenile</groupId>
 		<version>2.1.35</version>
 	</parent>
+	<!-- JGen is versioned and released on its own cadence, independently of Chenile. It is built only against
+	     released Chenile versions (the parent above); generated projects target config.json's chenileVersion. -->
+	<groupId>org.chenile.jgen</groupId>
 	<artifactId>jgen</artifactId>
 	<packaging>pom</packaging>
 	<version>${revision}</version>
@@ -32,91 +35,92 @@
 
 	<name>Java based Code Generator</name>
 	<properties>
-		<jgen.version>${chenile.version}</jgen.version>
-		<revision>${jgen.version}</revision>
+		<!-- JGen's own version. Override with -Drevision=<version> when releasing. -->
+		<revision>2.5.1</revision>
+		<jgen.version>${revision}</jgen.version>
 		<!-- polyglot and js-community must share a version -->
 		<graalvm.version>25.0.4</graalvm.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
-            <dependency><groupId>org.chenile</groupId><artifactId>bp-process-workers</artifactId><version>${jgen.version}</version></dependency>
+            <dependency><groupId>org.chenile.jgen</groupId><artifactId>bp-process-workers</artifactId><version>${jgen.version}</version></dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>bp-process-management</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>jgen-base</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>jgen-ext-pebble</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>jgen-cli</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>bp-interceptor</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>bp-service</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>bp-headless-service</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>bp-ecosystem</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>bp-jgen-blueprint</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>bp-wfservice</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>bp-wfcustom</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>bp-minimonolith</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>bp-mybatisQuery</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>bp-it</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>bp-batch</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.chenile</groupId>
+				<groupId>org.chenile.jgen</groupId>
 				<artifactId>jgen-portal</artifactId>
 				<version>${jgen.version}</version>
 			</dependency>

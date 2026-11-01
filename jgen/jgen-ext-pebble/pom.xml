@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>jgen</artifactId>
-        <groupId>org.chenile</groupId>
+        <groupId>org.chenile.jgen</groupId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -19,7 +19,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>jgen-base</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -42,7 +42,7 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <!-- Implementation-Version lets blueprints require a minimum version: "pebble@2.1.36" -->
+                        <!-- Implementation-Version lets blueprints require a minimum version: "pebble@2.5.1" -->
                         <manifest>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>

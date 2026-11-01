@@ -24,14 +24,15 @@
         <revision>{{blueprintVersion}}</revision>
         <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jgen.version>{{chenileVersion}}</jgen.version>
+        <!-- The JGen release this blueprint is built against (JGen is versioned independently of Chenile). -->
+        <jgen.version>{{jgenVersion}}</jgen.version>
         <junit.version>5.13.4</junit.version>
     </properties>
 
     <dependencies>
         <!-- Provided by JGen at run time: never bundle it into the blueprint jar. -->
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>jgen-base</artifactId>
             <version>${jgen.version}</version>
             <scope>provided</scope>
@@ -78,7 +79,7 @@
     {{^parentArtifactId}}
     <parent>
         <artifactId>jgen</artifactId>
-        <groupId>org.chenile</groupId>
+        <groupId>org.chenile.jgen</groupId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -88,7 +89,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>jgen-base</artifactId>
         </dependency>
         <dependency>

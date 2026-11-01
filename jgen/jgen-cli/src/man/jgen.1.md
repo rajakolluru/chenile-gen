@@ -2,7 +2,7 @@
 title: JGEN
 section: 1
 header: JGen Manual
-footer: jgen 2.1.36
+footer: jgen 2.5.1
 date: October 2026
 ---
 
@@ -42,7 +42,7 @@ Template files ending in *.mustache* are rendered with Mustache. File and folder
 instructions:
 
 - *\_\_name\_\_* is replaced by an input value;
-- *\_DoT\_* becomes a dot, so *\_DoT\_gitignore* is generated as *.gitignore* (since 2.1.36);
+- *\_DoT\_* becomes a dot, so *\_DoT\_gitignore* is generated as *.gitignore* (since 2.5.1);
 - a folder named *%%key=value%%* is kept only when the input matches;
 - a *.filelist* file is split into several files;
 - an empty folder named *%{{blueprint ...}}* generates a child blueprint in its place.
@@ -54,7 +54,7 @@ rebuild: from blueprint folders (see **FILES**) or straight from a GitHub releas
 Every input path (prompts, input files, the web portal, child blueprints) goes through the same validator. The
 validator reports every problem at once, before any file is written.
 
-Since 2.1.36, a blueprint can ask jgen to make the generated project a local Git repository: when the input **initGit** is
+Since 2.5.1, a blueprint can ask jgen to make the generated project a local Git repository: when the input **initGit** is
 true, jgen runs **git init** (branch **main**), adds every file and makes one commit. If the blueprint names a
 **GITHUB_REPOSITORY** input as its *gitRepositoryField* and that input has a value, jgen adds it as the **origin**
 remote, using SSH, or HTTPS when the configuration sets **gitRemoteProtocol** to **https**. jgen never creates
@@ -172,7 +172,8 @@ jgen does one thing per run. When several mode options are given, the first of *
 :   Print a usage summary and exit.
 
 **-V**, **\--version**
-:   Print the version and exit.
+:   Print jgen's version, the Chenile version generated projects target by default, and the Chenile version jgen
+    was built with (see **VERSIONS**), then exit.
 
 # BLUEPRINT REFERENCES
 
@@ -185,7 +186,7 @@ or by a reference:
 :   The GitHub repository. If its release carries a blueprint jar (exactly one, or exactly one named
     *repo-\*.jar*; *-sources*, *-javadoc* and *-tests* jars are ignored), jgen uses the jar. Otherwise, or when the
     tag has no release, jgen uses the repository's source archive at that tag as a *template-only* blueprint (since
-    2.1.36). A template-only blueprint is laid out like a jar's resources (*src/main/resources/META-INF/blueprint.json*
+    2.5.1). A template-only blueprint is laid out like a jar's resources (*src/main/resources/META-INF/blueprint.json*
     and its template folder) and may not declare an init hook.
 
 *name*
@@ -199,7 +200,7 @@ or by a reference:
 :   The expected SHA-256, as 64 hexadecimal digits: of the jar, or, for a template-only blueprint, of its files. A
     mismatch is an error. Pinning is recommended in scripts and CI.
 
-A local folder holding a template-only blueprint is named with **dir:***folder* (since 2.1.36). The folder may be the
+A local folder holding a template-only blueprint is named with **dir:***folder* (since 2.5.1). The folder may be the
 blueprint's repository or its *src/main/resources*. It is not cached, locked or trust-checked, so edits apply on the
 next run.
 
@@ -208,7 +209,7 @@ is refused.
 
 # CATALOGS
 
-Since 2.1.36, a short name that is not installed is looked up in blueprint catalogs:
+Since 2.5.1, a short name that is not installed is looked up in blueprint catalogs:
 \[*catalog*/\]*name*\[\@*version*\]. jgen searches the official catalog (**github:ajapros/jgen-catalog**) first, then
 the catalogs listed in *settings.json*, and uses the first match. *catalog* (the catalog's alias) picks one catalog;
 *version* picks a version, otherwise the latest. The entry's source is then fetched like any **github:** reference,
@@ -394,9 +395,18 @@ Work without network access:
 
     jgen -g github:acme/jgen-terraform --offline -o tf.json
 
+# VERSIONS
+
+Since 2.5.1, jgen has its own version line and release cadence, separate from Chenile's (2.1.*x*); 2.5.1 follows
+2.1.35. jgen depends only on released Chenile versions. Generated projects target the Chenile version in the
+configuration's **chenileVersion**, which defaults to the latest released Chenile. Change it with a config file
+(**-c**, or **-e** to create one). A blueprint that needs a newer Chenile says so with **sinceVersion** and refuses
+an older **chenileVersion**. jgen's own libraries are published as **org.chenile.jgen:jgen-base** and
+**org.chenile.jgen:jgen-ext-pebble**.
+
 # SEE ALSO
 
-**java**(1), **git-diff**(1), **mvn**(1)
+**stm-cli**(1), **java**(1), **git-diff**(1), **mvn**(1)
 
 The JGen documentation: <https://jgen.chenile.org>. Chenile: <https://chenile.org>.
 

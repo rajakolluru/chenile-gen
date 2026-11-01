@@ -1,5 +1,6 @@
-# Release configuration for JGen. Run by .github/workflows/release.yml when a version tag (e.g. 2.1.35) is pushed.
-# Local dry run:  jreleaser full-release --dry-run -Djreleaser.project.version=2.1.35
+# Release configuration for JGen. Run by .github/workflows/release.yml when a version tag (e.g. 2.5.1) is pushed.
+# JGen is released on its own cadence (2.5.x), independently of Chenile.
+# Local dry run:  jreleaser full-release --dry-run -Djreleaser.project.version=2.5.1
 project:
   name: jgen
   description: Blueprint-driven code generator for Chenile, and for anything else that is text
@@ -18,7 +19,7 @@ project:
   stereotype: CLI
   languages:
     java:
-      groupId: org.chenile
+      groupId: org.chenile.jgen
       artifactId: jgen-cli
       version: '25'
 
@@ -26,7 +27,7 @@ release:
   github:
     owner: rajakolluru
     name: chenile-gen
-    # Chenile tags are plain versions (2.1.35) and are pushed by the maintainer, not created here.
+    # JGen tags are plain JGen versions (2.5.1) and are pushed by the maintainer, not created here.
     tagName: '{{projectVersion}}'
     skipTag: true
     overwrite: true

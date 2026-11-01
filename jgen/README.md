@@ -471,7 +471,7 @@ Example:
 
 These replacements happen after file contents are rendered.
 
-### 3. Dots in names: `_DoT_` (2.1.36)
+### 3. Dots in names: `_DoT_` (2.5.1)
 
 Every `_DoT_` in a file or folder name becomes a dot. Use it for dotfiles and dot-folders, which Maven leaves out
 of a blueprint jar and Git treats specially:
@@ -776,7 +776,7 @@ In practice, many user-visible changes come from editing template resources rath
 - If you want to change global generation behavior, start in `jgen-base`.
 - If a generated project looks wrong for only one blueprint, inspect that blueprint's resource templates first. Much of the repository's behavior is encoded in templates rather than Java logic.
 
-## Generated Git repositories (2.1.36)
+## Generated Git repositories (2.5.1)
 
 Any blueprint can have JGen make its output a local Git repository, with no code:
 

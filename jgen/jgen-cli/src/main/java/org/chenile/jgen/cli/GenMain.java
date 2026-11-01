@@ -18,7 +18,6 @@ import org.chenile.jgen.provenance.Regenerator;
 import org.chenile.jgen.remote.BlueprintResolver;
 import org.chenile.jgen.remote.TrustPrompt;
 import org.chenile.jgen.util.CopyFromJar;
-import org.chenile.workflow.cli.VersionProvider;
 import picocli.CommandLine;
 
 import java.io.File;

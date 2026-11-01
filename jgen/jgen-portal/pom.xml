@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>jgen</artifactId>
-        <groupId>org.chenile</groupId>
+        <groupId>org.chenile.jgen</groupId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -38,7 +38,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>bp-process-management</artifactId>
         </dependency>
         <dependency>
@@ -46,55 +46,55 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>jgen-base</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>jgen-ext-pebble</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>bp-interceptor</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>bp-service</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>bp-headless-service</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>bp-ecosystem</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>bp-jgen-blueprint</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>bp-wfservice</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>bp-wfcustom</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>bp-minimonolith</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>bp-mybatisQuery</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>bp-it</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.chenile</groupId>
+            <groupId>org.chenile.jgen</groupId>
             <artifactId>bp-batch</artifactId>
         </dependency>
         <dependency>

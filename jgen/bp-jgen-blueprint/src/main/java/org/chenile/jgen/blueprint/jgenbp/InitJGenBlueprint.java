@@ -33,6 +33,8 @@ public class InitJGenBlueprint implements InitHook {
             map.put("BlueprintName", CapUtils.capitalizeFirst(blueprintName));
             // A standalone blueprint is generated as its own Git repository (JGen's git-initializer step).
             map.put("initGit", Boolean.TRUE.equals(map.get("standaloneRepo")));
+            // A standalone blueprint compiles against the JGen that generated it (org.chenile.jgen:jgen-base).
+            map.putIfAbsent("jgenVersion", org.chenile.jgen.util.JgenVersion.current());
         };
         blueprintConfig.postProcessHook = (Map<String,Object> map) -> {
             Path project = projectFolder(map);

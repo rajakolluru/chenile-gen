@@ -1,0 +1,38 @@
+# Builds and tests JGen on every push and pull request.
+# Dependencies resolve from Maven Central only (no local installs), so a dependency on a Chenile version that has
+# not been released fails here, even though it builds on a maintainer's machine.
+name: Build JGen
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Refuse unreleased Chenile versions
+        run: |
+          parent=$(sed -n '/<parent>/,/<\/parent>/p' jgen/pom.xml | grep -o '<version>[^<]*' | head -1 | cut -d'>' -f2)
+          echo "JGen builds against chenile-parent $parent"
+          case "$parent" in *SNAPSHOT*) echo "::error::chenile-parent $parent is a snapshot"; exit 1;; esac
+          default=$(grep -o '"chenileVersion" *: *"[^"]*"' jgen/jgen-base/src/main/resources/config.json | grep -o '[0-9][^"]*')
+          echo "Generated projects target Chenile $default by default"
+          curl -fsI "https://repo1.maven.org/maven2/org/chenile/chenile-parent/$default/chenile-parent-$default.pom" > /dev/null \
+            || { echo "::error::config.json targets Chenile $default, which is not on Maven Central"; exit 1; }
+
+      - name: Build and test (Maven Central only)
+        run: mvn -B -ntp -f jgen/pom.xml -Dmaven.repo.local=$RUNNER_TEMP/m2 verify

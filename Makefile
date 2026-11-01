@@ -5,13 +5,11 @@
 .PHONY: clean
 clean:
 	# cd app-gen && $(MAKE) clean
-	cd stmcli && $(MAKE) clean
 	cd jgen && $(MAKE) clean
 ## all: 
 .PHONY: all
 all: 
 	# cd app-gen && $(MAKE) all
-	cd stmcli && $(MAKE) all
 	cd jgen && $(MAKE) all
 
 ## help: type for getting this help

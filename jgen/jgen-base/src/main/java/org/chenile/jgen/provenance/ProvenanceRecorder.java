@@ -178,16 +178,8 @@ public final class ProvenanceRecorder {
     }
 
     private static String jgenVersion() {
-        try (InputStream in = ProvenanceRecorder.class.getResourceAsStream(
-                "/META-INF/maven/org.chenile/jgen-base/pom.properties")) {
-            if (in != null) {
-                Properties properties = new Properties();
-                properties.load(in);
-                return properties.getProperty("version");
-            }
-        } catch (IOException ignored) {
-            // fall through
-        }
-        return ProvenanceRecorder.class.getPackage().getImplementationVersion();
+        String version = org.chenile.jgen.util.JgenVersion.current();
+        return "unknown".equals(version) ? null : version;
     }
+
 }
