@@ -33,6 +33,20 @@ public class BlueprintConfig {
      * Final processing post the code generation
      */
     public Consumer<Map<String,Object>> postProcessHook;
+    /**
+     * Runs last, for a top-level generation only: after the generation record is written and after the Git
+     * repository (if {@code initGit}) is created. Use it for actions outside the generated file tree; files it
+     * changes are not part of the initial commit.
+     */
+    public Consumer<Map<String,Object>> finalHook;
+    /**
+     * Names the input field that holds the GitHub repository (owner/repo) of the generated project. The field must be
+     * declared with validation GITHUB_REPOSITORY. When the input map has {@code initGit=true} and this field has a
+     * value, JGen adds it as the {@code origin} remote. Null (the default) means the blueprint has no such field.
+     */
+    public String gitRepositoryField;
+    /** The message of the initial commit when {@code initGit} is true; may use ${input} placeholders. */
+    public String gitCommitMessage;
     /** Where this blueprint's descriptor was loaded from (a jar: or file: URL); recorded in generation records. */
     @com.fasterxml.jackson.annotation.JsonIgnore
     public String source;

@@ -29,8 +29,8 @@ public class FieldUtils {
         if (input == null || input.isEmpty()) return !isRequired(field);
         if (field.type == FieldType.MULTI_SELECT) {
             for (String item : input.split(",", -1))
-                if (!InputValidation.isValid(field.validation, item.trim())) return false;
-        } else if (!InputValidation.isValid(field.validation, input)) return false;
+                if (!InputValidation.isValid(field, item.trim())) return false;
+        } else if (!InputValidation.isValid(field, input)) return false;
         if (field.type == FieldType.BOOLEAN){
             input = input.toLowerCase(Locale.ROOT);
             return "y".equals(input) || "n".equals(input) || "true".equals(input) || "false".equals(input);

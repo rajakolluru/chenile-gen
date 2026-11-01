@@ -2,6 +2,71 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+{{#standaloneRepo}}
+    {{#parentArtifactId}}
+    <parent>
+        <groupId>{{parentGroupId}}</groupId>
+        <artifactId>{{parentArtifactId}}</artifactId>
+        <version>{{parentVersion}}</version>
+        <relativePath>{{parentRelativePath}}</relativePath>
+    </parent>
+    {{/parentArtifactId}}
+
+    <!-- A standalone JGen blueprint. `mvn package` builds the blueprint jar; see README.md. -->
+    <groupId>{{groupId}}</groupId>
+    <artifactId>bp-{{blueprintName}}</artifactId>
+    <version>${revision}</version>
+    <name>JGen blueprint: {{blueprintName}}</name>
+
+    <properties>
+        <!-- The release workflow builds with -Drevision=<tag>. -->
+        <revision>{{blueprintVersion}}</revision>
+        <maven.compiler.release>25</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jgen.version>{{chenileVersion}}</jgen.version>
+        <junit.version>5.13.4</junit.version>
+    </properties>
+
+    <dependencies>
+        <!-- Provided by JGen at run time: never bundle it into the blueprint jar. -->
+        <dependency>
+            <groupId>org.chenile</groupId>
+            <artifactId>jgen-base</artifactId>
+            <version>${jgen.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        {{#dependencies}}
+        <dependency>
+            <groupId>{{groupId}}</groupId>
+            <artifactId>{{artifactId}}</artifactId>
+            {{#version}}<version>{{version}}</version>{{/version}}
+        </dependency>
+        {{/dependencies}}
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.3</version>
+            </plugin>
+        </plugins>
+    </build>
+{{/standaloneRepo}}
+{{^standaloneRepo}}
     {{#parentArtifactId}}
     <parent>
         <groupId>{{parentGroupId}}</groupId>
@@ -18,7 +83,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     {{/parentArtifactId}}
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>bp-{{blueprintName}}</artifactId>
 
@@ -28,14 +92,10 @@
             <artifactId>jgen-base</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
         </dependency>
-        <dependency>
-        	<groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-        </dependency>
-
         {{#dependencies}}
         <dependency>
             <groupId>{{groupId}}</groupId>
@@ -44,5 +104,5 @@
         </dependency>
         {{/dependencies}}
     </dependencies>
-
+{{/standaloneRepo}}
 </project>

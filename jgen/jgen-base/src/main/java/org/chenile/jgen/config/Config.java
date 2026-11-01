@@ -11,4 +11,6 @@ public class Config {
     public String defaultServiceName;
     public String defaultVersion;
     public String defaultDestFolder;
+    /** How JGen writes GitHub remotes when it initialises a repository: "ssh" (default) or "https". */
+    public String gitRemoteProtocol;
 }

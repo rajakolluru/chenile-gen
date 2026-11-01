@@ -6,13 +6,20 @@ import org.chenile.jgen.util.CapUtils;
 
 import java.util.Map;
 
+/**
+ * Optional Java for the {{blueprintName}} blueprint. Templates do most of the work; add code here only for what
+ * templates cannot express. See https://jgen.chenile.org/authoring/
+ */
 public class Init{{BlueprintName}}Blueprint implements InitHook {
 
     @Override
     public void init(BlueprintConfig blueprintConfig) {
+        // After inputs are validated, before any file is written: add derived values for the templates.
         blueprintConfig.postInputCaptureHook = (Map<String,Object> map) -> {
-            String {{blueprintName}} = (String)map.get("{{blueprintName}}Name");
-            map.put("{{BlueprintName}}Name", CapUtils.capitalizeFirst({{blueprintName}}));
+            String projectName = (String) map.get("projectName");
+            map.put("ProjectName", CapUtils.capitalizeFirst(projectName));
         };
+        // Other hook points: childBlueprintInputs (inputs for child blueprints), postProcessHook (touch the
+        // generated files) and finalHook (after the generation record is written).
     }
 }

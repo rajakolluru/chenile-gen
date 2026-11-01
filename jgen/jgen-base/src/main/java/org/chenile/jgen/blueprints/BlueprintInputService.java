@@ -100,6 +100,8 @@ public class BlueprintInputService {
         map.put("multiple", Boolean.TRUE.equals(field.multiple));
         map.put("visibleWhen", field.visibleWhen);
         map.put("validation", field.validation);
+        map.put("pattern", field.pattern);
+        map.put("patternMessage", field.patternMessage);
         return map;
     }
 

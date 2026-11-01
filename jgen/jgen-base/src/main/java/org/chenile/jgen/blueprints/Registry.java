@@ -108,6 +108,7 @@ public class Registry {
         BlueprintConfig blueprint = mapper.readValue(descriptor, BlueprintConfig.class);
         blueprint.source = descriptor.toString();
         blueprint.classLoader = loader;
+        org.chenile.jgen.util.InputValidation.checkDeclarations(blueprint);
         if (blueprint.initHook != null) {
             Thread thread = Thread.currentThread();
             ClassLoader previous = thread.getContextClassLoader();

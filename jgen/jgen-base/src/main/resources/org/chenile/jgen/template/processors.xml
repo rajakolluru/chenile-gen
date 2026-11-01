@@ -24,6 +24,8 @@
             <file-splitter/>
             <!-- Replaces filenames of the form __xxx__ with contents from the map -->
             <file-name-replacer/>
+            <!-- Turns _DoT_ in file and folder names into a dot: _DoT_gitignore becomes .gitignore -->
+            <dot-replacer/>
             <!-- Processes conditional files. If a key in the map has a given value then the folder is copied. -->
             <conditional-processor/>
             <!-- Expands surviving child markers after parent rendering and conditional selection. -->
@@ -32,6 +34,10 @@
             <post-process-executor/>
             <!-- Writes .jgen/generation.json: blueprint, config, inputs and a hash of every generated file -->
             <provenance-writer/>
+            <!-- With initGit=true: makes the project a local Git repository with one commit (top-level only) -->
+            <git-initializer/>
+            <!-- Runs the blueprint's final hook (top-level generations only), e.g. to initialise a Git repository -->
+            <final-executor/>
         </processor-chain>
     </flow>
 </flows>

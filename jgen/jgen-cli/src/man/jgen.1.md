@@ -38,6 +38,7 @@ Template files ending in *.mustache* are rendered with Mustache. File and folder
 instructions:
 
 - *\_\_name\_\_* is replaced by an input value;
+- *\_DoT\_* becomes a dot, so *\_DoT\_gitignore* is generated as *.gitignore*;
 - a folder named *%%key=value%%* is kept only when the input matches;
 - a *.filelist* file is split into several files;
 - an empty folder named *%{{blueprint ...}}* generates a child blueprint in its place.
@@ -48,6 +49,12 @@ rebuild: from blueprint folders (see **FILES**) or straight from a GitHub releas
 
 Every input path (prompts, input files, the web portal, child blueprints) goes through the same validator. The
 validator reports every problem at once, before any file is written.
+
+A blueprint can ask jgen to make the generated project a local Git repository: when the input **initGit** is
+true, jgen runs **git init** (branch **main**), adds every file and makes one commit. If the blueprint names a
+**GITHUB_REPOSITORY** input as its *gitRepositoryField* and that input has a value, jgen adds it as the **origin**
+remote, using SSH, or HTTPS when the configuration sets **gitRemoteProtocol** to **https**. jgen never creates
+the GitHub repository and never pushes.
 
 After generating, jgen writes a generation record into the project (see **FILES**). **jgen -r** uses it to
 regenerate the project with a newer blueprint and report what changed.
@@ -294,6 +301,11 @@ Use a blueprint published on GitHub, then pin it for CI (**\--fetch** prints the
     jgen --fetch github:acme/jgen-terraform@1.2.0
     jgen -g github:acme/jgen-terraform@1.2.0#sha256:<hex> -o tf.json
     jgen -f tf.json --trust
+
+Start a new blueprint in its own Git repository, ready to push (set **standaloneRepo** to **y** in the input):
+
+    jgen -g jgen-blueprint -o new-blueprint.json
+    jgen -f new-blueprint.json
 
 Install a blueprint jar of your own:
 

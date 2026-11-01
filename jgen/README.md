@@ -416,9 +416,14 @@ The pipeline performs these steps:
 6. render `.mustache` files
 7. expand `.filelist` outputs into multiple files
 8. replace placeholders in file and folder names such as `__service__`
-9. process conditional folders such as `%%jpa=true%%`
-10. expand included blueprint markers through their own generation pipelines
-11. run blueprint post-processing hooks
+9. turn `_DoT_` in file and folder names into a dot (`_DoT_gitignore` becomes `.gitignore`)
+10. process conditional folders such as `%%jpa=true%%`
+11. expand included blueprint markers through their own generation pipelines
+12. run blueprint post-processing hooks
+13. write the generation record (`.jgen/generation.json`)
+14. with `initGit` true, make the project a local Git repository (and add the blueprint's `gitRepositoryField`
+    value as `origin`)
+15. run the blueprint's final hook
 
 The execution path in code is:
 
@@ -453,7 +458,16 @@ Example:
 
 These replacements happen after file contents are rendered.
 
-### 3. Conditional folders
+### 3. Dots in names: `_DoT_`
+
+Every `_DoT_` in a file or folder name becomes a dot. Use it for dotfiles and dot-folders, which Maven leaves out
+of a blueprint jar and Git treats specially:
+
+- `_DoT_gitignore` becomes `.gitignore`
+- `_DoT_github/workflows/release.yml` becomes `.github/workflows/release.yml`
+- `__service___DoT_properties` becomes `orders.properties` (placeholders are replaced first)
+
+### 4. Conditional folders
 
 Folders named like `%%key=value%%` are conditional.
 
@@ -465,7 +479,7 @@ If the input map contains `jpa=true`, the contents of that folder are moved into
 
 This is how one blueprint can package alternative file trees for optional features such as JPA or security.
 
-### 4. File lists
+### 5. File lists
 
 Files ending in `.filelist` are synthetic multi-file containers. After rendering, they are split into separate files.
 
@@ -695,6 +709,7 @@ Your blueprint templates can use the same conventions as the built-in blueprints
 
 - `.mustache` files for templated file contents
 - `__name__` placeholders in filenames and folder names
+- `_DoT_` in filenames and folder names for dotfiles such as `_DoT_gitignore`
 - `%%key=value%%` folders for conditional inclusion
 - `.filelist` files when one template needs to emit multiple files
 
@@ -747,3 +762,16 @@ In practice, many user-visible changes come from editing template resources rath
 - If you want to add a new generator, follow the `bp-*` module pattern.
 - If you want to change global generation behavior, start in `jgen-base`.
 - If a generated project looks wrong for only one blueprint, inspect that blueprint's resource templates first. Much of the repository's behavior is encoded in templates rather than Java logic.
+
+## Generated Git repositories
+
+Any blueprint can have JGen make its output a local Git repository, with no code:
+
+- **Turning it on:** `initGit` = `true` in the input map, either as a BOOLEAN input or set by a hook.
+- **What JGen does:** after generation, `git init` (branch `main`), add everything, and one commit.
+- **Connecting to GitHub:** if `blueprint.json` names a `gitRepositoryField` (an input with validation
+  `GITHUB_REPOSITORY`) and that input has a value, it becomes the `origin` remote.
+- **Remote style:** SSH by default, or HTTPS with `"gitRemoteProtocol": "https"` in the config.
+- **What it never does:** create the GitHub repository or push. It also never sets a commit author.
+
+See https://jgen.chenile.org/authoring/#generating-a-git-repository-initgit

@@ -1,25 +1,33 @@
 {
   "initHook" : "org.chenile.jgen.blueprint.{{blueprintName}}.Init{{BlueprintName}}Blueprint",
   "name" : "{{blueprintName}}",
-  "description" : "Generates a New {{BlueprintName}}",
+  "description" : "Generates a {{BlueprintName}} project",
   "templateFolder": "{{blueprintName}}-template",
   "inputFields" :[
     {
-      "name" : "{{blueprintName}}",
+      "name" : "projectName",
       "type" : "STRING",
-      "description": "Name of {{blueprintName}}"
+      "description": "Name of the project to generate",
+      "validation" : "PROJECT_NAME"
     },
     {
-    "name" : "{{blueprintName}}Version",
-    "type" : "STRING",
-    "description": "Version of {{blueprintName}}",
-    "defaultValue" : "${defaultVersion}"
+      "name" : "projectVersion",
+      "type" : "STRING",
+      "description": "Version of the generated project",
+      "defaultValue" : "${defaultVersion}",
+      "validation" : "VERSION"
     },
     {
       "name" : "destFolder",
       "type" : "STRING",
       "description": "Destination Folder",
       "defaultValue" : "${defaultDestFolder}"
+    },
+    {
+      "name" : "includeExtras",
+      "type" : "BOOLEAN",
+      "description": "Include the optional extras folder",
+      "defaultValue" : "n"
     }
     {{#jpa}}
     ,{

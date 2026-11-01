@@ -1,0 +1,43 @@
+package org.chenile.jgen.blueprint.{{blueprintName}};
+
+import org.chenile.jgen.blueprints.BlueprintConfig;
+import org.chenile.jgen.blueprints.BlueprintExecutor;
+import org.chenile.jgen.blueprints.BlueprintInputService;
+import org.chenile.jgen.blueprints.Registry;
+import org.chenile.jgen.config.Config;
+import org.chenile.jgen.config.ConfigProvider;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/** Loads the blueprint the way JGen does and generates the starter project into a temporary folder. */
+class {{BlueprintName}}BlueprintTest {
+    @TempDir Path output;
+
+    private Path generate(Map<String, Object> inputs) throws Exception {
+        BlueprintConfig blueprint = Registry.blueprints.get("{{blueprintName}}");
+        assertNotNull(blueprint, "META-INF/blueprint.json should be on the class path");
+        Config config = new ConfigProvider().obtainDefaultConfig();
+        Map<String, Object> map = new HashMap<>(new BlueprintInputService().buildInputMap(blueprint, config, inputs));
+        map.put("destFolder", output.toString());
+        new BlueprintExecutor().execute(blueprint, config, map);
+        return output.resolve(inputs.get("projectName").toString());
+    }
+
+    @Test void generatesTheStarterProject() throws Exception {
+        Path project = generate(Map.of("projectName", "demo"));
+        assertTrue(Files.readString(project.resolve("README.md")).contains("# Demo"));
+        assertFalse(Files.exists(project.resolve("EXTRAS.md")));
+    }
+
+    @Test void includesTheOptionalFolderWhenAskedFor() throws Exception {
+        Path project = generate(Map.of("projectName", "demo", "includeExtras", "y"));
+        assertTrue(Files.exists(project.resolve("EXTRAS.md")));
+    }
+}

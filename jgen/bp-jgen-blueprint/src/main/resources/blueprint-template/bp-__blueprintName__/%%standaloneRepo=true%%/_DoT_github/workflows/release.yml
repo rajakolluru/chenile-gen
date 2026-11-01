@@ -1,0 +1,33 @@
+# Publishes the blueprint when a version tag (e.g. 0.1.0) is pushed: builds the jar with that version and attaches
+# it to a GitHub release. That is all JGen needs: `jgen -g github:<owner>/<repo>` fetches the release's jar.
+name: Release blueprint
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Build and test
+        run: mvn -B -ntp package -Drevision=${{ github.ref_name }}
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          jar=$(ls target/*.jar | grep -v -e '-sources.jar' -e '-javadoc.jar' -e '-tests.jar' -e '.original')
+          gh release create "${{ github.ref_name }}" $jar --title "${{ github.ref_name }}" --generate-notes

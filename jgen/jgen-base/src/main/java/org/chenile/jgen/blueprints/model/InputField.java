@@ -17,4 +17,8 @@ public class InputField {
     public Long maxSizeBytes;
     public Boolean multiple;
     public Map<String, Object> visibleWhen;
+    /** With validation PATTERN: a Java regular expression the whole value must match. */
+    public String pattern;
+    /** With validation PATTERN: what a valid value looks like, used in error messages, e.g. "must look like ABC-123". */
+    public String patternMessage;
 }

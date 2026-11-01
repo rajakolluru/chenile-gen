@@ -7,5 +7,6 @@
 	"org" : "myorg",
 	"defaultServiceName" : "serviceName",
 	"defaultVersion" : "0.0.1-SNAPSHOT",
-	"defaultDestFolder" : "./output"
+	"defaultDestFolder" : "./output",
+	"gitRemoteProtocol" : "ssh"
 }

@@ -1,0 +1,51 @@
+# {{blueprintName}}, a JGen blueprint
+
+A [JGen](https://jgen.chenile.org) blueprint. Everything it generates lives in
+`src/main/resources/{{blueprintName}}-template/`; its inputs are declared in
+`src/main/resources/META-INF/blueprint.json`, and optional Java hooks are in
+`src/main/java/org/chenile/jgen/blueprint/{{blueprintName}}/`.
+
+## Use it
+
+{{#githubRepository}}
+```bash
+jgen -g github:{{githubRepository}} -o input.json     # emit a sample input
+jgen -f input.json                                    # generate
+```
+{{/githubRepository}}
+{{^githubRepository}}
+```bash
+jgen -g github:<owner>/<repo> -o input.json     # emit a sample input
+jgen -f input.json                              # generate
+```
+{{/githubRepository}}
+
+Or, without publishing: `mvn package`, copy `target/bp-{{blueprintName}}-*.jar` to `~/.jgen/blueprints/`, and run
+`jgen -g {{blueprintName}} -o input.json`.
+
+## Develop it
+
+```bash
+mvn test        # loads the blueprint like JGen does and generates the starter project
+mvn package     # builds target/bp-{{blueprintName}}-<version>.jar
+```
+
+- `__projectName__` in a path becomes an input value; files ending in `.mustache` are rendered with the inputs;
+  folders named `%%input=value%%` are kept only when the input matches. See the
+  [template reference](https://jgen.chenile.org/template-conventions/).
+- Add inputs in `blueprint.json`, with validation rules such as `JAVA_IDENTIFIER` or `HTTP_URL`
+  ([input validation](https://jgen.chenile.org/input-validation/)).
+- Add Java only for what templates cannot express, in the init hook
+  ([write your own blueprint](https://jgen.chenile.org/authoring/)).
+- Keep `jgen-base` at `provided` scope; shade any other library your hooks need.
+
+## Release it
+
+Push a version tag. `.github/workflows/release.yml` builds the jar with that version and attaches it to a GitHub
+release:
+
+```bash
+git tag 0.2.0 && git push origin 0.2.0
+```
+
+Add the topic `jgen-blueprint` to the repository so people can find it.

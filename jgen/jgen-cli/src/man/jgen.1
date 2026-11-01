@@ -44,6 +44,9 @@ File and folder names carry further instructions:
 .IP \[bu] 2
 \f[I]__name__\f[R] is replaced by an input value;
 .IP \[bu] 2
+\f[I]_DoT_\f[R] becomes a dot, so \f[I]_DoT_gitignore\f[R] is generated
+as \f[I].gitignore\f[R];
+.IP \[bu] 2
 a folder named \f[I]%%key=value%%\f[R] is kept only when the input
 matches;
 .IP \[bu] 2
@@ -62,6 +65,15 @@ It accepts other blueprints without a rebuild: from blueprint folders
 Every input path (prompts, input files, the web portal, child
 blueprints) goes through the same validator.
 The validator reports every problem at once, before any file is written.
+.PP
+A blueprint can ask jgen to make the generated project a local Git
+repository: when the input \f[B]initGit\f[R] is true, jgen runs \f[B]git
+init\f[R] (branch \f[B]main\f[R]), adds every file and makes one commit.
+If the blueprint names a \f[B]GITHUB_REPOSITORY\f[R] input as its
+\f[I]gitRepositoryField\f[R] and that input has a value, jgen adds it as
+the \f[B]origin\f[R] remote, using SSH, or HTTPS when the configuration
+sets \f[B]gitRemoteProtocol\f[R] to \f[B]https\f[R].
+jgen never creates the GitHub repository and never pushes.
 .PP
 After generating, jgen writes a generation record into the project (see
 \f[B]FILES\f[R]).
@@ -419,6 +431,16 @@ Use a blueprint published on GitHub, then pin it for CI
 jgen --fetch github:acme/jgen-terraform\[at]1.2.0
 jgen -g github:acme/jgen-terraform\[at]1.2.0#sha256:<hex> -o tf.json
 jgen -f tf.json --trust
+\f[R]
+.fi
+.PP
+Start a new blueprint in its own Git repository, ready to push (set
+\f[B]standaloneRepo\f[R] to \f[B]y\f[R] in the input):
+.IP
+.nf
+\f[C]
+jgen -g jgen-blueprint -o new-blueprint.json
+jgen -f new-blueprint.json
 \f[R]
 .fi
 .PP

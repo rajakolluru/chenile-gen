@@ -27,6 +27,13 @@ else: JGen refuses and names both sources.
 
 ## Publishing a blueprint on GitHub
 
+The quickest start is `jgen -g jgen-blueprint` with `standaloneRepo` set to `y`. It generates a self-contained
+blueprint project that is already a local Git repository with one commit, including a release workflow that
+follows the convention below. Create the GitHub repository, add it as `origin`, push, and push a version tag.
+See [Write your own blueprint](https://jgen.chenile.org/authoring/).
+
+The convention, if you set a repository up by hand:
+
 - Keep the blueprint in its own repository (the convention is `jgen-<name>`).
 - Build the jar with `mvn package` (a plain jar: never shade JGen's own libraries into it; do shade any other
   library your hooks use).

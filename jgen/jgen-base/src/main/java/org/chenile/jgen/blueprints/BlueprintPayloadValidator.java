@@ -223,7 +223,7 @@ public final class BlueprintPayloadValidator {
     }
 
     private static String expectation(InputField field) {
-        if (field.validation != null) return "must satisfy " + field.validation;
+        if (field.validation != null) return InputValidation.describe(field);
         if (field.type == null) return "has an invalid value";
         return switch (field.type) {
             case BOOLEAN -> "must be true or false (or y/n)";

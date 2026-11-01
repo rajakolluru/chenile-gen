@@ -24,7 +24,9 @@ class InputValidationTest {
             {"PROJECT_NAME", "my-service", "../escape", "bad/name"},
             {"VERSION", "2.1.32-SNAPSHOT", "bad version", "../1"},
             {"HTTP_URL", "https://example.com:8000", "file:///tmp", "http://", "bad"},
-            {"KAFKA_TOPIC", "process-work.v1", ".", "..", "bad topic", "a".repeat(250)}
+            {"KAFKA_TOPIC", "process-work.v1", ".", "..", "bad topic", "a".repeat(250)},
+            {"GITHUB_REPOSITORY", "acme/jgen-terraform", "acme", "acme/x/y", "-acme/x", "acme-/x", "a--b/x",
+                    "acme/..", "acme/", "a".repeat(40) + "/x", "acme/" + "r".repeat(101), "acme/bad name"}
         };
         for (String[] example : examples) {
             var rule = ValidationType.valueOf(example[0]);
