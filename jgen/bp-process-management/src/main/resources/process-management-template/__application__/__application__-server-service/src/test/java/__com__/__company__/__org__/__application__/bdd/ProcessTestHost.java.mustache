@@ -7,8 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         scanBasePackages = {
             "org.chenile.configuration",
             "org.chenile.orchestrator.process.configuration",
-            "{{packageName}}.configuration",
-            "{{packageName}}.bootstrap"
+            "{{packageName}}.configuration"
         })
 @EntityScan({
     "org.chenile.orchestrator.process.model",

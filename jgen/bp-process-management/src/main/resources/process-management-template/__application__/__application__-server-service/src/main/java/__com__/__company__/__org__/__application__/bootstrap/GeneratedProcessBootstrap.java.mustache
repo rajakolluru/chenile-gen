@@ -1,6 +1,8 @@
 package {{packageName}}.bootstrap;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.chenile.core.context.ContextContainer;
 import org.chenile.orchestrator.process.config.model.ProcessDef;
 import org.chenile.orchestrator.process.config.reader.ProcessConfigurator;
 import org.chenile.orchestrator.process.configuration.dao.ProcessDefinitionRepository;
@@ -10,15 +12,14 @@ import org.chenile.trigger.cron.*;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
-/** Seeds missing definitions/schedules only. Restarts never overwrite administrator edits. */
-@Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
-public class GeneratedProcessBootstrap implements ApplicationRunner {
+/**
+ * Seeds missing definitions/schedules only. Restarts never overwrite administrator edits. Created as a bean in
+ * {@code {{Application}}ProcessConfiguration}; it runs before every other ApplicationRunner.
+ */
+public class GeneratedProcessBootstrap implements ApplicationRunner, Ordered {
     private final ProcessConfigurator configurator;
     private final ProcessDefinitionRepository definitions;
     private final CrontabRepository crons;
@@ -39,6 +40,10 @@ public class GeneratedProcessBootstrap implements ApplicationRunner {
         this.json = json;
         this.transactions = new TransactionTemplate(manager);
     }
+    @Override public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
+    }
+
     @Override public void run(ApplicationArguments args) throws Exception {
         try (var stream = getClass().getResourceAsStream("/{{application}}/defs.json")) {
             var source = configurator instanceof DatabaseProcessConfigurator ? new ProcessConfigurator() : configurator;
@@ -72,7 +77,7 @@ public class GeneratedProcessBootstrap implements ApplicationRunner {
                     }
                     continue;
                 }
-                var context = org.chenile.core.context.ContextContainer.CONTEXT_CONTAINER;
+                var context = ContextContainer.CONTEXT_CONTAINER;
                 var snapshot = context.snapshot();
                 try {
                     context.setTenant(tenant);
@@ -85,7 +90,7 @@ public class GeneratedProcessBootstrap implements ApplicationRunner {
     }
     private String serialize(ProcessDef definition) {
         try { return json.writeValueAsString(definition); }
-        catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        catch (JsonProcessingException e) {
             throw new IllegalStateException("Cannot serialize " + definition.processType, e);
         }
     }

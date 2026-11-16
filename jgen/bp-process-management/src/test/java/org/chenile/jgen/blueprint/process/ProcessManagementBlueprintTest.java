@@ -221,11 +221,18 @@ class ProcessManagementBlueprintTest {
             assertTrue(serverConfig.contains("PubSubConfiguration.class"));
             assertTrue(serverConfig.contains("KafkaConfiguration.class"));
             assertTrue(serverConfig.contains("return new ObjectMapper();"));
+            // House rule: beans come from @Configuration/@Bean, never @Component.
+            assertTrue(serverConfig.contains("public GeneratedProcessBootstrap generatedProcessBootstrap("), serverConfig);
+            String bootstrap=Files.readString(root.resolve("example-server-service/src/main/java/com/example/process/example/bootstrap/GeneratedProcessBootstrap.java"));
+            assertFalse(bootstrap.contains("@Component"), bootstrap);
+            assertTrue(bootstrap.contains("implements ApplicationRunner, Ordered"), bootstrap);
             assertFalse(Files.exists(root.resolve("example-server-service/src/main/java/com/example/process/example/configuration/ProcessKafkaPublisher.java")));
             String serverTest=Files.readString(root.resolve("example-server-service/src/test/java/com/example/process/example/bdd/CukesRestTest.java"));
-            assertTrue(serverTest.contains("extends org.chenile.mqtt.test.KafkaBaseTest"));
+            assertTrue(serverTest.contains("import org.chenile.mqtt.test.KafkaBaseTest;"), serverTest);
+            assertTrue(serverTest.contains("extends KafkaBaseTest"), serverTest);
             String workerTest=Files.readString(root.resolve("example-worker-listener/src/test/java/com/example/process/example/worker/WorkerListenerTest.java"));
-            assertTrue(workerTest.contains("extends org.chenile.mqtt.test.KafkaBaseTest"));
+            assertTrue(workerTest.contains("import org.chenile.mqtt.test.KafkaBaseTest;"), workerTest);
+            assertTrue(workerTest.contains("extends KafkaBaseTest"), workerTest);
             assertTrue(workerTest.contains("kafka.send(record("));
             String listener=Files.readString(root.resolve("example-worker-listener/src/main/java/com/example/process/example/configuration/controller/ProcessWorkListener.java"));
             assertTrue(listener.contains("@EventsSubscribedTo({\"process-work\"})"), listener);

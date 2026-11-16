@@ -36,6 +36,13 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import org.chenile.mqtt.test.KafkaBaseTest;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import org.chenile.orchestrator.process.model.Process;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(
         classes = WorkerListenerTest.Host.class,
@@ -49,7 +56,7 @@ import static org.mockito.Mockito.verify;
             "chenile.kafka.consumer.max-retries=2"
         })
 @RunWith(SpringRunner.class)
-public class WorkerListenerTest extends org.chenile.mqtt.test.KafkaBaseTest {
+public class WorkerListenerTest extends KafkaBaseTest {
     @DynamicPropertySource
     static void kafkaProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.kafka.bootstrap-servers", () -> kafkaContainer.getBootstrapServers());
@@ -73,8 +80,8 @@ public class WorkerListenerTest extends org.chenile.mqtt.test.KafkaBaseTest {
 
     public static class TestWorker extends ExecutorWorkListener<WorkerPayload, WorkerOutput> {
         static volatile boolean fail;
-        static final java.util.concurrent.BlockingQueue<String> deliveries =
-                new java.util.concurrent.LinkedBlockingQueue<>();
+        static final BlockingQueue<String> deliveries =
+                new LinkedBlockingQueue<>();
         static final AtomicInteger calls = new AtomicInteger();
 
         public WorkerOutput doStart(WorkListenerInput<WorkerPayload> input) {
@@ -94,9 +101,9 @@ public class WorkerListenerTest extends org.chenile.mqtt.test.KafkaBaseTest {
     @Test
     public void consumesConfiguredProcessWorkTopicAndDeadLettersAfterRetries() throws Exception {
         assertFalse(beans.containsBean("dataSource"));
-        StateEntityServiceResponse<org.chenile.orchestrator.process.model.Process> callbackResponse =
+        StateEntityServiceResponse<Process> callbackResponse =
                 new StateEntityServiceResponse<>();
-        callbackResponse.setMutatedEntity(new org.chenile.orchestrator.process.model.Process());
+        callbackResponse.setMutatedEntity(new Process());
         when(manager.processById(anyString(), anyString(), any())).thenReturn(callbackResponse);
         TestWorker.fail = false;
         TestWorker.calls.set(0);
@@ -144,13 +151,13 @@ public class WorkerListenerTest extends org.chenile.mqtt.test.KafkaBaseTest {
         ProducerRecord<String, String> record = new ProducerRecord<>(topic, null, payload);
         record.headers().add(
                 WorkerConstants.PROCESS_TYPE,
-                processType.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                processType.getBytes(StandardCharsets.UTF_8));
         record.headers().add(
                 WorkerConstants.WORKER_TYPE,
-                "EXECUTOR".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                "EXECUTOR".getBytes(StandardCharsets.UTF_8));
         record.headers().add(
                 "x-chenile-tenant-id",
-                "tenant0".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                "tenant0".getBytes(StandardCharsets.UTF_8));
         return record;
     }
 
@@ -160,8 +167,8 @@ public class WorkerListenerTest extends org.chenile.mqtt.test.KafkaBaseTest {
         input.dispatchId = id + "-dispatch";
         input.payload = new WorkerPayload();
         input.payload.value = "payload-value";
-        input.execDef = java.util.Map.of("queue", "{{testWorkTopic}}");
-        return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(input);
+        input.execDef = Map.of("queue", "{{testWorkTopic}}");
+        return new ObjectMapper().writeValueAsString(input);
     }
 
     public static class WorkerPayload {

@@ -1,9 +1,15 @@
 package {{packageName}}.configuration;
 
+import {{packageName}}.bootstrap.GeneratedProcessBootstrap;
+import org.chenile.orchestrator.process.config.reader.ProcessConfigurator;
+import org.chenile.orchestrator.process.configuration.dao.ProcessDefinitionRepository;
 import org.chenile.pubsub.configuration.PubSubConfiguration;
 import org.chenile.pubsub.kafka.configuration.KafkaConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.chenile.trigger.cron.CrontabRepository;
+import org.chenile.trigger.cron.CrontabService;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.context.annotation.*;
 
 @Configuration
@@ -13,6 +19,19 @@ public class {{Application}}ProcessConfiguration {
     @ConditionalOnMissingBean(ObjectMapper.class)
     public ObjectMapper processObjectMapper() {
         return new ObjectMapper();
+    }
+
+    /** Seeds the generated process definitions and cron schedules at startup, without overwriting edits. */
+    @Bean
+    public GeneratedProcessBootstrap generatedProcessBootstrap(
+            ProcessConfigurator processConfigurator,
+            ProcessDefinitionRepository processDefinitionRepository,
+            CrontabRepository crontabRepository,
+            CrontabService crontabService,
+            ObjectMapper objectMapper,
+            PlatformTransactionManager transactionManager) {
+        return new GeneratedProcessBootstrap(processConfigurator, processDefinitionRepository, crontabRepository,
+                crontabService, objectMapper, transactionManager);
     }
 
 }

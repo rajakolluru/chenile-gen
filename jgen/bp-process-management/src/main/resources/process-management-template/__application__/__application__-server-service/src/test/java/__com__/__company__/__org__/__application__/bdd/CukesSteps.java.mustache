@@ -11,9 +11,16 @@ import org.springframework.test.context.DynamicPropertySource;
 import java.time.Duration;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
+import io.cucumber.spring.CucumberContextConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.After;
+import java.nio.charset.StandardCharsets;
 
-@io.cucumber.spring.CucumberContextConfiguration
-@org.springframework.boot.test.context.SpringBootTest(
+@CucumberContextConfiguration
+@SpringBootTest(
         classes = ProcessTestHost.class,
         properties = {
             "spring.datasource.url=jdbc:h2:mem:generated-process;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
@@ -27,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
             "chenile.process.management.enabled=false",
             "chenile.process.configurator={{definitionSource}}"
         })
-@org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+@AutoConfigureMockMvc
 public class CukesSteps {
     @Autowired ProcessRepository processes;
     private KafkaConsumer<String, String> consumer;
@@ -37,7 +44,7 @@ public class CukesSteps {
         registry.add("spring.kafka.bootstrap-servers", CukesRestTest::bootstrapServers);
     }
 
-    @io.cucumber.java.en.Given("generated process host")
+    @Given("generated process host")
     public void generatedProcessHost() {
         Map<String, Object> properties = new HashMap<>();
         properties.put("bootstrap.servers", CukesRestTest.bootstrapServers());
@@ -48,7 +55,7 @@ public class CukesSteps {
         consumer.subscribe(List.of("{{testWorkTopic}}"));
     }
 
-    @io.cucumber.java.en.Then("the committed process is published to Kafka")
+    @Then("the committed process is published to Kafka")
     public void committedProcessIsPublished() throws Exception {
         long deadline = System.nanoTime() + Duration.ofSeconds(30).toNanos();
         while (System.nanoTime() < deadline) {
@@ -57,7 +64,7 @@ public class CukesSteps {
                         new ObjectMapper().readValue(record.value(), WorkListenerInput.class);
                 String processType = new String(
                         record.headers().lastHeader("processType").value(),
-                        java.nio.charset.StandardCharsets.UTF_8);
+                        StandardCharsets.UTF_8);
                 if (!"{{testProcessType}}".equals(processType)) {
                     continue;
                 }
@@ -67,7 +74,7 @@ public class CukesSteps {
                                 record.headers()
                                         .lastHeader("x-chenile-tenant-id")
                                         .value(),
-                                java.nio.charset.StandardCharsets.UTF_8));
+                                StandardCharsets.UTF_8));
                 assertEquals("{{testWorkTopic}}", work.execDef.get("queue"));
                 assertTrue(work.dispatchId != null && !work.dispatchId.isBlank());
                 assertTrue(
@@ -79,7 +86,7 @@ public class CukesSteps {
         fail("No committed process worker command arrived at Kafka");
     }
 
-    @io.cucumber.java.After
+    @After
     public void closeConsumer() {
         if (consumer != null) {
             consumer.close();

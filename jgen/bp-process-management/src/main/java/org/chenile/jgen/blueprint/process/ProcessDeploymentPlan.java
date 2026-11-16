@@ -230,7 +230,6 @@ public class ProcessDeploymentPlan {
           List.of("org.chenile.orchestrator.process.configuration.dao", "org.chenile.trigger.cron"))
         repositories.add(Map.of("packageName", name));
       scans.add(Map.of("packageName", "org.chenile.orchestrator.process.configuration"));
-      scans.add(Map.of("packageName", group + ".bootstrap"));
     }
     if (registry) {
       entities.add(Map.of("packageName", "org.chenile.service.registry.model"));
