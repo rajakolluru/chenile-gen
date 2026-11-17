@@ -226,7 +226,7 @@ jgen-cli/bin/jgen.sh -g wfcustom -e workflow-specs
 
 The first command creates `process-specs/input-file.json`,
 `process-specs/input-file-processSpec.json` and
-`process-specs/input-file-cronSpec.json`; the second creates
+`process-specs/input-file-scheduleSpec.json`; the second creates
 `workflow-specs/input-file.json` and `workflow-specs/input-file-xmlFile.xml`.
 The main input JSON contains paths to these companions. Fill in required
 project/service names and customize the samples, then run
