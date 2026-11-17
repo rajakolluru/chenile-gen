@@ -1,7 +1,7 @@
 [
   {
     "name": "daily-file-upload",
-    "eventName": "ProcessCreate",
+    "eventId": "ProcessCreate",
     "cronExpression": "0 0 2 * * ?",
     "timezone": "UTC",
     "tenant": "default",

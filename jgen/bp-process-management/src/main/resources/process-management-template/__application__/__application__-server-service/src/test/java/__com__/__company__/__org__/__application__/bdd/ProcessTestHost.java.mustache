@@ -12,9 +12,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan({
     "org.chenile.orchestrator.process.model",
     "org.chenile.orchestrator.process.configuration.model",
-    "org.chenile.trigger.cron"
+    "org.chenile.scheduler.db"
 })
 @EnableJpaRepositories({
-    "org.chenile.orchestrator.process.configuration.dao", "org.chenile.trigger.cron"
+    "org.chenile.orchestrator.process.configuration.dao", "org.chenile.scheduler.db"
 })
 public class ProcessTestHost {}

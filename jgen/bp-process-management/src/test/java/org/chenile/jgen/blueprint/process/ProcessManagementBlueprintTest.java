@@ -6,6 +6,7 @@ import org.chenile.orchestrator.process.config.model.PredecessorArgs;
 import org.chenile.orchestrator.process.model.ProcessDto;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import org.chenile.jgen.blueprint.process.config.ScheduleSpec;
 import org.chenile.jgen.blueprints.BlueprintConfig;
 import org.chenile.jgen.config.ConfigProvider;
 import org.chenile.jgen.template.model.TemplateContext;
@@ -33,9 +34,9 @@ class ProcessManagementBlueprintTest {
         map.put("definitionSource","json"); map.put("registerInServiceRegistry",false);
         return map;
     }
-    private void withCrons(Map<String,Object> input, String cronJson) throws Exception {
-        Path file=temporary.resolve(UUID.randomUUID() + "-crons.json"); Files.writeString(file,cronJson);
-        input.put("cronSpec",file.toString());
+    private void withSchedules(Map<String,Object> input, String scheduleJson) throws Exception {
+        Path file=temporary.resolve(UUID.randomUUID() + "-schedules.json"); Files.writeString(file,scheduleJson);
+        input.put("scheduleSpec",file.toString());
     }
     @Test void acceptsTheRuntimeDefFixtureAndEmbeddedInputFields() throws Exception {
         String nativeDefs;
@@ -45,7 +46,7 @@ class ProcessManagementBlueprintTest {
         var input=input(nativeDefs); prepare(input);
         assertEquals(Set.of("feed","file","chunk"),definitions(input).processes.processMap.keySet());
         assertEquals("com.example.process.example.model.FeedIn",definitions(input).findByName("feed").args);
-        assertEquals(0,json.readValue(input.get("cronsJson").toString(),org.chenile.trigger.cron.Crontab[].class).length);
+        assertEquals(0,json.readValue(input.get("schedulesJson").toString(),ScheduleSpec[].class).length);
         var embedded=input("""
             {"processMap":{"feed":{"leaf":true,"inputFields":{"batchId":"string"},"future":true}},"future":{}}
             """);
@@ -65,8 +66,8 @@ class ProcessManagementBlueprintTest {
         reader.read(new ByteArrayInputStream(input.get("defsJson").toString().getBytes(StandardCharsets.UTF_8)));
         return reader;
     }
-    @Test void examplesProduceNativeDefinitionsAndTypedCronPayloads() throws Exception {
-        var input=input(example("file-upload-processes.json")); withCrons(input,example("file-upload-crons.json")); prepare(input);
+    @Test void examplesProduceNativeDefinitionsAndTypedSchedulePayloads() throws Exception {
+        var input=input(example("file-upload-processes.json")); withSchedules(input,example("file-upload-schedules.json")); prepare(input);
         var defs=definitions(input).processes.processMap;
         assertFalse(defs.get("FileUpload").leaf);
         assertTrue(defs.get("ChunkUpload").leaf);
@@ -80,9 +81,10 @@ class ProcessManagementBlueprintTest {
         var fileUpload=generated.stream().filter(p -> p.get("processType").equals("FileUpload")).findFirst().orElseThrow();
         assertEquals("AggregatedResult<ChunkUploadOutput>", fileUpload.get("outputType"));
         assertEquals("ChunkUploadOutput", fileUpload.get("childOutputType"));
-        var cron=json.readValue(input.get("cronsJson").toString(),org.chenile.trigger.cron.Crontab[].class)[0];
-        assertFalse(cron.enabled);
-        assertEquals("FileUpload",json.readValue(cron.eventPayloadJson,ProcessDto.class).processDefName);
+        var schedule=json.readValue(input.get("schedulesJson").toString(),ScheduleSpec[].class)[0];
+        assertFalse(schedule.enabled);
+        assertEquals("ProcessCreate",schedule.eventId);
+        assertEquals("FileUpload",json.convertValue(schedule.payload,ProcessDto.class).processDefName);
     }
     @Test void supportsThreeLevelsAndMultipleRoots() throws Exception {
         var input=input(example("three-level-processes.json")); prepare(input);
@@ -154,10 +156,10 @@ class ProcessManagementBlueprintTest {
             {"processMap":{"A":{"leaf":true,"args":"Shared"},"B":{"leaf":true,"args":"Shared"}}}
             ""","Duplicate or reserved");
     }
-    @Test void rejectsInvalidCronAndPredecessorCycles() throws Exception {
-        for (String cron : List.of(example("file-upload-crons.json").replace("0 0 2 * * ?","invalid"),
-                example("file-upload-crons.json").replace("\"incoming/upload.dat\"","5"))) {
-            var input=input(example("file-upload-processes.json")); withCrons(input,cron);
+    @Test void rejectsInvalidSchedulesAndPredecessorCycles() throws Exception {
+        for (String schedule : List.of(example("file-upload-schedules.json").replace("0 0 2 * * ?","invalid"),
+                example("file-upload-schedules.json").replace("\"incoming/upload.dat\"","5"))) {
+            var input=input(example("file-upload-processes.json")); withSchedules(input,schedule);
             assertThrows(IllegalArgumentException.class,()->prepare(input));
         }
         reject("""
@@ -178,7 +180,7 @@ class ProcessManagementBlueprintTest {
     }
     @Test void rendersRegistryChoicesAndPerTypeApiAndServiceJarsThroughTheRealPipeline() throws Exception {
         for (String mode : List.of("colocated", "separate", "existing")) {
-            var input=input(example("file-upload-processes.json")); withCrons(input,example("file-upload-crons.json"));
+            var input=input(example("file-upload-processes.json")); withSchedules(input,example("file-upload-schedules.json"));
             input.put("registryMode", mode.equals("existing") ? "existing" : "create");
             input.put("registryPlacement", mode.equals("separate") ? "separate" : "server");
             input.put("existingRegistryUrl", "http://registry.example:9000");

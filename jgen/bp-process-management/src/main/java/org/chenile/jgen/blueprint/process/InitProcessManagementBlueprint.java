@@ -7,11 +7,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import org.chenile.jgen.blueprint.process.config.ProcessDefinitionConfigurator;
+import org.chenile.jgen.blueprint.process.config.ScheduleSpec;
 import org.chenile.jgen.blueprint.workers.ProcessWorkerSetPlan;
 import org.chenile.jgen.blueprints.BlueprintConfig;
 import org.chenile.jgen.blueprints.InitHook;
 import org.chenile.jgen.blueprints.SampleInputFile;
-import org.chenile.trigger.cron.JsonCrontabRepository;
 
 /**
  * Adapts validated definitions and schedules to the template model; contains no validation rules.
@@ -27,8 +27,8 @@ public class InitProcessManagementBlueprint implements InitHook {
         "processSpec",
         SampleInputFile.resource(".json", getClass(), "/process-management-samples/defs.json"));
     blueprint.sampleInputFiles.put(
-        "cronSpec",
-        SampleInputFile.resource(".json", getClass(), "/process-management-samples/crons.json"));
+        "scheduleSpec",
+        SampleInputFile.resource(".json", getClass(), "/process-management-samples/schedules.json"));
   }
 
   public void prepare(Map<String, Object> input) {
@@ -37,14 +37,14 @@ public class InitProcessManagementBlueprint implements InitHook {
       try (var stream = Files.newInputStream(Path.of(input.get("processSpec").toString()))) {
         configurator.read(stream);
       }
-      var crons = new JsonCrontabRepository();
-      Object cronSpec = input.get("cronSpec");
-      if (cronSpec != null && !cronSpec.toString().isBlank()) {
-        try (var stream = Files.newInputStream(Path.of(cronSpec.toString()))) {
-          crons.read(stream);
+      List<ScheduleSpec> schedules = List.of();
+      Object scheduleSpec = input.get("scheduleSpec");
+      if (scheduleSpec != null && !scheduleSpec.toString().isBlank()) {
+        try (var stream = Files.newInputStream(Path.of(scheduleSpec.toString()))) {
+          schedules = List.of(JSON.readValue(stream, ScheduleSpec[].class));
         }
       }
-      configurator.validateCrons(crons.findAll());
+      configurator.validateSchedules(schedules);
       List<Map<String, Object>> processes = ProcessWorkerSetPlan.prepare(input, configurator);
       ProcessDeploymentPlan.prepare(input, processes, configurator.processes.processMap);
       input.put("packageName", configurator.packageName);
@@ -56,7 +56,7 @@ public class InitProcessManagementBlueprint implements InitHook {
           JSON.writerWithDefaultPrettyPrinter()
               .writeValueAsString(Map.of("processMap", configurator.processes.processMap)));
       input.put(
-          "cronsJson", JSON.writerWithDefaultPrettyPrinter().writeValueAsString(crons.findAll()));
+          "schedulesJson", JSON.writerWithDefaultPrettyPrinter().writeValueAsString(schedules));
       var root =
           configurator.processes.processMap.values().stream()
               .filter(d -> d.parentProcessType == null || d.parentProcessType.isBlank())
@@ -65,7 +65,7 @@ public class InitProcessManagementBlueprint implements InitHook {
       input.put("testProcessType", root.processType);
       input.put("testWorkTopic", root.config.get("queue"));
       input.put("processCount", processes.size());
-      input.put("hasCrons", !crons.findAll().isEmpty());
+      input.put("hasSchedules", !schedules.isEmpty());
     } catch (Exception e) {
       throw new IllegalArgumentException(
           "Invalid process-management blueprint input: " + e.getMessage(), e);

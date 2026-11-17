@@ -4,7 +4,7 @@
 server and a worker mini-monolith from native `processMap` definitions. It can
 reuse a service registry, host one in the server (recommended), or create a third
 mini-monolith containing the registry. It preserves typed inputs, arbitrary
-hierarchies, predecessor chaining, and separate optional cron schedules.
+hierarchies, predecessor chaining, and separate optional schedules.
 
 ## Generate
 
@@ -13,7 +13,7 @@ From `chenile-gen/jgen`:
 ```sh
 mvn install
 jgen-cli/bin/jgen.sh -g chenile-process-management -e process-specs
-# Edit process-specs/input-file.json and its companion process/cron specifications.
+# Edit process-specs/input-file.json and its companion process/schedule specifications.
 jgen-cli/bin/jgen.sh -f process-specs/input-file.json
 # Or use the checked-in example:
 jgen-cli/bin/jgen.sh -f bp-process-management/examples/file-upload-input.json
@@ -34,7 +34,7 @@ URL (default `http://localhost:8000`). Enter tenant `default` and the server's
 ## Inputs
 
 Existing inputs remain: `application`, `applicationVersion`, `destFolder`,
-`processSpec`, optional `cronSpec`, `definitionSource` (`json` or `database`),
+`processSpec`, optional `scheduleSpec`, `definitionSource` (`json` or `database`),
 `super_pom` and additional server-service `dependencies`.
 
 | Input | Default / visibility |
@@ -62,7 +62,7 @@ the explicit registry choices above.
 ## Generated modules
 
 - `<application>-api`: process-start service contracts, depending on each process type's API.
-- `<application>-server-config`: native definitions and cron seeds, server only.
+- `<application>-server-config`: native definitions and schedule seeds, server only.
 - `<application>-server-service`: typed Chenile HTTP services, process bootstrap,
   runtime services and acknowledged Kafka publication; no business workers.
 - `<application>-<processType>-workers`: a Maven parent per process type, containing
@@ -107,7 +107,7 @@ set. For each definition it invokes `chenile-process-workers`, which generates t
 API and service JARs, including child API dependencies. Each process type's contracts
 travel with its implementation without depending on a shared application payload module.
 
-## Process and cron specifications
+## Process and schedule specifications
 
 The process file retains the runtime's native `processMap` structure, with optional
 `inputFields` and `outputFields` metadata either at document level or inside a
@@ -125,13 +125,15 @@ The checked-in processSpec examples include `outputFields` on their leaf definit
 to show the generated output contract. If omitted, the blueprint still generates an
 empty `<ProcessType>Output` model.
 
-Cron schedules remain a separate JSON array read by `JsonCrontabRepository`.
-Only the server packages and seeds these resources. Bootstrap creates missing
+Schedules are a separate JSON array: each entry has `name`, `tenant`, `cronExpression` (Quartz, with
+seconds), optional `timezone` (UTC), `enabled`, `eventId` (only `ProcessCreate`) and a `payload` whose
+`processDefName` and `args` must match a process type's `inputFields`. The generator checks them, then the
+server packages them as `schedules.json` and seeds them into chenile-scheduler-db. Bootstrap creates missing
 records without overwriting saved administrator changes on restart.
 
 Input names, deployment URLs and the default Kafka topic declare shared
 `validation` rules in `blueprint.json`; JGen enforces them before blueprint hooks.
-Process hierarchy, cron contracts and deployment relationships remain blueprint
+Process hierarchy, schedule contracts and deployment relationships remain blueprint
 checks. See [declarative input validation](../docs/input-validation.md).
 
 ## Verification
@@ -147,6 +149,6 @@ The complete split/execute/aggregate and remote callback cycle still depends on
 your application-specific worker implementations.
 
 The server initializes the runtime's idempotent outbox/receipt SQL schema;
-Hibernate manages the process, definition and crontab entities in the local
+Hibernate manages the process, definition and schedule entities in the local
 default configuration. For an externally managed schema, disable automatic SQL
 initialization after provisioning those tables and select schema validation.

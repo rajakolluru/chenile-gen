@@ -7,8 +7,8 @@ import org.chenile.pubsub.configuration.PubSubConfiguration;
 import org.chenile.pubsub.kafka.configuration.KafkaConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.chenile.trigger.cron.CrontabRepository;
-import org.chenile.trigger.cron.CrontabService;
+import org.chenile.scheduler.db.ScheduleService;
+import org.chenile.scheduler.db.SchedulerDefinitionRepository;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.context.annotation.*;
 
@@ -21,17 +21,17 @@ public class {{Application}}ProcessConfiguration {
         return new ObjectMapper();
     }
 
-    /** Seeds the generated process definitions and cron schedules at startup, without overwriting edits. */
+    /** Seeds the generated process definitions and schedules at startup, without overwriting edits. */
     @Bean
     public GeneratedProcessBootstrap generatedProcessBootstrap(
             ProcessConfigurator processConfigurator,
             ProcessDefinitionRepository processDefinitionRepository,
-            CrontabRepository crontabRepository,
-            CrontabService crontabService,
+            SchedulerDefinitionRepository schedulerDefinitionRepository,
+            ScheduleService scheduleService,
             ObjectMapper objectMapper,
             PlatformTransactionManager transactionManager) {
-        return new GeneratedProcessBootstrap(processConfigurator, processDefinitionRepository, crontabRepository,
-                crontabService, objectMapper, transactionManager);
+        return new GeneratedProcessBootstrap(processConfigurator, processDefinitionRepository,
+                schedulerDefinitionRepository, scheduleService, objectMapper, transactionManager);
     }
 
 }

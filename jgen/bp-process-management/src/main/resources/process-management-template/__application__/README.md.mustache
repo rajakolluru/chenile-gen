@@ -6,7 +6,7 @@ The registry endpoint is {{serviceRegistryUrl}}.
 
 | Host | Deployment URL | Role |
 | --- | --- | --- |
-| {{serverMonolith}} | {{serverDeploymentUrl}} | Process state, outbox, definitions REST, triggers and crontabs{{#colocatedRegistry}}, service registry{{/colocatedRegistry}} |
+| {{serverMonolith}} | {{serverDeploymentUrl}} | Process state, outbox, definitions REST, triggers and schedules{{#colocatedRegistry}}, service registry{{/colocatedRegistry}} |
 | {{workerMonolith}} | {{workerDeploymentUrl}} | Headless Kafka listener, process delegate and all worker JARs |
 {{#separateRegistry}}| {{registryMonolith}} | {{registryDeploymentUrl}} | Service registry only |{{/separateRegistry}}
 
@@ -49,9 +49,10 @@ typed child results and errors using `AggregatedResult<ChildOutput>` from
 `process-delegate`, without defining an application-specific aggregate model.
 
 The server owns `{{application}}-server-config`, including definitions and optional
-cron schedules. Bootstrap inserts missing records only; restarts preserve saved
-administrator changes. Generated cron schedules remain disabled unless enabled
-in the input specification.
+schedules (`schedules.json`). At startup the bootstrap saves each missing schedule as a database schedule
+(chenile-scheduler-db) in its tenant; restarts preserve saved administrator changes. A schedule fires
+`ProcessCreate` through the trigger service. Generated schedules remain disabled unless enabled in the
+input specification.
 
 Start a process through the process service's generic `POST /process` endpoint.
 Provide `processDefName` and an `args` object containing that process definition's
@@ -72,7 +73,7 @@ advertise a different public endpoint.
 
 The management API requires `PROCESS_MANAGEMENT_API_KEY`. That key protects its
 administrator routes; configure your application's HTTP authentication for
-public process, trigger, crontab and registry routes before exposing them.
+public process, trigger, schedule and registry routes before exposing them.
 
 Kafka publications wait for broker acknowledgement before the outbox command can
 complete. The generated server sets `pubsub.publish.waitTime` to
@@ -87,7 +88,7 @@ server or test bootstrap-server configuration is needed. The deployment startup
 instructions above apply when running the applications outside these tests.
 
 The server initializes the runtime's idempotent outbox/receipt SQL schema;
-Hibernate manages the process, definition and crontab entities in the local
+Hibernate manages the process, definition and schedule entities in the local
 default configuration. For an externally managed schema, disable automatic SQL
 initialization after provisioning those tables and select schema validation.
 
@@ -96,6 +97,20 @@ console at `{{serverDeploymentUrl}}/h2-console` (JDBC URL:
 `jdbc:h2:file:./.{{serverMonolith}}/data;MODE=PostgreSQL;DB_CLOSE_ON_EXIT=FALSE`,
 user `sa`, blank password). Set `PROCESS_H2_CONSOLE_ENABLED=false` when using an
 externally managed database or before exposing the server outside local development.
+
+## Running more than one server node
+
+By default Quartz keeps its schedules in memory on each server node. A schedule's idempotency key is built
+from the scheduled fire time, so if several nodes fire the same schedule, only one trigger is accepted. Every node
+still does the firing, though.
+
+To have each trigger fire on exactly one node, run the nodes against one PostgreSQL database with the `clustered`
+profile (`SPRING_PROFILES_ACTIVE=clustered`). It switches Quartz to its clustered JDBC job store, configured in
+`application-clustered.properties` in the server-config module.
+
+Create Quartz's `QRTZ_*` tables once beforehand, with the `chenile-quartz` Liquibase changelog that ships in
+chenile-scheduler (`classpath:db/changelog/chenile-quartz.changelog.xml`), or with Quartz's own
+`tables_postgres.sql`.
 
 ## Process manager UI
 

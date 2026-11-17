@@ -1,7 +1,9 @@
 package org.chenile.jgen.blueprint.process;
 
 import org.chenile.jgen.blueprint.process.config.ProcessDefinitionConfigurator;
-import org.chenile.trigger.cron.JsonCrontabRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import org.chenile.jgen.blueprint.process.config.ScheduleSpec;
 import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -42,20 +44,30 @@ class ProcessDefinitionConfiguratorTest {
             """)));
     }
 
-    @Test void validatesSeparateCronPayloadAgainstItsProcessInputFields() throws Exception {
+    @Test void validatesSeparateSchedulePayloadAgainstItsProcessInputFields() throws Exception {
         var reader=configurator(); reader.read(json("""
             {"processMap":{"feed":{"leaf":true,"inputFields":{"batchId":"string"}}}}
             """));
-        var crons=new JsonCrontabRepository();
         String source="""
-            [{"name":"daily","tenant":"default","cronExpression":"0 0 2 * * ?","eventName":"ProcessCreate",
+            [{"name":"daily","tenant":"default","cronExpression":"0 0 2 * * ?","eventId":"ProcessCreate",
               "payload":{"processDefName":"feed","args":{"batchId":"a"}}}]
             """;
-        crons.read(json(source)); assertDoesNotThrow(()->reader.validateCrons(crons.findAll()));
-        crons.read(json(source.replace("\"batchId\":\"a\"","\"batchId\":5")));
-        var failure=assertThrows(IllegalArgumentException.class,()->reader.validateCrons(crons.findAll()));
+        assertDoesNotThrow(()->reader.validateSchedules(schedules(source)));
+        var failure=assertThrows(IllegalArgumentException.class,
+                ()->reader.validateSchedules(schedules(source.replace("\"batchId\":\"a\"","\"batchId\":5"))));
         assertTrue(failure.getMessage().contains("Wrong type"));
-        crons.read(json(source.replace("\"processDefName\":\"feed\"","\"processDefName\":\"missing\"")));
-        assertThrows(IllegalArgumentException.class,()->reader.validateCrons(crons.findAll()));
+        assertThrows(IllegalArgumentException.class,()->reader.validateSchedules(
+                schedules(source.replace("\"processDefName\":\"feed\"","\"processDefName\":\"missing\""))));
+        assertThrows(IllegalArgumentException.class,()->reader.validateSchedules(
+                schedules(source.replace("0 0 2 * * ?","invalid"))));
+        assertThrows(IllegalArgumentException.class,()->reader.validateSchedules(
+                schedules(source.replace("\"cronExpression\"","\"timezone\":\"Mars/Base\",\"cronExpression\""))));
+        String twice=source.substring(0,source.lastIndexOf(']'))+","+source.trim().substring(1);
+        assertTrue(assertThrows(IllegalArgumentException.class,()->reader.validateSchedules(schedules(twice)))
+                .getMessage().contains("Duplicate schedule"));
+    }
+
+    private List<ScheduleSpec> schedules(String json) throws Exception {
+        return List.of(new ObjectMapper().readValue(json, ScheduleSpec[].class));
     }
 }

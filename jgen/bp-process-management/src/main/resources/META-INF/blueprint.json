@@ -31,9 +31,9 @@
       "description": "Native processMap definitions with optional inputFields and outputFields"
     },
     {
-      "name": "cronSpec",
+      "name": "scheduleSpec",
       "type": "FILE",
-      "description": "Optional JSON array of cron schedules (separate from process definitions)",
+      "description": "Optional JSON array of schedules that start processes (separate from process definitions)",
       "required": false
     },
     {

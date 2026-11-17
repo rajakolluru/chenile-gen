@@ -14,7 +14,9 @@ import org.chenile.orchestrator.process.config.model.ProcessDef;
 import org.chenile.orchestrator.process.config.model.Processes;
 import org.chenile.orchestrator.process.config.reader.ProcessConfigurator;
 import org.chenile.orchestrator.process.model.ProcessDto;
-import org.chenile.trigger.cron.Crontab;
+import java.time.DateTimeException;
+import java.time.ZoneId;
+import org.quartz.CronExpression;
 
 /** Native process definitions with optional input fields and generation-specific validation. */
 public class ProcessDefinitionConfigurator extends ProcessConfigurator {
@@ -215,23 +217,37 @@ public class ProcessDefinitionConfigurator extends ProcessConfigurator {
   }
 
   /** Check process ingress against the already validated process definitions and DTO fields. */
-  public void validateCrons(List<Crontab> crons) throws IOException {
+  public void validateSchedules(List<ScheduleSpec> schedules) throws IOException {
     var json = new ObjectMapper();
     var spec = (Definitions) processes;
-    for (var cron : crons) {
+    Set<String> names = new HashSet<>();
+    for (var schedule : schedules) {
+      require(schedule != null, "A schedule cannot be null");
       require(
-          "ProcessCreate".equals(cron.eventName), "Only ProcessCreate cron ingress is supported");
-      require(cron.tenant != null, "Cron tenant is required");
-      var payload = json.readValue(cron.eventPayloadJson, ProcessDto.class);
+          schedule.name != null && !schedule.name.isBlank() && schedule.name.length() <= 255,
+          "Schedule name is required, at most 255 characters");
+      require(names.add(schedule.tenant + ":" + schedule.name), "Duplicate schedule: " + schedule.name);
+      require(
+          "ProcessCreate".equals(schedule.eventId), "Only ProcessCreate schedules are supported");
+      require(schedule.tenant != null, "Schedule tenant is required");
+      require(
+          schedule.cronExpression != null && CronExpression.isValidExpression(schedule.cronExpression),
+          "Invalid cron expression " + schedule.cronExpression);
+      try {
+        ZoneId.of(schedule.timezone);
+      } catch (DateTimeException | NullPointerException invalid) {
+        require(false, "Invalid timezone " + schedule.timezone);
+      }
+      var payload = json.convertValue(schedule.payload, ProcessDto.class);
       require(
           payload != null && spec.processMap.containsKey(payload.processDefName),
-          "Unknown cron process type");
-      require(payload.args instanceof Map<?, ?>, "Cron args must be an object");
+          "Unknown schedule process type");
+      require(payload.args instanceof Map<?, ?>, "Schedule args must be an object");
       var args = (Map<?, ?>) payload.args;
       require(
           args.keySet()
               .equals(spec.inputFields.getOrDefault(payload.processDefName, Map.of()).keySet()),
-          "Cron args must match inputFields");
+          "Schedule args must match inputFields");
       for (var field : fields(payload.processDefName)) {
         Object value = args.get(field.get("name"));
         boolean valid =
@@ -242,8 +258,9 @@ public class ProcessDefinitionConfigurator extends ProcessConfigurator {
               case "Long" -> value instanceof Integer || value instanceof Long;
               default -> value instanceof Number;
             };
-        require(valid, "Wrong type for cron argument: " + field.get("name"));
+        require(valid, "Wrong type for schedule argument: " + field.get("name"));
       }
     }
   }
+
 }

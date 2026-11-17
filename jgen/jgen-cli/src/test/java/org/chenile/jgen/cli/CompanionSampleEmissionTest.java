@@ -5,7 +5,7 @@ import org.chenile.jgen.blueprints.BlueprintInputService;
 import org.chenile.jgen.blueprints.Registry;
 import org.chenile.jgen.config.ConfigProvider;
 import org.chenile.jgen.blueprint.process.config.ProcessDefinitionConfigurator;
-import org.chenile.trigger.cron.JsonCrontabRepository;
+import org.chenile.jgen.blueprint.process.config.ScheduleSpec;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import picocli.CommandLine;
@@ -14,6 +14,7 @@ import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,18 +38,18 @@ class CompanionSampleEmissionTest {
         assertEquals(0, execute("-g","chenile-process-management","-e",folder.toString()));
         var inputs = read(output);
         Path definitions = Path.of(inputs.get("processSpec").toString());
-        Path schedules = Path.of(inputs.get("cronSpec").toString());
+        Path schedules = Path.of(inputs.get("scheduleSpec").toString());
         assertEquals(folder.resolve("input-file-processSpec.json"), definitions);
-        assertEquals(folder.resolve("input-file-cronSpec.json"), schedules);
+        assertEquals(folder.resolve("input-file-scheduleSpec.json"), schedules);
         inputs.putAll(new ConfigProvider().getConfigAsMap(new ConfigProvider().obtainDefaultConfig()));
         inputs.put("application","example");
         var configurator = new ProcessDefinitionConfigurator(inputs);
         try (var stream = Files.newInputStream(definitions)) { configurator.read(stream); }
-        var crons = new JsonCrontabRepository();
-        try (var stream = Files.newInputStream(schedules)) { crons.read(stream); }
-        assertDoesNotThrow(() -> configurator.validateCrons(crons.findAll()));
+        List<ScheduleSpec> specs;
+        try (var stream = Files.newInputStream(schedules)) { specs = List.of(json.readValue(stream, ScheduleSpec[].class)); }
+        assertDoesNotThrow(() -> configurator.validateSchedules(specs));
         assertEquals(2, configurator.processes.processMap.size());
-        assertFalse(crons.findAll().get(0).enabled);
+        assertFalse(specs.get(0).enabled);
         assertTrue(configurator.outputFields("item").stream().anyMatch(field -> "processed".equals(field.get("name"))));
     }
 
@@ -88,7 +89,7 @@ class CompanionSampleEmissionTest {
         Path folder = temporary.resolve("specs");
         Files.createDirectories(folder);
         Path output = folder.resolve("input-file.json");
-        Path existing = Files.writeString(folder.resolve("input-file-cronSpec.json"),"keep");
+        Path existing = Files.writeString(folder.resolve("input-file-scheduleSpec.json"),"keep");
         assertNotEquals(0, execute("-g","chenile-process-management","-e",folder.toString()));
         assertEquals("keep",Files.readString(existing));
         assertFalse(Files.exists(output));

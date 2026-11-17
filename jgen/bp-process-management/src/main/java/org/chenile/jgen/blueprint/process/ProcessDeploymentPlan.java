@@ -225,9 +225,9 @@ public class ProcessDeploymentPlan {
           List.of(
               "org.chenile.orchestrator.process.model",
               "org.chenile.orchestrator.process.configuration.model",
-              "org.chenile.trigger.cron")) entities.add(Map.of("packageName", name));
+              "org.chenile.scheduler.db")) entities.add(Map.of("packageName", name));
       for (String name :
-          List.of("org.chenile.orchestrator.process.configuration.dao", "org.chenile.trigger.cron"))
+          List.of("org.chenile.orchestrator.process.configuration.dao", "org.chenile.scheduler.db"))
         repositories.add(Map.of("packageName", name));
       scans.add(Map.of("packageName", "org.chenile.orchestrator.process.configuration"));
     }

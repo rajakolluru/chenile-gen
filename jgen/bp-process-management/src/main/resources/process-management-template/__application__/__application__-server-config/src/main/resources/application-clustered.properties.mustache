@@ -1,0 +1,17 @@
+# Run several {{application}}Server nodes against one PostgreSQL database with Quartz clustered:
+#   SPRING_PROFILES_ACTIVE=clustered PROCESS_DATABASE_URL=jdbc:postgresql://db:5432/{{application}} ... ./run-server.sh
+# Each cron trigger then fires on exactly one node, and misfires are recovered by the surviving nodes.
+#
+# The QRTZ_* tables must exist first. Create them once with the Liquibase changelog that ships in chenile-scheduler
+# (classpath:db/changelog/chenile-quartz.changelog.xml, context "chenile-quartz"), or by running Quartz's own
+# org/quartz/impl/jdbcjobstore/tables_postgres.sql. Never use spring.quartz.jdbc.initialize-schema=always in a
+# cluster: Quartz's script drops the tables, so a restarting node would wipe the live schedules.
+spring.quartz.job-store-type=jdbc
+spring.quartz.jdbc.initialize-schema=never
+spring.quartz.overwrite-existing-jobs=true
+spring.quartz.properties.org.quartz.scheduler.instanceName={{application}}Server
+spring.quartz.properties.org.quartz.scheduler.instanceId=AUTO
+spring.quartz.properties.org.quartz.jobStore.isClustered=true
+spring.quartz.properties.org.quartz.jobStore.clusterCheckinInterval=15000
+spring.quartz.properties.org.quartz.jobStore.useProperties=true
+spring.quartz.properties.org.quartz.jobStore.driverDelegateClass=org.quartz.impl.jdbcjobstore.PostgreSQLDelegate

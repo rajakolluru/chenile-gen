@@ -1,6 +1,7 @@
 package {{packageName}}.bootstrap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.chenile.core.context.ContextContainer;
 import org.chenile.orchestrator.process.config.model.ProcessDef;
@@ -8,7 +9,9 @@ import org.chenile.orchestrator.process.config.reader.ProcessConfigurator;
 import org.chenile.orchestrator.process.configuration.dao.ProcessDefinitionRepository;
 import org.chenile.orchestrator.process.configuration.model.ProcessDefinition;
 import org.chenile.orchestrator.process.service.defs.DatabaseProcessConfigurator;
-import org.chenile.trigger.cron.*;
+import org.chenile.scheduler.db.ScheduleService;
+import org.chenile.scheduler.db.SchedulerDefinitionEntity;
+import org.chenile.scheduler.db.SchedulerDefinitionRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.Ordered;
@@ -16,27 +19,27 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
- * Seeds missing definitions/schedules only. Restarts never overwrite administrator edits. Created as a bean in
+ * Seeds missing process definitions and schedules only. Restarts never overwrite administrator edits. Created as a bean in
  * {@code {{Application}}ProcessConfiguration}; it runs before every other ApplicationRunner.
  */
 public class GeneratedProcessBootstrap implements ApplicationRunner, Ordered {
     private final ProcessConfigurator configurator;
     private final ProcessDefinitionRepository definitions;
-    private final CrontabRepository crons;
-    private final CrontabService cronService;
+    private final SchedulerDefinitionRepository schedules;
+    private final ScheduleService scheduleService;
     private final ObjectMapper json;
     private final TransactionTemplate transactions;
     public GeneratedProcessBootstrap(
             ProcessConfigurator configurator,
             ProcessDefinitionRepository definitions,
-            CrontabRepository crons,
-            CrontabService cronService,
+            SchedulerDefinitionRepository schedules,
+            ScheduleService scheduleService,
             ObjectMapper json,
             PlatformTransactionManager manager) {
         this.configurator = configurator;
         this.definitions = definitions;
-        this.crons = crons;
-        this.cronService = cronService;
+        this.schedules = schedules;
+        this.scheduleService = scheduleService;
         this.json = json;
         this.transactions = new TransactionTemplate(manager);
     }
@@ -63,30 +66,36 @@ public class GeneratedProcessBootstrap implements ApplicationRunner, Ordered {
                 database.clearCache();
             }
         }
-        try (var stream = getClass().getResourceAsStream("/{{application}}/cron-triggers.json")) {
-            var schedules = new JsonCrontabRepository();
-            schedules.read(stream);
-            for (var cron : schedules.findAll()) {
-                String name = cron.name;
-                String tenant = cron.tenant;
-                var existing = crons.findAll().stream().filter(c -> c.name.equals(name)).findFirst();
-                if (existing.isPresent()) {
-                    if (!tenant.equals(existing.get().tenant)) {
-                        throw new IllegalStateException(
-                                "Cron name belongs to another tenant: " + name);
-                    }
-                    continue;
-                }
+        try (var stream = getClass().getResourceAsStream("/{{application}}/schedules.json")) {
+            for (JsonNode node : json.readTree(stream)) {
+                SchedulerDefinitionEntity schedule = toSchedule(node);
+                boolean exists = schedules.findByTenant(schedule.tenant).stream()
+                        .anyMatch(existing -> existing.name.equals(schedule.name));
+                if (exists) continue;
+                // ScheduleService saves in the caller's tenant: seed each schedule as its own tenant.
                 var context = ContextContainer.CONTEXT_CONTAINER;
                 var snapshot = context.snapshot();
                 try {
-                    context.setTenant(tenant);
-                    cronService.save(cron);
+                    context.setTenant(schedule.tenant);
+                    scheduleService.save(schedule);
                 } finally {
                     context.restore(snapshot);
                 }
             }
         }
+    }
+
+    private SchedulerDefinitionEntity toSchedule(JsonNode node) {
+        SchedulerDefinitionEntity schedule = new SchedulerDefinitionEntity();
+        schedule.name = node.path("name").asText();
+        schedule.tenant = node.path("tenant").asText();
+        schedule.enabled = node.path("enabled").asBoolean(true);
+        schedule.cronExpression = node.path("cronExpression").asText();
+        schedule.timezone = node.path("timezone").asText("UTC");
+        schedule.eventId = node.path("eventId").asText("ProcessCreate");
+        schedule.description = node.hasNonNull("description") ? node.get("description").asText() : null;
+        schedule.payload = node.get("payload").toString();
+        return schedule;
     }
     private String serialize(ProcessDef definition) {
         try { return json.writeValueAsString(definition); }
