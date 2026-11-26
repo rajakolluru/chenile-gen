@@ -31,7 +31,7 @@ JGen is released on its own cadence, independently of Chenile. JGen versions are
 are 2.1.x. Three rules keep the two apart:
 
 - **JGen builds only against released Chenile.** The parent of `jgen/pom.xml` is a released `chenile-parent`
-  (2.1.35). Moving JGen to a newer Chenile means changing that parent after the Chenile release is on Maven
+  (2.1.36). Moving JGen to a newer Chenile means changing that parent after the Chenile release is on Maven
   Central. The `Build JGen` workflow (`.github/workflows/build.yml`) builds from Maven Central only, so a dependency
   on an unreleased Chenile fails there.
 - **Generated projects target a released Chenile.** The default `chenileVersion` in
@@ -40,11 +40,13 @@ are 2.1.x. Three rules keep the two apart:
 - **JGen's artifacts are `org.chenile.jgen:*`.** `jgen-base` and `jgen-ext-pebble`, which standalone blueprints and
   extensions compile against, are published to Maven Central under `org.chenile.jgen`.
 
-To release, for example, 2.5.1:
+The 2.5.2 release builds with and generates Chenile 2.1.36 by default.
+
+To release, for example, 2.5.2:
 
 1. Set `<revision>` in `jgen/pom.xml` if needed, commit and push.
-2. Publish the libraries: `make -C jgen deploy-central version=2.5.1 passphrase=<gpg passphrase>`.
-3. Tag and push: `git tag -a 2.5.1 -m "JGen 2.5.1" && git push origin 2.5.1`.
+2. Publish the libraries: `make -C jgen deploy-central version=2.5.2 passphrase=<gpg passphrase>`.
+3. Tag and push: `git tag -a 2.5.2 -m "JGen 2.5.2" && git push origin 2.5.2`.
 
 The tag runs `.github/workflows/release.yml`, which builds JGen with `-Drevision=<tag>` and runs JReleaser
 (`jreleaser.yml`). JReleaser publishes the GitHub release (the distribution zip and a version-free `jgen-cli.jar`

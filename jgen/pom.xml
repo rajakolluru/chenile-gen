@@ -36,7 +36,7 @@
 	<name>Java based Code Generator</name>
 	<properties>
 		<!-- JGen's own version. Override with -Drevision=<version> when releasing. -->
-		<revision>2.5.1</revision>
+		<revision>2.5.2</revision>
 		<jgen.version>${revision}</jgen.version>
 		<!-- polyglot and js-community must share a version -->
 		<graalvm.version>25.0.4</graalvm.version>
