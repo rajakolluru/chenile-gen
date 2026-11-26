@@ -58,6 +58,14 @@ jobs:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JRELEASER_HOMEBREW_GITHUB_TOKEN: ${{ secrets.JRELEASER_HOMEBREW_GITHUB_TOKEN }}
 
+      - name: Verify the Homebrew formula
+        # JReleaser can skip the tap without failing (for example an expired token), so check the result.
+        run: |
+          curl -fsSL -H "Accept: application/vnd.github.raw" \
+            https://api.github.com/repos/ajapros/homebrew-jgen-tap/contents/Formula/jgen.rb \
+            | grep -q "version \"${VERSION}\"" \
+            || { echo "::error::Formula/jgen.rb in ajapros/homebrew-jgen-tap is not ${VERSION}"; exit 1; }
+
       - name: Keep JReleaser output
         if: always()
         uses: actions/upload-artifact@v4
